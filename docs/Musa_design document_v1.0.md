@@ -348,7 +348,7 @@ Baseado em dados do ICOM, museus têm tamanhos de acervo variados:
 
 | Tecnologia | Para Quê? | Vantagem |
 |------------|-----------|----------|
-| **Tainacan** | Gerenciamento do acervo | Sistema profissional, gratuito, testado, com API REST completa |
+| **Backend de acervo contract-first** | Gerenciamento do acervo | Implementação trocável (índice estático → Payload → catálogo museológico), sem dependência de fornecedor |
 | **OpenUSD** | Modelos 3D interativos | Padrão da indústria (Pixar), flexível |
 | **IA/OCR** | Catalogação automática | Digitalização rápida, barata, precisa |
 | **Web 3D (Three.js/WebGL)** | Visualização online | Funciona em qualquer navegador |
@@ -373,7 +373,7 @@ Baseado em dados do ICOM, museus têm tamanhos de acervo variados:
    - **Resultado:** Transparência e escalabilidade
 
 4. **Sistema de Importação Flexível**
-   - Tainacan suporta importação em lote de CSV, XLSX e JSON
+   - Ingestão em lote de CSV, XLSX e JSON
    - API REST completa para integração
    - Metadados personalizáveis por coleção
 

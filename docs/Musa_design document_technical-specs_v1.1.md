@@ -2,7 +2,7 @@
 
 ## Sumário Executivo
 
-Este documento descreve a arquitetura técnica completa do serviço **Museu Digital 3D**, uma plataforma modular para digitalização, catalogação, preservação e exibição interativa de acervos museológicos. O sistema combina o backend de gestão de acervo **Tainacan** (baseado em WordPress) com tecnologias de ponta para modelos 3D (**OpenUSD**, **glTF/GLB**) e visualização imersiva (**Omniverse Kit App Streaming**, **Three.js**). A plataforma inclui assistentes de IA conversacionais integrados, capazes de responder perguntas sobre o acervo tanto no frontend web quanto em quiosques físicos com reconhecimento de fala.
+Este documento descreve a arquitetura técnica completa do serviço **Museu Digital 3D**, uma plataforma modular para digitalização, catalogação, preservação e exibição interativa de acervos museológicos. O sistema é **contract-first**: a camada de acervo é definida por um contrato de ficha versionado (JSON Schema) e implementada de forma **backend-agnóstica**, sem dependência de WordPress (ver §2.1). A modelagem 3D usa **OpenUSD** como formato-fonte e **glTF/GLB** como formato de entrega web, com visualização imersiva via **Three.js** ou **Omniverse Kit App Streaming**. A plataforma inclui assistentes de IA conversacionais integrados, capazes de responder perguntas sobre o acervo tanto no frontend web quanto em quiosques físicos com reconhecimento de fala.
 
 ---
 
@@ -22,8 +22,8 @@ flowchart TB
         CloudFront["CloudFront / CDN<br/>(Cache de Assets 3D)"]
     end
 
-    subgraph Backend["Backend Principal"]
-        Tainacan["Tainacan (WordPress)<br/>- API REST<br/>- Gestão de Coleções<br/>- Metadados Textuais<br/>- Importação CSV/JSON"]
+    subgraph Backend["Backend Principal (contract-first)"]
+        Catalog["Acervo API (serviço separado)<br/>- Fichas por contrato (JSON Schema)<br/>- Coleções / Subcoleções<br/>- Asset refs agnósticos de formato<br/>- Ingestão CSV / JSON / TOML"]
         Admin["Painel de Controle<br/>(Módulos, Faturamento)"]
         Queue["Fila de Demandas<br/>(Agentes Automáticos)"]
     end
@@ -57,12 +57,12 @@ flowchart TB
     Kiosk --> STT
     Kiosk --> TTS
     Mobile --> CloudFront
-    CloudFront --> Tainacan
+    CloudFront --> Catalog
     CloudFront --> S3
     Admin --> Backend
     Queue --> Processing
-    Tainacan --> S3
-    Tainacan --> DB
+    Catalog --> S3
+    Catalog --> DB
     OCR --> LLM
     USD --> S3
     USD --> Streaming
@@ -70,7 +70,7 @@ flowchart TB
     
     RAG --> VectorDB
     RAG --> LLM
-    RAG --> Tainacan
+    RAG --> Catalog
     Web --> RAG
     Kiosk --> RAG
     STT --> RAG
@@ -81,29 +81,59 @@ flowchart TB
 
 ## 2. Componentes Técnicos
 
-### 2.1 Backend: Tainacan (WordPress + API REST)
+### 2.1 Camada de Acervo (contract-first, backend-agnóstica)
 
-O **Tainacan** é a espinha dorsal do sistema de gestão de acervo. Ele oferece:
+A camada de acervo **não depende de WordPress**. Ela é definida por um **contrato de
+ficha** versionado (`schemas/ficha.schema.json`, ver §3.2) e por uma **API de acervo**
+estável (§6.1). A implementação que materializa esse contrato é trocável sem migração de
+dados, porque a fonte de verdade é o diretório `acervo/` em disco (pastas = coleções e
+subcoleções; arquivos = fichas + assets), versionado em Git.
 
-#### 2.1.1 API REST Completa
-- **Endpoint Base:** `/wp-json/tainacan/v2/`
-- **Leitura e Escrita:** Suporte completo para CRUD de coleções, itens, metadados e taxonomias.
-- **Formatos Suportados:** JSON, JSON-LD.
-- **Filtros Avançados:** Suporte a metaquery para filtros por metadados customizados.
+#### 2.1.1 Princípio: contrato único, implementações múltiplas
 
-#### 2.1.2 Estrutura de Dados
+| Aspecto | Definição |
+|---------|-----------|
+| **Contrato** | `ficha.json` validado por JSON Schema, com campos de asset agnósticos de formato (§3.2) |
+| **Fontes de verdade** | `acervo/` (estrutura de pastas + fichas) e os assets 3D (USD como arquivo-fonte) |
+| **API** | Recursos `/collections`, `/collections/{id}/items`, `/items/{id}`, `/schema`, `/search` (§6.1) |
+| **Implementação** | Detalhe substituível — não vaza para o contrato nem para o frontend |
+
+#### 2.1.2 Implementações por estágio
+
+| Estágio | Implementação | Dependências | Quando usar |
+|---------|---------------|--------------|-------------|
+| **MVP** | índice gerado em build-time (`catalog.json` + SQLite) sobre `acervo/`; site estático | nenhuma (sem PHP, sem MySQL, sem WordPress) | prototipação rápida do frontend (WebGL/WebAssembly) e validação do contrato antes de investir em infraestrutura |
+| **Escala** | **Payload** (TypeScript + Next.js, PostgreSQL ou MongoDB) expondo REST/GraphQL sobre os mesmos campos | Node.js + PostgreSQL (+ `pgvector` para RAG) | quando houver edição concorrente, papéis/permissões e múltiplos museus |
+| **Padrões** | Omeka S (LAMP, GPL-3.0) ou CollectiveAccess 2.0 (PHP 8.2+, MySQL, API GraphQL) | PHP + MySQL | quando o cliente exigir padrões museológicos (OAI-PMH, controle de autoridade, exportação BagIT) |
+
+A passagem entre estágios usa sempre o mesmo caminho: **CSV/JSON gerado a partir das
+fichas** (§6.2), o que mantém baixo o custo de troca de backend.
+
+> ⚠️ **Nota de licenciamento.** Omeka S e CollectiveAccess são GPL-3.0: o copyleft só é
+> acionado ao **distribuir** o software, não pela hospedagem como serviço. Backends
+> "source-available" com limite de receita (ex.: Directus/MSCL) foram descartados por
+> risco comercial para um serviço vendido em tiers.
+
+#### 2.1.3 Estrutura de Dados
 
 | Entidade | Descrição | Exemplo de Uso |
 |----------|-----------|----------------|
-| **Coleção** | Agrupamento lógico de itens | "Coleção de Esculturas Gregas" |
+| **Coleção** | Agrupamento lógico de itens (uma pasta de primeiro nível em `acervo/`) | "Coleção de Esculturas Gregas" |
+| **Subcoleção** | Agrupamento dentro de uma coleção (mesma navegação do acervo) | "Cerâmica Ática" |
 | **Item** | Uma peça do acervo | "Vaso Grego - Séc. V a.C." |
 | **Metadado** | Campo de informação customizável | "Autor", "Data", "Material", "Dimensões" |
 | **Taxonomia** | Hierarquia de termos para categorização | "Período: Arcaico → Clássico → Helenístico" |
 
-#### 2.1.3 Extensibilidade
-- **Importadores Customizados:** Permite criar plugins para importar dados de fontes externas.
-- **Filtros e Hooks:** WordPress oferece hooks para modificar comportamento do Tainacan.
-- **Plugins:** Possibilidade de estender funcionalidades via plugins WordPress.
+#### 2.1.4 Extensibilidade
+
+- **Campos novos sem migração estrutural:** a "ficha universal" agrega metadados e a UI
+  consulta apenas os campos que cada coleção declara usar.
+- **Coleções e campos em Payload:** os `collections` e `fields` espelham o JSON Schema,
+  mantendo o contrato como fonte das definições.
+- **Endpoints customizados:** o Payload permite endpoints próprios para ingestão em lote
+  e para as etapas do pipeline de catalogação.
+- **Modo padrões:** exportadores (CSV/XML/OAI-PMH) rodam como etapa de build, sem acoplar
+  o frontend ao catálogo museológico.
 
 ---
 
@@ -179,8 +209,8 @@ flowchart LR
         Embeddings["Embeddings<br/>para RAG"]
     end
     
-    subgraph Import["Etapa 3: Importação"]
-        Tainacan["Tainacan<br/>Importação em Lote"]
+    subgraph Import["Etapa 3: Ingestão"]
+        Catalog["Acervo API<br/>Valida + Indexa Lote"]
         VectorDB["Banco Vetorial"]
     end
     
@@ -190,7 +220,7 @@ flowchart LR
     Prompt --> LLM
     LLM --> CSV
     LLM --> Embeddings
-    CSV --> Tainacan
+    CSV --> Catalog
     Embeddings --> VectorDB
 ```
 
@@ -421,18 +451,18 @@ lod.addLevel(lowRes, 50);   // De 50 unidades: baixa resolução
 scene.add(lod);
 ```
 
-#### 2.6.3 Integração com Tainacan via API REST
+#### 2.6.3 Integração com a API do Acervo
 
 **Exemplo de Consulta à API:**
 ```javascript
 // Buscar itens de uma coleção
-const response = await fetch(`${TAINACAN_API}/items?collection_id=${collectionId}`);
+const response = await fetch(`${ACERVO_API}/collections/${collectionId}/items`);
 const data = await response.json();
 
-// Para cada item, buscar modelo 3D (campo customizado)
-const glbUrl = item.metadata['asset_3d_glb']?.value;
-if (glbUrl) {
-    loadModel(glbUrl);
+// Para cada item, resolver o asset 3D de forma agnóstica de formato
+const asset = item.model_primary;        // ex.: "vaso_grego_vc.glb"
+if (asset) {
+    loadModel(asset, item.model_viewer); // three_js | usd_wasm | kit_stream
 }
 ```
 
@@ -470,7 +500,7 @@ async function askAssistant() {
 
 ## 3. Modelo de Dados
 
-### 3.1 Estrutura do "Asset Watertight" (USD + Metadados)
+### 3.1 Estrutura do "Asset Watertight" (GLB no MVP; USD para arquivamento e edição)
 
 ```yaml
 Asset:
@@ -496,28 +526,35 @@ Asset:
       - payloads: (opcional, para peças compostas)
         - "/Fragmentos/Fragmento01.usd"
   - Export:
-    - glb_otimizado: "vaso_grego_vc.glb"
-    - metadados_csv: "vaso_grego_vc.csv"  # Para importação no Tainacan
+    - glb_otimizado: "vaso_grego_vc.glb"  # Entrega web (obrigatório no MVP)
+    - usd_arquivo: "vaso_grego_vc.usda"   # Arquivamento/edição (opcional; premium)
+    - ficha_normalizada: "ficha.json"     # Extraída do USD; validada pelo JSON Schema
     - embedding: [0.123, 0.456, ...]      # Para busca semântica
 ```
 
-### 3.2 Campos no Tainacan
+### 3.2 Campos da Ficha (agnósticos de backend)
+
+> O contrato é único e versionado em `schemas/ficha.schema.json`. A implementação que o
+> armazena é trocável (§2.1.2): índice build-time (MVP), Payload (escala) ou catálogo
+> museológico (padrões). Os nomes de campo abaixo são estáveis.
 
 | Campo | Tipo | Origem | Descrição |
 |-------|------|--------|-----------|
-| `asset_id` | Texto | USD | Identificador único do asset |
-| `titulo` | Texto | USD | Nome da peça |
-| `autor` | Texto | USD | Autor/Criador |
-| `data` | Data | USD | Data de criação/período |
-| `material` | Texto | USD | Material predominante |
-| `dimensoes` | Texto | USD | Dimensões físicas |
-| `descricao` | Texto Longo | USD | Descrição detalhada |
-| `colecao` | Taxonomia | USD | Coleção a que pertence |
-| `tags` | Taxonomia | USD | Palavras-chave |
-| `asset_3d_glb` | URL | Pipeline | Link para GLB otimizado |
-| `asset_3d_usd` | URL | Pipeline | Link para USD original |
+| `asset_id` | Texto | ficha | Identificador único do asset |
+| `titulo` | Texto | ficha | Nome da peça |
+| `autor` | Texto | ficha | Autor/Criador |
+| `data` | Data | ficha | Data de criação/período |
+| `material` | Texto | ficha | Material predominante |
+| `dimensoes` | Texto | ficha | Dimensões físicas |
+| `descricao` | Texto Longo | ficha | Descrição detalhada |
+| `colecao` | Taxonomia | ficha | Coleção a que pertence |
+| `tags` | Taxonomia | ficha | Palavras-chave |
+| `model_primary` | URL | Pipeline | Asset que o frontend carrega hoje (ex.: `.glb`) |
+| `model_source` | URL | Pipeline | Asset-fonte para edição/arquivamento (ex.: `.usda`), opcional |
+| `model_formats` | Array | Pipeline | Formatos disponíveis: `["glb"]`, `["glb","usd"]`, `["glb","usd","usdz"]` |
+| `model_viewer` | Seleção | Pipeline | `three_js` \| `usd_wasm` \| `kit_stream` |
 | `digital_twin_sala` | URL | Pipeline | Link para digital twin da sala |
-| `status_3d` | Seleção | Automático | "disponível", "em_processamento", "indisponível" |
+| `model_status` | Seleção | Automático | `available`, `processing`, `unavailable` |
 | `embedding` | Array | Pipeline | Embedding semântico para RAG |
 
 ---
@@ -586,29 +623,33 @@ flowchart LR
     K8s --> Prod["Produção"]
 ```
 
-### 5.2 Implantação do Tainacan (WordPress)
+### 5.2 Implantação da Camada de Acervo
+
+**MVP (sem banco de dados):** a camada de acervo é o próprio repositório de documentos —
+pastas `acervo/<colecao>/<peca>/` com `ficha.json` + `model.glb`. O build valida as fichas
+contra o contrato, gera `catalog.json` e o índice vetorial, e publica o site estático.
+
+**Escala (Payload sobre PostgreSQL + pgvector):**
 
 ```yaml
 # docker-compose.yml (exemplo)
-version: '3'
 services:
-  wordpress:
-    image: wordpress:latest
+  postgres:
+    image: pgvector/pgvector:pg16
     environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: secret
+      POSTGRES_DB: musa
+      POSTGRES_PASSWORD: secret
     volumes:
-      - ./wp-content:/var/www/html/wp-content
+      - db_data:/var/lib/postgresql/data
+  acervo:
+    build: ./services/acervo
+    environment:
+      DATABASE_URI: postgres://postgres:secret@postgres:5432/musa
+      PAYLOAD_SECRET: change-me
     ports:
-      - "8080:80"
-  db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: wordpress
-    volumes:
-      - db_data:/var/lib/mysql
+      - "3000:3000"
+    depends_on:
+      - postgres
 volumes:
   db_data:
 ```
@@ -640,39 +681,53 @@ s3://museu-digital/{cliente_id}/
 
 ## 6. Integrações e APIs
 
-### 6.1 Tainacan REST API
+### 6.1 API do Acervo (contrato do MUSA)
+
+O contrato é estável independentemente da implementação (§2.1.2). No MVP ele é
+materializado como arquivos estáticos (`catalog.json`, `items/{id}.json`); no estágio de
+escala, o Payload expõe os mesmos recursos via REST/GraphQL.
 
 | Endpoint | Método | Descrição |
 |----------|--------|-----------|
-| `/items` | GET | Listar itens com filtros |
-| `/items/{id}` | GET | Obter item específico |
-| `/collections` | GET | Listar coleções |
-| `/metadata` | GET | Listar metadados disponíveis |
-| `/items` | POST | Criar novo item |
+| `/collections` | GET | Listar coleções e subcoleções |
+| `/collections/{id}/items` | GET | Listar itens com filtros |
+| `/items/{id}` | GET | Obter a ficha completa de uma peça |
+| `/schema` | GET | Publicar o JSON Schema da ficha universal |
+| `/search?q=` | GET | Busca semântica (RAG) |
+| `/items` | POST | Criar ou atualizar item (requer backend de escala) |
 
-### 6.2 Pipeline de Importação Automática
+### 6.2 Pipeline de Ingestão e Indexação
+
+Cada ficha é validada contra o contrato antes de entrar no índice. Ficha fora do
+contrato **falha o build** — é isso que mantém o "asset watertight" verificável.
 
 ```python
-# Exemplo de script de importação
-import csv
-import requests
+# Exemplo: valida as fichas contra o contrato e gera o índice do acervo
+import json
+import sqlite3
+from pathlib import Path
 
-def import_to_tainacan(csv_file, collection_id):
-    with open(csv_file, 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            response = requests.post(
-                f"{TAINACAN_URL}/wp-json/tainacan/v2/items",
-                json={
-                    "collection_id": collection_id,
-                    "metadata": [
-                        {"metadatum_id": 1, "value": row['titulo']},
-                        {"metadatum_id": 2, "value": row['autor']},
-                        {"metadatum_id": 3, "value": row['data']},
-                    ]
-                }
-            )
-            print(f"Importado: {row['titulo']} - Status: {response.status_code}")
+from jsonschema import validate
+
+SCHEMA = json.loads(Path("schemas/ficha.schema.json").read_text(encoding="utf-8"))
+
+
+def build_index(acervo_root: Path, out_dir: Path) -> None:
+    conn = sqlite3.connect(out_dir / "catalog.db")
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS items (id TEXT PRIMARY KEY, colecao TEXT, ficha JSON)"
+    )
+
+    for ficha_path in sorted(acervo_root.glob("*/*/ficha.json")):
+        ficha = json.loads(ficha_path.read_text(encoding="utf-8"))
+        validate(instance=ficha, schema=SCHEMA)
+        conn.execute(
+            "INSERT OR REPLACE INTO items (id, colecao, ficha) VALUES (?, ?, ?)",
+            (ficha["asset_id"], ficha["colecao"], json.dumps(ficha, ensure_ascii=False)),
+        )
+
+    conn.commit()
+    conn.close()
 ```
 
 ### 6.3 Conversão USD → GLB
@@ -715,7 +770,7 @@ const data = await response.json();
 
 ### 7.1 Segurança
 
-- **Autenticação:** WordPress nativo + plugins de 2FA
+- **Autenticação:** nativa do backend de escala (Payload) com 2FA no provedor de identidade; o MVP não expõe escrita pública
 - **API:** Tokens JWT para autenticação de aplicações externas
 - **HTTPS:** Obrigatório para todos os endpoints
 - **IAM:** Políticas de acesso granular para S3
@@ -728,7 +783,7 @@ const data = await response.json();
 |------|------------|----------|-------------|
 | **Banco de Dados** | Diário | 30 dias | S3 (Glacier) |
 | **Assets 3D** | Contínuo (S3 versioning) | Ilimitado | S3 + Glacier |
-| **Site WordPress** | Semanal | 3 versões | S3 + Export local |
+| **Aplicação + índice do acervo** | Semanal | 3 versões | S3 + Export local |
 | **Embeddings** | Semanal | 30 dias | S3 + Backup local |
 
 ---
@@ -740,6 +795,11 @@ const data = await response.json();
 | Métrica
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
+
+> ⚠️ **REGISTRO HISTÓRICO EMBUTIDO.** Todo o conteúdo abaixo, até o fim deste arquivo,
+> é a transcrição de uma sessão de design sobre a arquitetura "USD-first", anexada a
+> este documento. Ele **não** faz parte da especificação numerada (§1–§8) acima. A
+> decisão vigente sobre a camada de acervo está em `docs/adr/0001-camada-de-acervo.md`.
 
 Excelente! Vamos reescrever a arquitetura completa com o USDA como fonte única de verdade, eliminando arquivos TOML/JSON separados e simplificando todo o pipeline.
 

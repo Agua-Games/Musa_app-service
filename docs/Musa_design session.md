@@ -1,4 +1,11 @@
 
+> ⚠️ **REGISTRO HISTÓRICO.** Este arquivo é a transcrição de uma sessão de design e é
+> preservado **como estava na data**. As menções ao Tainacan refletem o estado da discussão
+> naquele momento e **não** são a decisão vigente.
+>
+> Decisão atual sobre a camada de acervo: `docs/adr/0001-camada-de-acervo.md`.
+> Para a arquitetura consolidada, ver `docs/Musa_design document_technical-specs_v1.1.md` §2.1.
+
 Estou colaborando num projeto de alguns amigos que é o seguinte: estamos desenvolvendo um serviço + aplicativo para prestar serviço para museus. O nosso serviço consistirá em oferecer um website (o frontend) com banco de dados e sistema para catalogação, hospedagem e exibição online do acervo, hospedado em servidor remoto (na nuvem, em estilo aws, etc), com possibilidade de backup local pontual em máquina(s) dedicada(s) do próprio museu.
 
 Minha atribuição é fazer apenas o frontend. Mas como é um projeto de amigos, e no qual estou envolvido e quero que dê certo, e obviamente vou discutir 

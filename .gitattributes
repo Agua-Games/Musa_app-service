@@ -1,0 +1,3 @@
+# Normalize line endings in the repository, check out native per platform.
+# Keeps future diffs free of whole-file CRLF churn on mixed Windows/Linux teams.
+* text=auto

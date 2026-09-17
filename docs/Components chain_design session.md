@@ -1,3 +1,10 @@
+> ⚠️ **REGISTRO HISTÓRICO.** Este arquivo é a transcrição de uma sessão de design e é
+> preservado **como estava na data**. As menções ao Tainacan refletem o estado da discussão
+> naquele momento e **não** são a decisão vigente.
+>
+> Decisão atual sobre a camada de acervo: `docs/adr/0001-camada-de-acervo.md`.
+> Para a arquitetura consolidada, ver `docs/Musa_design document_technical-specs_v1.1.md` §2.1.
+
 Para o seu projeto que exige um visual moderno, gráficos 3D com WebGL e funcionalidades avançadas como RAG, o cenário ideal não é uma única API, mas uma combinação de ferramentas especializadas.
 
 Sobre sua pergunta direta: **o Kimi Code é uma ferramenta de agente de programação**, excelente para refatorar e gerenciar grandes bases de código . Ele pode ajudar a *construir* seu sistema, mas não é uma API de serviço para entregar as funcionalidades de IA do seu site. Para isso, você precisará de outros serviços.
