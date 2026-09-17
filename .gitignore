@@ -19,16 +19,13 @@ _build/
 scratch/
 
 # --- Local editor / agent configuration -----------------------------------
-# Machine-specific: the MCP configs embed an absolute path such as
-# c:\Users\<user>\...\codebase-memory-mcp.exe, which is wrong for anyone else.
-# NOTE: these four folders are ALREADY TRACKED, so this rule alone does
-# nothing to them — .gitignore only affects untracked paths. To genuinely stop
-# tracking them, run once:
-#     git rm -r --cached .claude .cursor .vscode .zed
-.claude/
-.cursor/
-.vscode/
-.zed/
+# Deliberately TRACKED, not ignored. .claude/, .cursor/, .vscode/ and .zed/
+# hold this project's agent rules and MCP setup, which the team needs; ignoring
+# them would also silently skip NEW files placed in those folders.
+# Caveat: the MCP configs embed a machine-specific absolute path such as
+# c:\Users\<user>\...\codebase-memory-mcp.exe, so a collaborator may have to
+# adjust theirs. If that becomes a real problem, version a .dist template
+# instead of ignoring the folder.
 
 # --- 3D models kept out of git on purpose ---------------------------------
 # ~26 MB of GLB. Three of the four are the Khronos glTF Sample Assets and are
