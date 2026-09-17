@@ -3,8 +3,11 @@
 - **Status:** aceita
 - **Data:** 2026-09-16
 - **Substitui:** a decisão implícita de usar **Tainacan** (WordPress) como backend de acervo,
-  registrada em `docs/Musa_design document_technical-specs_v1.1.md` (original) e nos logs de
-  sessão.
+  registrada na versão original de `docs/Musa_design document_technical-specs_v1.1.md`.
+- **Nota:** os logs de sessão de design que originaram esta decisão foram **consolidados nos
+  documentos abaixo e removidos do repositório** em 2026-09-16, para não deixarem duas
+  arquiteturas contraditórias no mesmo `docs/`. Eles permanecem recuperáveis:
+  `git show 2dbcb4f:"docs/Musa_design session.md"`.
 
 ## Contexto
 
@@ -101,5 +104,6 @@ cliente, a obrigação de fornecer o código-fonte correspondente passa a valer.
 
 - `docs/Musa_design document_technical-specs_v1.1.md` §2.1, §3.1, §3.2, §5.2, §6.1, §6.2
 - `docs/Musa_design document_v1.0.md` — tabela de tecnologia e diferenciais
-- `docs/Components chain_design session.md` — arquitetura "USD-first", já sem WordPress
+- `docs/Musa_design implementacao-usd.md` — implementação USD consolidada
+- `docs/adr/0002-tooling-de-desenvolvimento.md` — tooling de desenvolvimento assistido por IA
 - `schemas/ficha.schema.json` — o contrato em si
