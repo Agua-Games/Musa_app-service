@@ -1,0 +1,445 @@
+{
+  "generated": "2026-09-16",
+  "contract": "schemas/ficha.schema.json",
+  "museum": {
+    "id": "musa-demo",
+    "name": "MUSA Atelier Museum",
+    "tagline": "A demo venue running on the MUSA app-service",
+    "tier": "gold"
+  },
+  "collections": [
+    {
+      "id": "old-masters",
+      "title": "Old Masters",
+      "description": "Dutch and Flemish painting of the Golden Age, alongside French Impressionism.",
+      "cover": "assets/img/art-night-watch.jpg",
+      "tier": "bronze",
+      "subcollections": [
+        {
+          "id": "dutch-golden-age",
+          "title": "Dutch Golden Age"
+        },
+        {
+          "id": "impressionism",
+          "title": "Impressionism"
+        }
+      ]
+    },
+    {
+      "id": "classical-antiquities",
+      "title": "Classical Antiquities",
+      "description": "Sculpture and vessels from ancient Egypt, Greece and Rome.",
+      "cover": "assets/img/art-venus.jpg",
+      "tier": "silver",
+      "subcollections": [
+        {
+          "id": "egypt",
+          "title": "Egypt"
+        },
+        {
+          "id": "greece",
+          "title": "Greece"
+        }
+      ]
+    },
+    {
+      "id": "decorative-arts",
+      "title": "Decorative Arts & Armor",
+      "description": "Fashion, light and steel — the applied arts collection.",
+      "cover": "assets/img/art-corset.jpg",
+      "tier": "silver",
+      "subcollections": [
+        {
+          "id": "fashion",
+          "title": "Fashion"
+        },
+        {
+          "id": "arms-armor",
+          "title": "Arms & Armor"
+        }
+      ]
+    },
+    {
+      "id": "gallery-rooms",
+      "title": "Permanent Galleries (Digital Twin)",
+      "description": "Rooms of the venue, mirrored online as an explorable digital twin.",
+      "cover": "assets/img/twin-wall.jpg",
+      "tier": "gold",
+      "subcollections": [
+        {
+          "id": "room-a",
+          "title": "Room A — Northern Masters"
+        }
+      ]
+    }
+  ],
+  "items": [
+    {
+      "asset_id": "OA-001",
+      "titulo": "Girl with a Pearl Earring",
+      "autor": "Johannes Vermeer",
+      "data": "1665",
+      "material": "Oil on canvas",
+      "dimensoes": "44.5 × 39 cm",
+      "descricao": "A tronie — a study of a girl in exotic dress, turned over her shoulder toward the viewer. The pearl is painted with two strokes of lead white.",
+      "colecao": "old-masters",
+      "subcolecao": "dutch-golden-age",
+      "tags": [
+        "painting",
+        "dutch",
+        "golden-age",
+        "portrait"
+      ],
+      "image": "assets/img/art-pearl-earring.jpg",
+      "tier": "bronze",
+      "hero": true,
+      "website_status": "published",
+      "model_status": "unavailable",
+      "featured_on": [
+        "bronze-gallery"
+      ]
+    },
+    {
+      "asset_id": "OA-002",
+      "titulo": "The Milkmaid",
+      "autor": "Johannes Vermeer",
+      "data": "1658",
+      "material": "Oil on canvas",
+      "dimensoes": "45.5 × 41 cm",
+      "descricao": "A kitchen maid pouring milk, rendered with Vermeer's signature northern light and quiet geometry.",
+      "colecao": "old-masters",
+      "subcolecao": "dutch-golden-age",
+      "tags": [
+        "painting",
+        "dutch",
+        "genre"
+      ],
+      "image": "assets/img/art-milkmaid.jpg",
+      "tier": "bronze",
+      "hero": false,
+      "website_status": "published",
+      "model_status": "unavailable",
+      "featured_on": [
+        "bronze-gallery"
+      ]
+    },
+    {
+      "asset_id": "OA-003",
+      "titulo": "The Night Watch",
+      "autor": "Rembrandt van Rijn",
+      "data": "1642",
+      "material": "Oil on canvas",
+      "dimensoes": "363 × 437 cm",
+      "descricao": "Rembrandt's monumental civic guard portrait — movement, shadow and gilded light at civic scale.",
+      "colecao": "old-masters",
+      "subcolecao": "dutch-golden-age",
+      "tags": [
+        "painting",
+        "dutch",
+        "baroque"
+      ],
+      "image": "assets/img/art-night-watch.jpg",
+      "tier": "bronze",
+      "hero": true,
+      "website_status": "published",
+      "model_status": "unavailable",
+      "featured_on": [
+        "bronze-gallery"
+      ]
+    },
+    {
+      "asset_id": "OA-004",
+      "titulo": "Water Lilies",
+      "autor": "Claude Monet",
+      "data": "1906",
+      "material": "Oil on canvas",
+      "dimensoes": "89.9 × 94.1 cm",
+      "descricao": "One panel of Monet's obsessive, decades-long meditation on his garden pond at Giverny.",
+      "colecao": "old-masters",
+      "subcolecao": "impressionism",
+      "tags": [
+        "painting",
+        "french",
+        "impressionism"
+      ],
+      "image": "assets/img/art-water-lilies.jpg",
+      "tier": "bronze",
+      "hero": false,
+      "website_status": "published",
+      "model_status": "unavailable",
+      "featured_on": [
+        "bronze-gallery"
+      ]
+    },
+    {
+      "asset_id": "OA-005",
+      "titulo": "Self-Portrait",
+      "autor": "Vincent van Gogh",
+      "data": "1889",
+      "material": "Oil on canvas",
+      "dimensoes": "65 × 54 cm",
+      "descricao": "Painted in Saint-Rémy-de-Provence while the artist was a patient at the asylum — swirling ultramarine and violet.",
+      "colecao": "old-masters",
+      "subcolecao": "impressionism",
+      "tags": [
+        "painting",
+        "dutch",
+        "post-impressionism",
+        "portrait"
+      ],
+      "image": "assets/img/art-vangogh-self.jpg",
+      "tier": "bronze",
+      "hero": false,
+      "website_status": "published",
+      "model_status": "unavailable",
+      "featured_on": [
+        "bronze-gallery"
+      ]
+    },
+    {
+      "asset_id": "AN-001",
+      "titulo": "Venus de Milo",
+      "autor": "Alexandros of Antioch (attrib.)",
+      "data": "-130",
+      "material": "Parian marble",
+      "dimensoes": "204 cm",
+      "descricao": "Hellenistic marble statue of Aphrodite, discovered on Milos in 1820. This 3D scan was published CC0 by the National Gallery of Denmark (SMK) via the Sketchfab cultural-heritage programme.",
+      "colecao": "classical-antiquities",
+      "subcolecao": "greece",
+      "tags": [
+        "sculpture",
+        "greek",
+        "hellenistic",
+        "3d"
+      ],
+      "image": "assets/img/art-venus.jpg",
+      "tier": "silver",
+      "hero": true,
+      "website_status": "published",
+      "model_primary": "assets/models/venus-de-milo.glb",
+      "model_source": "https://sketchfab.com/3d-models/venus-de-milo-statuestexturingchallenge-smk-2983d92ac4e744f485492580ca7629f2",
+      "model_formats": [
+        "glb"
+      ],
+      "model_viewer": "three_js",
+      "model_status": "available",
+      "featured_on": [
+        "silver-gallery"
+      ]
+    },
+    {
+      "asset_id": "AN-002",
+      "titulo": "Black-figure Amphora",
+      "autor": "Unknown (Attic workshop)",
+      "data": "-540",
+      "material": "Terracotta, black-figure",
+      "dimensoes": "42 × 26 cm",
+      "descricao": "Storage amphora with black-figure panels. Photogrammetry scheduled — 3D pipeline in progress.",
+      "colecao": "classical-antiquities",
+      "subcolecao": "greece",
+      "tags": [
+        "ceramics",
+        "greek",
+        "archaic"
+      ],
+      "image": "assets/img/art-greek-amphora.jpg",
+      "tier": "silver",
+      "hero": false,
+      "website_status": "published",
+      "model_status": "processing",
+      "featured_on": [
+        "silver-gallery"
+      ]
+    },
+    {
+      "asset_id": "AN-003",
+      "titulo": "Statue of the Goddess Taweret",
+      "autor": "Unknown",
+      "data": "-1400",
+      "material": "Greywacke",
+      "dimensoes": "74 cm",
+      "descricao": "The hippo-headed household goddess Taweret, protector of mothers and children. Historic archive photograph, Cairo Museum.",
+      "colecao": "classical-antiquities",
+      "subcolecao": "egypt",
+      "tags": [
+        "sculpture",
+        "egypt",
+        "new-kingdom"
+      ],
+      "image": "assets/img/art-egyptian-statue.jpg",
+      "tier": "silver",
+      "hero": false,
+      "website_status": "published",
+      "model_status": "unavailable",
+      "featured_on": [
+        "silver-gallery"
+      ]
+    },
+    {
+      "asset_id": "AN-004",
+      "titulo": "Bust of Nefertiti",
+      "autor": "Thutmose (workshop, attrib.)",
+      "data": "-1345",
+      "material": "Painted limestone, stucco",
+      "dimensoes": "47 cm",
+      "descricao": "The iconic painted limestone bust of queen Nefertiti, Amarna period. Photography of the original is subject to museum policy; shown here as a study image.",
+      "colecao": "classical-antiquities",
+      "subcolecao": "egypt",
+      "tags": [
+        "sculpture",
+        "egypt",
+        "amarna"
+      ],
+      "image": "assets/img/art-nefertiti.jpg",
+      "tier": "silver",
+      "hero": true,
+      "website_status": "published",
+      "model_status": "unavailable",
+      "featured_on": [
+        "silver-gallery"
+      ]
+    },
+    {
+      "asset_id": "DA-001",
+      "titulo": "Antique Corset",
+      "autor": "Atelier Cécile (demo attribution)",
+      "data": "1880",
+      "material": "Silk, whalebone, metal",
+      "dimensoes": "58 × 42 cm",
+      "descricao": "Structured evening corset demonstrating 19th-century couture construction. Interactive 3D study model.",
+      "colecao": "decorative-arts",
+      "subcolecao": "fashion",
+      "tags": [
+        "fashion",
+        "textile",
+        "19th-century",
+        "3d"
+      ],
+      "image": "assets/img/art-corset.jpg",
+      "tier": "silver",
+      "hero": false,
+      "website_status": "published",
+      "model_primary": "assets/models/antique-corset.glb",
+      "model_formats": [
+        "glb"
+      ],
+      "model_viewer": "three_js",
+      "model_status": "available",
+      "featured_on": [
+        "silver-gallery"
+      ]
+    },
+    {
+      "asset_id": "DA-002",
+      "titulo": "Samurai Helmet (Kabuto)",
+      "autor": "Unknown armorer",
+      "data": "1600",
+      "material": "Lacquered iron, silk",
+      "dimensoes": "38 × 30 cm",
+      "descricao": "Battle-worn kabuto with crest. Surface study model with full PBR texture set.",
+      "colecao": "decorative-arts",
+      "subcolecao": "arms-armor",
+      "tags": [
+        "armor",
+        "japan",
+        "edo",
+        "3d"
+      ],
+      "image": "assets/img/art-helmet.jpg",
+      "tier": "silver",
+      "hero": false,
+      "website_status": "published",
+      "model_primary": "assets/models/samurai-helmet.glb",
+      "model_formats": [
+        "glb"
+      ],
+      "model_viewer": "three_js",
+      "model_status": "available",
+      "featured_on": [
+        "silver-gallery"
+      ]
+    },
+    {
+      "asset_id": "DA-003",
+      "titulo": "Edo-period Lantern",
+      "autor": "Unknown",
+      "data": "1750",
+      "material": "Iron, washi, lacquer",
+      "dimensoes": "52 × 28 cm",
+      "descricao": "Travel lantern with internal candle mount. Rendered via Omniverse Kit App streaming in production — shown as a stream placeholder in this scaffold.",
+      "colecao": "decorative-arts",
+      "subcolecao": "arms-armor",
+      "tags": [
+        "object",
+        "japan",
+        "edo",
+        "3d"
+      ],
+      "image": "assets/img/art-lantern.jpg",
+      "tier": "silver",
+      "hero": false,
+      "website_status": "published",
+      "model_primary": "assets/models/lantern.glb",
+      "model_formats": [
+        "glb",
+        "usd"
+      ],
+      "model_viewer": "kit_stream",
+      "model_status": "available",
+      "featured_on": [
+        "silver-gallery"
+      ]
+    },
+    {
+      "asset_id": "GR-001",
+      "titulo": "Room A — Northern Masters (Digital Twin)",
+      "autor": "MUSA digital twin pipeline",
+      "data": "2026",
+      "material": "WebGL scene",
+      "dimensoes": "12 × 8 m",
+      "descricao": "Explorable digital twin of the venue's main gallery, with framed works and sculpture pedestals.",
+      "colecao": "gallery-rooms",
+      "subcolecao": "room-a",
+      "tags": [
+        "digital-twin",
+        "room",
+        "webgl"
+      ],
+      "image": "assets/img/twin-wall.jpg",
+      "tier": "gold",
+      "hero": true,
+      "website_status": "published",
+      "model_primary": "twin:room-a",
+      "model_formats": [
+        "glb"
+      ],
+      "model_viewer": "three_js",
+      "model_status": "available",
+      "featured_on": [
+        "digital-twin"
+      ]
+    },
+    {
+      "asset_id": "ARC-001",
+      "titulo": "Attic Red-figure Kylix",
+      "autor": "Onesimos (circle, attrib.)",
+      "data": "-490",
+      "material": "Terracotta, red-figure",
+      "dimensoes": "32 cm Ø",
+      "descricao": "Drinking cup attributed to the circle of Onesimos. Not yet published to the website — visible in the admin browser only.",
+      "colecao": "classical-antiquities",
+      "subcolecao": "greece",
+      "tags": [
+        "ceramics",
+        "greek",
+        "archaic"
+      ],
+      "image": "assets/img/art-greek-amphora.jpg",
+      "tier": "bronze",
+      "hero": false,
+      "website_status": "draft",
+      "model_status": "unavailable",
+      "featured_on": []
+    }
+  ]
+}

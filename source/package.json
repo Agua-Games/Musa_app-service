@@ -1,0 +1,11 @@
+{
+  "name": "musa-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MUSA app-service — website/frontend milestone (scaffold).",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
+  }
+}

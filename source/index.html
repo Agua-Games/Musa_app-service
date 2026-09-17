@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MUSA — Digital Home for Collections</title>
+<meta name="description" content="MUSA is the app-service for museums, galleries, art cinemas and bookstores — online presence, interactive 3D collections, digital twins and AI-guided visits." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='none' stroke='%23b98a4a' stroke-width='6'/><text x='50' y='66' font-size='52' text-anchor='middle' fill='%23d8b878' font-family='Georgia'>M</text></svg>" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<!-- ======================= Fixed top menu ======================= -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="brand"><span class="mark">M</span>MUSA</a>
+    <div class="nav-links" id="navLinks">
+      <a href="#collections">Collections</a>
+      <a href="#room-wall">The Room</a>
+      <a href="#gallery-3d">3D Gallery</a>
+      <a href="#digital-twin">Digital Twin</a>
+      <a href="#cinema">Cinema</a>
+      <a href="#store">Store</a>
+      <a href="#plans">Plans</a>
+      <a href="#" class="nav-cta" id="navLogin">Sign in</a>
+    </div>
+    <button class="nav-burger" id="navBurger" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<!-- ======================= Hero + AI assistant ======================= -->
+<header class="hero" id="top">
+  <div class="hero-bg"><img src="assets/img/hero-museum-hall.jpg" alt="Museum hall ceiling" /></div>
+  <div class="hero-veil"></div>
+  <div class="wrap hero-content">
+    <p class="eyebrow reveal-up d1">App-service for museums · galleries · art cinemas · bookstores</p>
+    <h1 class="reveal-up d2">Give your collection a <em>living digital home</em>.</h1>
+    <p class="lede reveal-up d3">MUSA turns physical venues into elegant online experiences — published collections, interactive 3D pieces, digital twins of your rooms, an art-cinema screening space and an AI guide that knows every object you own.</p>
+
+    <form class="assistant reveal-up d4" id="assistantForm">
+      <span class="orb"></span>
+      <input type="text" id="assistantInput" placeholder="Ask the collection assistant… try “Which pieces have 3D models?”" autocomplete="off" />
+      <button type="submit">Ask</button>
+    </form>
+    <div class="assistant-hints reveal-up d4">
+      <button type="button" data-q="Which pieces have 3D models?">Which pieces have 3D models?</button>
+      <button type="button" data-q="Tell me about the Venus de Milo">About the Venus de Milo</button>
+      <button type="button" data-q="What films are showing this week?">Films this week</button>
+      <button type="button" data-q="What are the visiting hours?">Visiting hours</button>
+    </div>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</header>
+
+<!-- ======================= Collections overview ======================= -->
+<section id="collections">
+  <div class="wrap">
+    <div class="sec-head fx">
+      <div>
+        <p class="eyebrow">The venue</p>
+        <h2>Collections, <em>three ways</em> to meet them</h2>
+        <div class="rule"></div>
+      </div>
+      <p class="side">Every MUSA venue publishes its collections across three presentation tiers — from quiet photographic galleries to explorable digital twins. This demo venue ships with one example of each.</p>
+    </div>
+    <div class="collections-grid" id="collectionsGrid"><!-- built by JS from the API layer --></div>
+  </div>
+</section>
+
+<!-- ======================= The Room — clickable gallery wall ======================= -->
+<section id="room-wall">
+  <div class="wrap">
+    <div class="sec-head fx">
+      <div>
+        <p class="eyebrow">Inside the gallery</p>
+        <h2>The room itself, <em>clickable</em></h2>
+        <div class="rule"></div>
+      </div>
+      <p class="side">A photographic backdrop of the venue's gallery wall. Every glowing marker is a piece on view — select one to open its frame and record card.</p>
+    </div>
+    <div class="wall-shell fx" id="wallShell">
+      <img src="assets/img/twin-wall.jpg" alt="Gallery room backdrop" />
+      <div class="wall-veil"></div>
+      <div class="wall-spots" id="wallSpots"><!-- markers injected from the catalog --></div>
+      <p class="wall-hint">Click a marker to reveal the piece</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= Tier I · Bronze photo gallery ======================= -->
+<section id="bronze-gallery" class="gallery-bronze">
+  <div class="wrap">
+    <div class="sec-head fx">
+      <div>
+        <p class="eyebrow">Tier I · Bronze — photo gallery</p>
+        <h2>Old Masters, <em>in the round light</em></h2>
+        <div class="rule"></div>
+      </div>
+      <p class="side">Studio-quality photography of the collection. Select any piece to zoom in and study the surface — full-screen, lossless, close.</p>
+    </div>
+    <div class="bronze-grid" id="bronzeGrid"></div>
+  </div>
+</section>
+
+<!-- ======================= Tier II · Silver 3D gallery ======================= -->
+<section id="gallery-3d">
+  <div class="wrap">
+    <div class="sec-head fx">
+      <div>
+        <p class="eyebrow">Tier II · Silver — interactive 3D</p>
+        <h2>Walk around <em>the objects</em></h2>
+        <div class="rule"></div>
+      </div>
+      <p class="side">Selected pieces carry interactive WebGL models. Open a card to rotate, zoom and inspect the piece from every angle — the same viewer the venue's curators use.</p>
+    </div>
+    <div class="silver-grid" id="silverGrid"></div>
+  </div>
+</section>
+
+<!-- ======================= Tier III · Gold digital twin ======================= -->
+<section id="digital-twin" class="twin">
+  <div class="wrap">
+    <div class="sec-head fx">
+      <div>
+        <p class="eyebrow">Tier III · Gold — digital twin</p>
+        <h2>Room A, <em>mirrored online</em></h2>
+        <div class="rule"></div>
+      </div>
+      <p class="side">A live WebGL twin of the Northern Masters gallery. Drag to orbit, scroll to move closer, and click any framed work for its record card.</p>
+    </div>
+    <div class="twin-shell fx" id="twinShell">
+      <div class="twin-hud">
+        <div class="twin-top">
+          <span class="twin-chip">Twin · <b>Room A</b> — Northern Masters</span>
+          <span class="twin-chip" id="twinQuality">WebGL · realtime</span>
+        </div>
+        <div class="twin-info" id="twinInfo">
+          <p class="eyebrow" id="twinInfoColl"></p>
+          <h4 id="twinInfoTitle"></h4>
+          <p id="twinInfoMeta"></p>
+        </div>
+        <p class="twin-hint">Drag to orbit · Scroll to zoom · Click a work</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= Art cinema (streaming scaffold) ======================= -->
+<section id="cinema">
+  <div class="wrap">
+    <div class="sec-head fx">
+      <div>
+        <p class="eyebrow">Screening room · streaming</p>
+        <h2>The art cinema, <em>online</em></h2>
+        <div class="rule"></div>
+      </div>
+      <p class="side">Scheduled programmes, premieres and the venue's restored classics — streamed to members. The player and playlist below are the streaming module's scaffolding.</p>
+    </div>
+    <div class="cinema-grid fx">
+      <div>
+        <div class="player paused" id="player">
+          <video id="playerVideo" playsinline preload="metadata"></video>
+          <div class="player-title"><b id="ptTitle"></b> · <span id="ptMeta"></span></div>
+          <div class="player-bar">
+            <button id="pbPlay" title="Play / pause">▶</button>
+            <div class="progress" id="pbProgress"><i id="pbFill"></i></div>
+            <span id="pbTime" style="font-size:11px;color:var(--paper-dim)">0:00</span>
+            <select id="pbQuality" title="Quality (scaffold)">
+              <option value="auto">Auto</option>
+              <option value="1080p">1080p</option>
+              <option value="720p">720p</option>
+              <option value="480p">480p</option>
+            </select>
+            <button id="pbCc" title="Subtitles (scaffold)">CC</button>
+            <button id="pbFs" title="Fullscreen">⛶</button>
+          </div>
+        </div>
+        <p class="stream-note">Demo streams are public sample videos — the production module delivers venue programmes over the streaming pipeline (DRM, scheduled premieres, live Q&amp;As).</p>
+      </div>
+      <aside>
+        <p class="eyebrow" style="margin-bottom:14px">This week</p>
+        <div class="playlist" id="playlist"></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= Store (scaffold) ======================= -->
+<section id="store" class="store">
+  <div class="wrap">
+    <div class="sec-head fx">
+      <div>
+        <p class="eyebrow">Museum store</p>
+        <h2>Take the collection <em>home</em></h2>
+        <div class="rule"></div>
+      </div>
+      <p class="side">Prints, casts, textiles and catalogues produced with the venue. Checkout is stubbed — this grid is the template the commerce module plugs into.</p>
+    </div>
+    <div class="store-bar fx">
+      <div class="store-filters" id="storeFilters"></div>
+      <button class="btn" id="cartOpen">Cart · <span id="cartCount">0</span></button>
+    </div>
+    <div class="store-grid fx" id="storeGrid"></div>
+  </div>
+</section>
+
+<!-- ======================= Plans & modules ======================= -->
+<section id="plans">
+  <div class="wrap">
+    <div class="sec-head fx">
+      <div>
+        <p class="eyebrow">For venues</p>
+        <h2>Choose your <em>presence</em>. Add what you need.</h2>
+        <div class="rule"></div>
+      </div>
+      <p class="side">Three subscription tiers for museums, galleries, art cinemas and bookstores — plus modules that snap on as your ambitions grow. Prices in BRL, per month.</p>
+    </div>
+
+    <div class="tiers fx" id="tiersGrid"></div>
+
+    <div class="modules-head fx">
+      <h3 class="serif">Modules</h3>
+      <p style="font-size:12px;color:var(--paper-faint)">Tick the modules your venue needs — the estimate updates live.</p>
+    </div>
+    <div class="modules fx" id="modulesGrid"></div>
+
+    <div class="modules-total fx">
+      <div>
+        <p class="eyebrow" id="totalLabel">Bronze · base subscription</p>
+        <p class="serif" style="font-size:15px;color:var(--paper-dim)" id="totalModules">No modules selected</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:26px">
+        <div class="sum"><span id="totalPrice">R$ 597</span><small> /mo</small></div>
+        <button class="btn solid" id="proposalBtn">Request proposal</button>
+      </div>
+    </div>
+    <p class="plans-note fx">One-time services (3D scanning from R$ 470/object, custom frontend from R$ 5.000, digital-twin capture from R$ 2.500) are quoted per venue. See the design document for the full cost model.</p>
+  </div>
+</section>
+
+<!-- ======================= Admin (visible after sign-in) ======================= -->
+<section id="admin">
+  <div class="wrap">
+    <div class="admin-head">
+      <div class="who">
+        <span class="avatar" id="adminAvatar">H</span>
+        <div><b id="adminName">—</b><span id="adminRole">—</span></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="role-switch" id="roleSwitch">
+          <button data-view="client" class="active">Venue admin</button>
+          <button data-view="musa">MUSA team</button>
+        </div>
+        <button class="btn" id="logoutBtn">Sign out</button>
+      </div>
+    </div>
+    <p class="admin-sub" id="adminSub"></p>
+
+    <!-- Client view: folder-style collection browser -->
+    <div id="adminClient">
+      <div class="admin-layout">
+        <div class="folder-browser">
+          <div class="fb-toolbar">
+            <div class="crumb" id="fbCrumb"><b>acervo/</b></div>
+            <div class="fb-selection" id="fbSelection">Nothing selected</div>
+            <div class="fb-actions">
+              <button id="fbPublish" disabled>Publish to website</button>
+              <button id="fbUnpublish" disabled>Demote to draft</button>
+              <button id="fbHeroOn" disabled>Set as hero</button>
+              <button id="fbHeroOff" disabled>Remove hero</button>
+            </div>
+          </div>
+          <div class="fb-up" id="fbUp" style="display:none"><button type="button">← Up one level</button></div>
+          <div class="fb-list" id="fbList"></div>
+        </div>
+        <aside class="item-panel" id="itemPanel">
+          <div class="ip-img"><img id="ipImg" src="assets/img/art-night-watch.jpg" alt="" /></div>
+          <div class="ip-body">
+            <p class="eyebrow" id="ipId">—</p>
+            <h4 id="ipTitle">Select an item</h4>
+            <p class="ip-author" id="ipAuthor"></p>
+            <div class="field">
+              <label for="ipStatus">Website visibility</label>
+              <select id="ipStatus">
+                <option value="published">Published on website</option>
+                <option value="draft">Draft (admin only)</option>
+              </select>
+            </div>
+            <label style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--paper-dim);margin-top:10px">
+              <input type="checkbox" id="ipHero" style="accent-color:var(--gold);width:16px;height:16px" /> Hero piece (promoted on the homepage)
+            </label>
+            <p class="ip-note" id="ipNote">Changes persist via the collection API (POST /items) — in this scaffold they update the local catalog.</p>
+          </div>
+        </aside>
+      </div>
+
+      <div class="admin-modules">
+        <div class="am-card">
+          <h4>Hero pieces</h4>
+          <div class="am-val" id="amHero">0 / 50</div>
+          <p>Promoted on the venue homepage and in the assistant's suggestions.</p>
+          <div class="am-bar"><i id="amHeroBar" style="width:20%"></i></div>
+        </div>
+        <div class="am-card">
+          <h4>Published items</h4>
+          <div class="am-val" id="amPublished">0</div>
+          <p>Visible to visitors across all collections on the website.</p>
+          <div class="am-bar"><i id="amPubBar" style="width:60%"></i></div>
+        </div>
+        <div class="am-card">
+          <h4>3D pipeline</h4>
+          <div class="am-val" id="amModels">0</div>
+          <p>Models available · processing · unavailable. GLB delivery via CDN.</p>
+          <div class="am-bar"><i id="amModelBar" style="width:40%"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MUSA team view -->
+    <div id="adminMusa" style="display:none">
+      <div class="admin-modules" style="margin-top:0">
+        <div class="am-card">
+          <h4>Venues onboard</h4><div class="am-val">1</div>
+          <p>MUSA Atelier Museum · Gold tier · modules: assistant, streaming.</p>
+          <div class="am-bar"><i style="width:12%"></i></div>
+        </div>
+        <div class="am-card">
+          <h4>Monthly recurring</h4><div class="am-val">R$ 4.844</div>
+          <p>Base Gold R$ 3.197 + modules R$ 1.647. Invoicing module pending.</p>
+          <div class="am-bar"><i style="width:74%"></i></div>
+        </div>
+        <div class="am-card">
+          <h4>Pipeline queue</h4><div class="am-val">3 jobs</div>
+          <p>1 photogrammetry in progress · 2 twin captures scheduled this month.</p>
+          <div class="am-bar"><i style="width:30%"></i></div>
+        </div>
+        <div class="am-card">
+          <h4>Assistant usage</h4><div class="am-val">2.4k asks</div>
+          <p>Questions this month · 96% answered from collection context (RAG).</p>
+          <div class="am-bar"><i style="width:86%"></i></div>
+        </div>
+        <div class="am-card">
+          <h4>Storage</h4><div class="am-val">61 GB</div>
+          <p>Photos + GLB models + twin scene. Versioned, Glacier-backed.</p>
+          <div class="am-bar"><i style="width:24%"></i></div>
+        </div>
+        <div class="am-card">
+          <h4>Uptime · CDN</h4><div class="am-val">99.97%</div>
+          <p>Cache hit 93% · GLB p75 load 1.8 s · API p95 210 ms.</p>
+          <div class="am-bar"><i style="width:99%"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= Footer ======================= -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <p class="foot-brand">MUSA</p>
+        <p style="font-size:13px;color:var(--paper-dim);max-width:300px;margin-top:14px">The app-service for venues with collections — online presence, interactive 3D, digital twins, streaming and an AI that knows the collection.</p>
+      </div>
+      <div class="foot-col"><p>Visit</p>
+        <a href="#collections">Collections</a><a href="#gallery-3d">3D Gallery</a><a href="#digital-twin">Digital Twin</a><a href="#cinema">Cinema</a>
+      </div>
+      <div class="foot-col"><p>Venues</p>
+        <a href="#plans">Plans &amp; modules</a><a href="#store">Store</a><a href="#" id="footLogin">Venue sign-in</a>
+      </div>
+      <div class="foot-col"><p>Contact</p>
+        <a href="mailto:hello@musa.example">hello@musa.example</a><a href="#">Tue–Sun · 10:00–18:00</a>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span>© 2026 MUSA — frontend milestone scaffold. Artworks shown are public-domain pieces from open museum collections.</span>
+      <span>Contract-first · backend-agnostic · REST-ready</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ======================= Overlays ======================= -->
+
+<!-- Lightbox (Bronze zoom) -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lbClose">×</button>
+  <div class="lightbox-stage" id="lbStage"><img id="lbImg" src="" alt="" /></div>
+  <div class="lightbox-bar">
+    <button id="lbZoomOut" title="Zoom out">−</button>
+    <button id="lbZoomIn" title="Zoom in">+</button>
+    <button id="lbReset" title="Reset">⟲</button>
+    <button id="lbFull" title="Maximize">⛶</button>
+  </div>
+  <div class="lightbox-cap" id="lbCap"></div>
+</div>
+
+<!-- Wall hotspot popup (item frame + caption) -->
+<div class="wall-modal" id="wallModal">
+  <button class="viewer-modal-close" id="wallClose">×</button>
+  <div class="wall-frame">
+    <div class="wall-frame-stage">
+      <img id="wfImg" src="" alt="" />
+      <button class="wall-nav prev" id="wfPrev" title="Previous">‹</button>
+      <button class="wall-nav next" id="wfNext" title="Next">›</button>
+      <span class="wall-counter" id="wfCounter"></span>
+    </div>
+    <div class="wall-frame-side">
+      <p class="eyebrow" id="wfArea"></p>
+      <h3 class="serif" id="wfTitle"></h3>
+      <p class="wf-author" id="wfAuthor"></p>
+      <dl class="ficha" id="wfFicha"></dl>
+      <p class="viewer-desc" id="wfDesc"></p>
+      <div class="viewer-actions">
+        <button class="btn solid" id="wf3d" hidden>Open 3D view</button>
+        <button class="btn" id="wfRecord">Full record card</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3D viewer modal (Silver) -->
+<div class="viewer-modal" id="viewerModal">
+  <button class="viewer-modal-close" id="vmClose">×</button>
+  <div class="viewer-shell">
+    <div class="viewer-stage" id="vmStage">
+      <div class="loading" id="vmLoading">Preparing the piece…</div>
+      <div class="viewer-fallback" id="vmFallback"></div>
+      <p class="viewer-hint">Drag to rotate · Scroll to zoom</p>
+    </div>
+    <div class="viewer-side">
+      <div class="viewer-tabs">
+        <button class="active" data-tab="view">3D View</button>
+        <button data-tab="details">Record card</button>
+        <button data-tab="source">Source &amp; scan</button>
+      </div>
+      <div class="viewer-pane" id="paneView"></div>
+      <div class="viewer-pane hidden" id="paneDetails"></div>
+      <div class="viewer-pane hidden" id="paneSource"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Login modal -->
+<div class="modal" id="loginModal">
+  <div class="modal-card">
+    <p class="eyebrow">Venue access</p>
+    <h3>Sign in</h3>
+    <p class="sub">Two admin tiers: the venue owner manages collections &amp; hero pieces; MUSA team members see operations, modules &amp; billing.</p>
+    <p class="form-err" id="loginErr"></p>
+    <form id="loginForm">
+      <div class="field"><label for="loginEmail">Email</label><input type="email" id="loginEmail" required placeholder="you@venue.example" /></div>
+      <div class="field"><label for="loginPass">Password</label><input type="password" id="loginPass" required placeholder="••••••" /></div>
+      <button class="btn solid" type="submit" style="width:100%;margin-top:6px">Sign in</button>
+    </form>
+    <div class="demo-accounts">
+      <p>Demo accounts · password “demo”</p>
+      <button type="button" class="demo-chip" data-email="owner@musa.demo"><b>owner@musa.demo</b> — venue owner (client tier)<span>Collection browser, hero pieces, website visibility</span></button>
+      <button type="button" class="demo-chip" data-email="team@musa.demo"><b>team@musa.demo</b> — MUSA team member<span>Cross-venue ops, modules, billing &amp; pipeline</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Cart drawer -->
+<div class="scrim" id="scrim"></div>
+<aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart">
+  <header><h3 class="serif">Cart</h3><button id="cartClose">×</button></header>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-foot">
+    <div class="cart-total"><span>Total</span><span id="cartTotal">R$ 0</span></div>
+    <button class="btn solid" id="checkoutBtn">Checkout</button>
+  </div>
+</aside>
+
+<!-- Chat panel -->
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-head">
+    <span class="orb"></span>
+    <div><b>Collection assistant</b><span>● online · knows the acervo</span></div>
+    <button id="chatClose">×</button>
+  </div>
+  <div class="chat-log" id="chatLog"></div>
+  <form class="chat-input" id="chatForm">
+    <input type="text" id="chatInput" placeholder="Ask about any piece…" autocomplete="off" />
+    <button type="submit">➤</button>
+  </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="data/catalog.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/main.js"></script>
+<script type="module" src="assets/js/three-item.js"></script>
+<script type="module" src="assets/js/three-twin.js"></script>
+</body>
+</html>

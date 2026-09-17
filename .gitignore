@@ -1,9 +1,50 @@
+# ---------------------------------------------------------------------------
+# Ignore rules for the MUSA app-service repository.
+# Principle: anything large, derived or machine-specific stays on disk only.
+# git never forgets a binary, so the decision has to be made before the add.
+# ---------------------------------------------------------------------------
+
 # --- Derived / tooling state ---------------------------------------------
-# Codebase Memory MCP local index (rebuildable via index_repository)
+# Codebase Memory MCP local index; rebuildable with index_repository.
 .codebase-memory/
 
-# Build output
+# --- Build output ---------------------------------------------------------
+build/
 _build/
+
+# --- Scratch / pre-selection material -------------------------------------
+# Downloads, shortlists and dead ends, e.g. the marketing image pre-selection
+# in scratch/marketing_images/. Nothing under scratch/ is referenced by
+# source/, so it must not pad every clone.
+scratch/
+
+# --- Local editor / agent configuration -----------------------------------
+# Machine-specific: the MCP configs embed an absolute path such as
+# c:\Users\<user>\...\codebase-memory-mcp.exe, which is wrong for anyone else.
+# NOTE: these four folders are ALREADY TRACKED, so this rule alone does
+# nothing to them — .gitignore only affects untracked paths. To genuinely stop
+# tracking them, run once:
+#     git rm -r --cached .claude .cursor .vscode .zed
+.claude/
+.cursor/
+.vscode/
+.zed/
+
+# --- 3D models kept out of git on purpose ---------------------------------
+# ~26 MB of GLB. Three of the four are the Khronos glTF Sample Assets and are
+# reproduced byte-for-byte by tools/fetch_models.py; the fourth is a manual
+# download. Binary payloads belong in a CDN or an object store, not in the
+# history of a code repository.
+*.glb
+
+# --- Deliberately NOT ignored ---------------------------------------------
+# .git/    Not a worktree path: it IS the repository. Git never tracks paths
+#          inside .git/, so a rule here is a no-op. Its size is HISTORY, and
+#          history only shrinks by rewriting it or by keeping big binaries out
+#          in the first place -- which is what the *.glb rule above is for.
+# .github/ Holds the CI workflows and .github/copilot-instructions.md. GitHub
+#          reads those from the REMOTE, so ignoring them would silently break
+#          CI and strip the project agent rules from every collaborator.
 
 # --- OS artifacts ---------------------------------------------------------
 desktop.ini
