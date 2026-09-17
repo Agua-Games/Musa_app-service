@@ -1,0 +1,11 @@
+# --- Derived / tooling state ---------------------------------------------
+# Codebase Memory MCP local index (rebuildable via index_repository)
+.codebase-memory/
+
+# Build output
+_build/
+
+# --- OS artifacts ---------------------------------------------------------
+desktop.ini
+Thumbs.db
+.DS_Store
