@@ -4,7 +4,7 @@
 > não redescubra na prática o que já foi aprendido, e para que não desfaça decisões que custaram
 > sessões para serem tomadas.
 >
-> Última atualização: **2026-09-17**.
+> Última atualização: **2026-09-18**.
 
 ---
 
@@ -64,13 +64,18 @@ docs/
 └── adr/
     ├── 0001-camada-de-acervo.md              # contrato, backend-agnóstico, sem WordPress
     ├── 0002-tooling-de-desenvolvimento.md     # MCP, índice de codebase, limites
-    └── 0003-onboarding-de-clientes.md         # artefato versionado, tenancy, gating
+    ├── 0003-onboarding-de-clientes.md         # artefato versionado, tenancy, gating
+    ├── 0004-frontend-auto-hospedado.md         # three.js vendorizado, mídia licenciada
+    └── 0005-publicacao-do-frontend.md          # GitHub Pages + assets materializados no CI
 schemas/ficha.schema.json                     # O CONTRATO
 source/                                       # frontend estático (o site)
 tools/
 ├── fetch_assets.py                           # baixa 14 imagens do Wikimedia
 ├── fetch_models.py                           # baixa 3 modelos Khronos (o 4º é manual)
+├── fetch_vendor.py                           # vendoriza three.js (sem CDN em runtime)
 └── validate_catalog.py                       # valida o catálogo contra o contrato
+.github/workflows/pages.yml                   # publica source/ no GitHub Pages (ADR 0005)
+reasonix.toml                                 # preferências do agente neste workspace
 ```
 
 ---
@@ -84,8 +89,8 @@ tools/
 | Frontend estático completo (hero, galerias, viewer 3D, digital twin, triagem, loja, planos, admin) | `source/`, servido por `npm run dev` (porta 7100) |
 | Camada de dados contract-first com modos `mock` e `live` | `source/assets/js/api.js` |
 | Contrato que o catálogo **realmente** satisfaz | `python tools/validate_catalog.py` → **14 itens, 0 violações** |
-| Fetchers de assets reproduzíveis | 3 modelos Khronos com tamanho exato verificado; 14 imagens Wikimedia |
-| Decisões registradas | 3 ADRs |
+| Fetchers de assets reproduzíveis | 3 modelos Khronos com tamanho exato verificado; 14 imagens Wikimedia; three.js r160 vendorizado (`tools/fetch_vendor.py`) |
+| Decisões registradas | 4 ADRs |
 | Repositório cliente | `DemoMuseum`, esqueleto commitado e publicado |
 
 **O que NÃO existe ainda** (e por isso o M0 é onde o trabalho começa):
@@ -114,6 +119,36 @@ $c.items | Group-Object website_status | Select-Object Name, Count
 Pelo mesmo motivo, um cliente Bronze receberia os dados do Gold se o catálogo os contivesse. O
 conserto é o item 3 do M0.
 
+### Frontend: hospedagem e a armadilha do `file://` (2026-09-18)
+
+O frontend **precisa ser testado por `http(s)`**. Abrir `source/index.html` direto do disco
+(`file://`) produz sintomas que parecem bug de código e não são:
+
+- o viewer 3D mostra *"WebGL viewer could not load (Three.js bundle unreachable)"* — o navegador
+  recusa **módulos ES** de uma origem opaca, então `three-item.js` nunca executa nem define
+  `window.MusaItemViewer`;
+- o embed do YouTube não carrega (mesma origem opaca);
+- o GLB em si também não seria buscado, pelo mesmo motivo.
+
+Nada disso tem a ver com a GPU/WebGL: é política de origem para *módulos e `fetch`*, não acesso à
+placa de vídeo. `main.js` agora detecta `location.protocol === "file:"` e explica isso na tela.
+
+Para rodar local: `npm run dev` **dentro de `source/`** (a `package.json` mora ali) e abrir
+`http://localhost:7100/`. Para testar online, o ADR 0005 publica `source/` no GitHub Pages.
+
+Estado desta sessão (mudanças **ainda não commitadas** quando isto foi escrito):
+
+| Item | Estado |
+|---|---|
+| Vídeo do hero | montagem do **YouTube** montada em `#heroVideo` por `heroFilm()` (`main.js`); o `<video>` local, o fallback em cascata e o corte por `prefers-reduced-motion` foram **removidos**. A foto `hero-museum-hall.jpg` está **fora de `.hero-bg` de propósito** (linha comentada em `index.html` para restaurar) |
+| Backdrops das seções | `<img class="sec-bg">` como primeiro filho de cada `.sec-media` (6 seções); `--sec-bg` e `.sec-media::before` foram **abandonados** — ver §7 |
+| Legenda do carrossel | colada na imagem, largura 100% da imagem, sem folga |
+| Viewer 3D | passa a mostrar o erro real em vez de "unreachable" |
+| Hospedagem | `.github/workflows/pages.yml` publica `source/` — ADR 0005. Pages **habilitado** em 2026-09-18 (`build_type: workflow`) |
+| Modelos 3D | os 4 GLB (~29,6 MB) passaram a ser **versionados**: a regra `*.glb` saiu do `.gitignore` — desvio consciente do invariante §5.3, ver §11 |
+| Binários | `.gitattributes` fixa `*.glb`/`*.mp4`/imagens como `binary`: `* text=auto` decide por *sniffing* dos primeiros 8000 bytes e um GLB pequeno pode passar por texto (ver §7) |
+| Ferramentas do agente | `reasonix.toml` fixa `[tools.shell] prefer = "powershell"`; `AGENTS.md` ganhou a regra de **não** criar artefatos que o próprio shell do agente não consegue apagar |
+
 ---
 
 ## 4. Decisões tomadas — não rediscutir
@@ -123,11 +158,18 @@ conserto é o item 3 do M0.
 | **0001** | Camada de acervo **contract-first e backend-agnóstica**. **Sem WordPress.** MVP = índice em build-time; escala = **Payload** (TS/Postgres); modo padrões = Omeka S / CollectiveAccess. Directus foi rejeitado por licença (MSCL, limite de receita). | traga números, não gosto; um 4º ADR substitui |
 | **0002** | Índice de codebase via MCP como fonte primária de exploração, tratado como **dado derivado**. | — |
 | **0003** | MUSA é **artefato versionado e fixado**; o repo do cliente tem só conteúdo + config + CI; **runtime nunca escreve em git**; **entitlements vêm do servidor**; gating no build; **multi-deploy antes de multi-tenant**. | idem |
+| **0004** | Frontend **auto-hospedado**: three.js vendorizado (sem CDN em runtime) e mídia licenciada. | — |
+| **0005** | Demonstração publicada no **GitHub Pages via GitHub Actions** (a Pages recusa um subdiretório como raiz). Os binários seguem fora do git e são **materializados no build** pelos próprios fetchers. | traga números; um 6º ADR substitui |
 
 **Descartado de propósito:** Tainacan/WordPress (bloat e acoplamento), `ficha.toml` (substituído pelo
 USD como fonte + `ficha.json` derivada), Qdrant como backend do acervo (pgvector junto ao Postgres),
-`.exe` + DLLs copiados para repos de clientes, admin versionando conteúdo em git, `config.json` do
+**.exe` + DLLs copiados para repos de clientes, admin versionando conteúdo em git, `config.json` do
 cliente definindo o próprio tier.
+
+> ⚠️ **Divergência em aberto do ADR 0004 (2026-09-18):** o vídeo do hero passou a depender do
+> YouTube em tempo de execução (`https://www.youtube.com/iframe_api`), o que o ADR 0004 proíbe
+> ("sem CDN em runtime"). Não é decisão registrada ainda — ver §11 (candidato ao ADR 0006). Se uma
+> rede de museu bloquear terceiros, o hero fica **preto**, porque a foto deixou de ser camada base.
 
 ---
 
@@ -136,7 +178,8 @@ cliente definindo o próprio tier.
 1. **Ficha fora do contrato falha o build.** Sem exceção, sem aviso.
 2. **Nada `draft` e nada de tier acima do contratado chega ao payload.**
 3. **Zero binário grande versionado** (`*.glb`, `*.usd`, `*.jpg` de alta). Vai para o bucket, com
-   URL na ficha.
+   URL na ficha. ⚠️ **Violado de propósito em 2026-09-18**: os quatro GLB (~29,6 MB) e ~50 MB de JPEG
+   do demo entraram no git para o Pages funcionar sem object store. É decisão temporária — ver §11.
 4. **Zero código do MUSA dentro de um repo de cliente.**
 5. **Entitlements nunca são editáveis pelo cliente.**
 6. **`docs/* session.md` não se reescreve.** Transcrições são registro datado; decisão nova vira ADR.
@@ -173,6 +216,14 @@ cliente definindo o próprio tier.
 | **Apagar o fim de um arquivo não tem ferramenta de edição** | — | trunque com `[System.IO.File]::WriteAllText` (UTF-8 sem BOM) e **prove** com `git diff --numstat` (`0 <N>` = só deleção) |
 | **Blob continua vivo depois de reescrever a história** | `.git` não encolhe | `reflog expire --all` + `gc --prune=now` **depois** do force-push |
 | **Ícones/itens de teste que "passam"** | um teste que não testa nada é pior que um teste que falha | assertar um valor que você já viu |
+| **Testar o frontend por `file://`** | viewer 3D: "Three.js bundle unreachable"; YouTube não carrega; um estilo que parece "não ter pegado" | sirva por http (`npm run dev` em `source/`) e faça *hard refresh* (Ctrl+Shift+R) antes de concluir que CSS/JS não mudaram |
+| **Shell do agente morre com `Win32 error 5`** | `bash: couldn't create signal pipe`, em toda chamada de shell (git, node, python) | é o *restricted token* do preset `workspace-write`; `reasonix.toml` com `[tools.shell] prefer = "powershell"` resolve; alternativamente, sessão com preset `danger-full-access` |
+| **GitHub Pages recusa `source/` como raiz** | em Settings → Pages só existem `/ (root)` e `/docs` | não é limitação do repo: publique via GitHub Actions (ADR 0005) |
+| **`url()` relativo dentro de custom property resolve contra o CSS, não o documento** | o backdrop de todas as seções some **sem erro visível**; o `background-image` computado vira `/assets/css/assets/img/…` e dá **404** | ponha a mídia em `<img src>` no HTML (resolve contra o documento) ou declare o `--var` **dentro do `style.css`**, com caminho relativo ao próprio CSS. Confira o valor computado antes de mexer em qualquer outra coisa |
+| **Espaço no nome do arquivo (e `%20`) é inocente** | suspeita-se de `demo_room (11).jpg` e o "conserto" vira renomear 55 arquivos à toa | meça antes: os 8 assets referenciados respondem **200** com `%20` (e as `<img>` do site sempre funcionaram). O defeito estava no item acima |
+| **`prefers-reduced-motion` desligado nesta máquina (`MinAnimate=0`)** | o Chromium reporta `reduce`; código que remove/esconde o vídeo do hero faz o elemento **sumir do DOM** — no DevTools `.hero-bg` só tem o `<img>` | meça `matchMedia("(prefers-reduced-motion: reduce)").matches` antes de concluir "não carregou"; nunca apague o elemento por causa disso |
+| **MP4 com faixa de vídeo HEVC/H.265** | o `<video>` "toca" (`readyState: 4`, `currentTime` avança) e **não pinta nada** — tela preta silenciosa, sem erro no console | confira o codec **antes** de depurar CSS/JS: `hvc1` presente e `avc1` ausente = Chrome/Edge não decodificam. Sintoma objetivo: `videoWidth === 0`. Transcode para H.264/AVC ou VP9 |
+| **`--user-data-dir` do Chrome dentro do repo** | o Chrome *headless* de verificação deixa um perfil de ~1.400 arquivos que o **shell do agente não consegue apagar** (leitura, `Move-Item`, `Remove-Item`, `[IO.Directory]::Delete`, `rd` e `icacls` todos negados) | aponte `--user-data-dir` para `%TEMP%` — verificado: o Chrome escreve lá e o shell apaga limpo. E note: **não era ACL** (a `icacls` provou ACL idêntica à de `source/index.html`, que o shell apagava), é política do sandbox sobre o que um filho criou. Ver `AGENTS.md` |
 
 ---
 
@@ -185,8 +236,13 @@ cliente definindo o próprio tier.
 # 2. O contrato está satisfeito?
 python tools\validate_catalog.py
 
+# 2b. Rodar o site: `npm run dev` roda DENTRO de source/ (a package.json mora ali).
+#     Sem http(s) não há 3D nem YouTube (ver §7, armadilha do file://).
+
 # 3. Os assets são reproduzíveis?
-python tools\fetch_models.py     # 3 modelos ok; venus-de-milo é MANUAL (sai com código 1)
+python tools\fetch_models.py     # com os 4 GLB versionados: "skip ... (already present)", sai 0
+                                 # (num clone sem source/assets/models/ ele baixa 3 e o venus-de-milo
+                                 #  é MANUAL: sai com código 1)
 
 # 4. Estado do git
 git -C H:\Musa_app-service\alpha log --oneline
@@ -194,6 +250,18 @@ git -C H:\Musa_app-service\DemoMuseum log --oneline
 
 # 5. Leia nesta ordem
 #    docs/adr/0001 → docs/adr/0003 → docs/Musa_design onboarding.md → source/README.md
+
+# 6. Verificar o frontend de verdade — o projeto NÃO tem teste automatizado, então
+#    um navegador headless é a única forma de provar DOM/CSS no estado real.
+#    Edge e Chrome estão instalados; a partir do PowerShell:
+#      --headless=new --dump-dom URL                  DOM depois do JS (o #heroVideo existe?)
+#      --force-prefers-reduced-motion                 reproduz ESTA máquina (ver §7)
+#      --screenshot=out.png --window-size=1440,900    grava ASSÍNCRONO: espere o arquivo
+#      --user-data-dir=$env:TEMP\...                  NUNCA dentro do repo (§7)
+#    Estilos computados e emulação fina pedem CDP: --remote-debugging-port=9333 mais
+#    o WebSocket global do Node 22 (Runtime.evaluate, Emulation.setEmulatedMedia,
+#    Page.captureScreenshot). Foi assim que os defeitos de 2026-09-18 foram provados:
+#    o iframe do hero, o `videoWidth: 0` do MP4 e o 404 de todos os backdrops.
 ```
 
 > Se o grafo não contiver um arquivo que você sabe existir, **o índice está velho** — e um índice
@@ -414,6 +482,31 @@ onboarding self-service; marketplace de módulos; suporte N1 com runbook.
 - [ ] §8.1 da spec (métricas) tem valores **propostos**, não medidos — substituir por medição no M3.
 - [ ] `source/README.md` descreve o estado do frontend, mas o README do DemoMuseum precisa ganhar o
       passo a passo real quando a pipeline estiver ligada.
+- [x] **Commitar e publicar** as mudanças de frontend de 2026-09-18 (vídeo do hero via YouTube,
+      backdrops das seções como `<img class="sec-bg">`, legenda do carrossel colada, diagnóstico do
+      viewer 3D, `reasonix.toml`, `.github/workflows/pages.yml`, ADRs 0004/0005, `tools/fetch_vendor.py`)
+      — feito no push desta sessão; o Pages só publica o que está no `main`.
+- [x] **Settings → Pages → Source = "GitHub Actions"** (ADR 0005) — feito pelo dono. A API confirma
+      `build_type: workflow` e `html_url: https://agua-games.github.io/Musa_app-service/`.
+- [ ] **Verificar o site publicado de ponta a ponta**: o hero (embed do YouTube), os **3 viewers WebGL**
+      (que dependem dos GLB versionados) e os backdrops. A verificação headless desta sessão cobriu o
+      hero e os 6 `<img class="sec-bg">` — **não** os viewers nem a legenda do carrossel em navegador
+      de verdade.
+- [ ] **`Musa_montage_02_web.mp4` (4,3 MB): decidir e agir.** Verificado em 2026-09-18: a faixa de
+      vídeo é **HEVC/H.265** (`hvc1` presente, `avc1` ausente) e **nenhum navegador decodifica** — o
+      `<video>` reporta `readyState: 4` com `videoWidth: 0` e pinta nada. O arquivo ficou **sem
+      referência** no markup e foi para o `.gitignore` com essa justificativa. Para voltar ao
+      auto-hospedado (ADR 0004), transcodifique para H.264/AVC e devolva o `<video>` a `#heroVideo`:
+      `ffmpeg -i Musa_montage_02_web.mp4 -c:v libx264 -crf 23 -preset slow -pix_fmt yuv420p -movflags +faststart -an montage_h264.mp4`
+- [ ] **ADR 0006 (candidato): o vídeo do hero depende do YouTube em runtime.** Contradiz o ADR 0004
+      ("sem CDN em runtime"). Se uma rede de museu bloquear terceiros, o hero fica **preto** — a foto
+      deixou de ser camada base. Registre o ADR se a decisão ficar; caso contrário, auto-hospede.
+- [ ] **Decidir sobre a foto do hero:** `hero-museum-hall.jpg` está fora de `.hero-bg` **de
+      propósito** (linha comentada em `source/index.html`). Restaurar como camada base ou remover.
+- [ ] **Reavaliar os binários versionados.** ~29,6 MB de GLB e ~50 MB de JPEG do demo entraram no git
+      para o Pages funcionar sem object store (viola o §5.3 de propósito). Quando houver bucket, tire
+      os binários do git **e reescreva a história** (`reflog expire --all` + `gc --prune=now`) — sem
+      isso o blob fica no `.git` para sempre (§7).
 
 ---
 

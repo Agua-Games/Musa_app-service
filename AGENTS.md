@@ -41,3 +41,26 @@ mcp_codebase-memo_get_architecture({ "project": "<display_name>" })
 - `search_code(pattern, project)` — Grep-like text search within indexed files
 - `manage_adr(action)` — CRUD for Architecture Decision Records
 - `ingest_traces(traces)` — Ingest runtime traces to validate HTTP edges
+
+## Creating artifacts on this machine (2026-09-18 — read before you write anything)
+
+**Never leave in the repository anything the agent's own shell cannot delete, and
+ask the user *before* creating something that needs custom permissions, elevated
+rights or a privileged helper — explaining what and why.**
+
+What went wrong: a headless-Chrome run for frontend verification was pointed at
+`--user-data-dir=<repo>/.musa-chrome-profile`. Chrome is launched by the shell's
+restricted token, so the ~1,400 files it wrote were **not deletable by that same
+shell afterwards** — every read, move and delete was denied. This was *not* NTFS:
+`icacls` showed the directory's ACL was identical to `source/index.html`, which
+the shell could delete fine, and a Chrome profile written to `%TEMP%` deleted
+cleanly. The blocker is the sandbox's own file-access policy for artifacts
+written by a sandboxed child. Cleaning it up cost the repository owner a
+convoluted manual process. Two rules follow:
+
+1. **Throwaway state goes where it cannot reach the repository.** A Chrome
+   profile belongs in `%TEMP%` (verified). Never `--user-data-dir` inside the
+   repo. Same for caches, scratch clones and test output.
+2. **If a step needs custom ACLs, elevation or a privileged helper, stop and ask
+   first.** Do not create it on a "we can clean it up later" premise — check
+   that the cleanup path actually works before you need it.
