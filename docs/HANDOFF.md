@@ -73,6 +73,7 @@ tools/
 ├── fetch_assets.py                           # baixa 14 imagens do Wikimedia
 ├── fetch_models.py                           # baixa 3 modelos Khronos (o 4º é manual)
 ├── fetch_vendor.py                           # vendoriza three.js (sem CDN em runtime)
+├── check_frontend.py                         # porta do build: import map válido e vendor presente
 └── validate_catalog.py                       # valida o catálogo contra o contrato
 .github/workflows/pages.yml                   # publica source/ no GitHub Pages (ADR 0005)
 reasonix.toml                                 # preferências do agente neste workspace
@@ -148,6 +149,9 @@ Estado desta sessão (mudanças **ainda não commitadas** quando isto foi escrit
 | Modelos 3D | os 4 GLB (~29,6 MB) passaram a ser **versionados**: a regra `*.glb` saiu do `.gitignore` — desvio consciente do invariante §5.3, ver §11 |
 | Binários | `.gitattributes` fixa `*.glb`/`*.mp4`/imagens como `binary`: `* text=auto` decide por *sniffing* dos primeiros 8000 bytes e um GLB pequeno pode passar por texto (ver §7) |
 | Ferramentas do agente | `reasonix.toml` fixa `[tools.shell] prefer = "powershell"`; `AGENTS.md` ganhou a regra de **não** criar artefatos que o próprio shell do agente não consegue apagar |
+| Hero film | classe **`.hero-film`** separada de `.sec-bg`, para o header ter opacidade própria: `--hero-film-opacity` (padrão **1**) e `--hero-film-brightness` (0.6), no topo do bloco em `style.css` |
+| Viewers 3D | **corrigidos em 2026-09-18**: o import map usava *bare specifier*, o que anulava a própria chave `three` — os dois viewers nunca funcionaram em ambiente nenhum. Ver §7 |
+| Portão do frontend | `tools/check_frontend.py` roda no `pages.yml` **antes** do upload: reprova import map não-URL e vendor ausente |
 
 ---
 
@@ -216,7 +220,8 @@ cliente definindo o próprio tier.
 | **Apagar o fim de um arquivo não tem ferramenta de edição** | — | trunque com `[System.IO.File]::WriteAllText` (UTF-8 sem BOM) e **prove** com `git diff --numstat` (`0 <N>` = só deleção) |
 | **Blob continua vivo depois de reescrever a história** | `.git` não encolhe | `reflog expire --all` + `gc --prune=now` **depois** do force-push |
 | **Ícones/itens de teste que "passam"** | um teste que não testa nada é pior que um teste que falha | assertar um valor que você já viu |
-| **Testar o frontend por `file://`** | viewer 3D: "Three.js bundle unreachable"; YouTube não carrega; um estilo que parece "não ter pegado" | sirva por http (`npm run dev` em `source/`) e faça *hard refresh* (Ctrl+Shift+R) antes de concluir que CSS/JS não mudaram |
+| **Import map com valor que não é URL** | os **dois viewers WebGL ficam mortos** e a página parece perfeita: `resolve`/`GLTFLoader` falham, o console diz `Resolution of specifier "three" was blocked by a null entry.` e `main.js` mostra "Three.js bundle unreachable" | o valor tem de começar com `/`, `./`, `../` ou ser URL absoluta. `"three": "assets/vendor/…"` é **bare specifier**: o parser guarda `null` na chave e a resolução **morre sem fallback**. Use `"./assets/vendor/…"`. `python tools/check_frontend.py` reprova isso no build |
+| **Testar o frontend por `file://`** | viewer 3D não carrega; YouTube não carrega; um estilo que parece "não ter pegado" | sirva por http (`npm run dev` em `source/`) e faça *hard refresh* (Ctrl+Shift+R) antes de concluir que CSS/JS não mudaram. **Atenção:** a mensagem "Three.js bundle unreachable" é genérica e, em 2026-09-18, a causa real não era o `file://` — era o import map acima |
 | **Shell do agente morre com `Win32 error 5`** | `bash: couldn't create signal pipe`, em toda chamada de shell (git, node, python) | é o *restricted token* do preset `workspace-write`; `reasonix.toml` com `[tools.shell] prefer = "powershell"` resolve; alternativamente, sessão com preset `danger-full-access` |
 | **GitHub Pages recusa `source/` como raiz** | em Settings → Pages só existem `/ (root)` e `/docs` | não é limitação do repo: publique via GitHub Actions (ADR 0005) |
 | **`url()` relativo dentro de custom property resolve contra o CSS, não o documento** | o backdrop de todas as seções some **sem erro visível**; o `background-image` computado vira `/assets/css/assets/img/…` e dá **404** | ponha a mídia em `<img src>` no HTML (resolve contra o documento) ou declare o `--var` **dentro do `style.css`**, com caminho relativo ao próprio CSS. Confira o valor computado antes de mexer em qualquer outra coisa |
@@ -488,10 +493,14 @@ onboarding self-service; marketplace de módulos; suporte N1 com runbook.
       — feito no push desta sessão; o Pages só publica o que está no `main`.
 - [x] **Settings → Pages → Source = "GitHub Actions"** (ADR 0005) — feito pelo dono. A API confirma
       `build_type: workflow` e `html_url: https://agua-games.github.io/Musa_app-service/`.
-- [ ] **Verificar o site publicado de ponta a ponta**: o hero (embed do YouTube), os **3 viewers WebGL**
-      (que dependem dos GLB versionados) e os backdrops. A verificação headless desta sessão cobriu o
-      hero e os 6 `<img class="sec-bg">` — **não** os viewers nem a legenda do carrossel em navegador
-      de verdade.
+- [ ] **Confirmar os viewers WebGL em navegador real.** O defeito (import map com *bare specifier*) foi
+      corrigido e o portão `tools/check_frontend.py` passa a reprová-lo no build, mas a sessão de
+      2026-09-18 **não conseguiu** refazer o teste de clique: no meio da sessão o Chrome do sandbox
+      deixou de funcionar (`spawn EPERM`, `--dump-dom` sem saída, `--remote-debugging-port` não abre).
+      Falta: abrir o site, abrir um card de **Silver** (GLB) e a **sala Gold** (digital twin) e ver a
+      malha. Confirmado só estaticamente: valor do import map, arquivos vendor presentes no artifact
+      publicado e os 4 GLB com o tamanho byte-exato.
+- [ ] **Verificar a legenda do carrossel** (visual, nunca medida) em navegador de verdade.
 - [ ] **`Musa_montage_02_web.mp4` (4,3 MB): decidir e agir.** Verificado em 2026-09-18: a faixa de
       vídeo é **HEVC/H.265** (`hvc1` presente, `avc1` ausente) e **nenhum navegador decodifica** — o
       `<video>` reporta `readyState: 4` com `videoWidth: 0` e pinta nada. O arquivo ficou **sem
