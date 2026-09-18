@@ -7,10 +7,11 @@
 # (see docs/HANDOFF.md §2). Select "GitHub Actions" as the Pages source once in
 # Settings -> Pages.
 #
-# The heavy assets are deliberately NOT in git (.gitignore: *.glb, and the
-# three.js vendor bundle per docs/adr/0004). They are reproduced here at build
-# time by this repository's own fetchers, so the published site is complete
-# without versioning binaries.
+# The media assets ARE versioned as of 2026-09-18 (see .gitignore and HANDOFF
+# §5.3): the GLB models and the demo JPEGs ship with the repository, because the
+# published demo needs a working WebGL viewer and there is no object store yet.
+# The fetchers below are kept as a fallback and are a no-op on a full checkout --
+# they skip any file already present at the exact expected size.
 
 name: Deploy frontend to GitHub Pages
 
@@ -59,6 +60,15 @@ jobs:
       # viewer degrades gracefully.
       - name: Fetch the 3D models
         run: python tools/fetch_models.py || echo "::warning::venus-de-milo.glb is a manual model and is not in the published build"
+
+      # Frontend plumbing that only a browser exercises. An import map whose
+      # value is a BARE specifier -- "assets/vendor/…" instead of
+      # "./assets/vendor/…" -- is quietly normalised to null, and then every
+      # `import ... from "three"` fails with "Resolution of specifier "three"
+      # was blocked by a null entry": both WebGL viewers are dead while the page
+      # looks fine (docs/HANDOFF.md §7). Gate the deploy on it.
+      - name: Check the frontend's module plumbing
+        run: python tools/check_frontend.py
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
