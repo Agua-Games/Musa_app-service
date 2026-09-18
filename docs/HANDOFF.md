@@ -140,7 +140,7 @@ Estado desta sessão (mudanças **ainda não commitadas** quando isto foi escrit
 
 | Item | Estado |
 |---|---|
-| Vídeo do hero | montagem do **YouTube** montada em `#heroVideo` por `heroFilm()` (`main.js`); o `<video>` local, o fallback em cascata e o corte por `prefers-reduced-motion` foram **removidos**. A foto `hero-museum-hall.jpg` está **fora de `.hero-bg` de propósito** (linha comentada em `index.html` para restaurar) |
+| Vídeo do hero | montagem do **YouTube** (vídeo `siuAaTMil6g`, carregado de `https://www.youtube.com/iframe_api`) montada em `#heroVideo` por `heroFilm()` (`main.js`); o `<video>` local, o fallback em cascata e o corte por `prefers-reduced-motion` foram **removidos**. A foto `hero-museum-hall.jpg` está **fora de `.hero-bg` de propósito** (linha comentada em `index.html` para restaurar) |
 | Backdrops das seções | `<img class="sec-bg">` como primeiro filho de cada `.sec-media` (6 seções); `--sec-bg` e `.sec-media::before` foram **abandonados** — ver §7 |
 | Legenda do carrossel | colada na imagem, largura 100% da imagem, sem folga |
 | Viewer 3D | passa a mostrar o erro real em vez de "unreachable" |
