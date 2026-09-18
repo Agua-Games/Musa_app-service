@@ -13,6 +13,10 @@
 # The extension's configuration is reasonix.toml, which IS tracked.
 .reasonix/
 
+# Python bytecode, e.g. from a test that imports a checker in tools/.
+__pycache__/
+*.pyc
+
 # --- Build output ---------------------------------------------------------
 build/
 _build/
