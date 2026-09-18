@@ -13,8 +13,8 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    "three": "assets/vendor/three/three.module.js",
+    "three/addons/": "assets/vendor/three/addons/"
   }
 }
 </script>
@@ -41,7 +41,12 @@
 
 <!-- ======================= Hero + AI assistant ======================= -->
 <header class="hero" id="top">
-  <div class="hero-bg"><img src="assets/img/hero-museum-hall.jpg" alt="Museum hall ceiling" /></div>
+  <div class="hero-bg">
+    <!-- TEMPORARY: the still photograph is removed so the film is the only thing
+         filling the hero while we verify it. Restore the base layer with:
+         <img src="assets/img/hero-museum-hall.jpg" alt="Museum hall ceiling" /> -->
+    <div class="hero-video" id="heroVideo" aria-hidden="true"></div>
+  </div>
   <div class="hero-veil"></div>
   <div class="wrap hero-content">
     <p class="eyebrow reveal-up d1">App-service for museums · galleries · art cinemas · bookstores</p>
@@ -64,7 +69,8 @@
 </header>
 
 <!-- ======================= Collections overview ======================= -->
-<section id="collections">
+<section id="collections" class="sec-media">
+  <img class="sec-bg" src="assets/img/demo_room%20(11).jpg" alt="" />
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -90,7 +96,7 @@
       <p class="side">A photographic backdrop of the venue's gallery wall. Every glowing marker is a piece on view — select one to open its frame and record card.</p>
     </div>
     <div class="wall-shell fx" id="wallShell">
-      <img src="assets/img/twin-wall.jpg" alt="Gallery room backdrop" />
+      <img src="assets/img/demo_room%20(16).jpg" alt="Gallery room backdrop" />
       <div class="wall-veil"></div>
       <div class="wall-spots" id="wallSpots"><!-- markers injected from the catalog --></div>
       <p class="wall-hint">Click a marker to reveal the piece</p>
@@ -98,8 +104,30 @@
   </div>
 </section>
 
+<!-- ======================= Salon — featured works carousel ======================= -->
+<section id="salon" class="sec-media">
+  <img class="sec-bg" src="assets/img/demo_paintings%20(5).jpg" alt="" />
+  <div class="wrap">
+    <div class="sec-head fx">
+      <div>
+        <p class="eyebrow">From the collection</p>
+        <h2>The salon, <em>in rotation</em></h2>
+        <div class="rule"></div>
+      </div>
+      <p class="side">A rotating selection of works — paintings and sculpture, shown one at a time. Each piece slides away and the next takes its place; tap a dot to browse the hang.</p>
+    </div>
+    <div class="carousel fx" id="salonCarousel">
+      <div class="carousel-viewport">
+        <div class="carousel-track" id="carouselTrack"></div>
+      </div>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+  </div>
+</section>
+
 <!-- ======================= Tier I · Bronze photo gallery ======================= -->
-<section id="bronze-gallery" class="gallery-bronze">
+<section id="bronze-gallery" class="gallery-bronze sec-media">
+  <img class="sec-bg" src="assets/img/demo_paintings%20(1).jpg" alt="" />
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -114,7 +142,8 @@
 </section>
 
 <!-- ======================= Tier II · Silver 3D gallery ======================= -->
-<section id="gallery-3d">
+<section id="gallery-3d" class="sec-media">
+  <img class="sec-bg" src="assets/img/demo_statues%20(1).jpg" alt="" />
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -129,7 +158,8 @@
 </section>
 
 <!-- ======================= Tier III · Gold digital twin ======================= -->
-<section id="digital-twin" class="twin">
+<section id="digital-twin" class="twin sec-media">
+  <img class="sec-bg" src="assets/img/demo_room%20(16).jpg" alt="" />
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -176,17 +206,17 @@
             <button id="pbPlay" title="Play / pause">▶</button>
             <div class="progress" id="pbProgress"><i id="pbFill"></i></div>
             <span id="pbTime" style="font-size:11px;color:var(--paper-dim)">0:00</span>
-            <select id="pbQuality" title="Quality (scaffold)">
+            <select id="pbQuality" title="Quality">
               <option value="auto">Auto</option>
-              <option value="1080p">1080p</option>
-              <option value="720p">720p</option>
               <option value="480p">480p</option>
+              <option value="240p">240p</option>
             </select>
             <button id="pbCc" title="Subtitles (scaffold)">CC</button>
             <button id="pbFs" title="Fullscreen">⛶</button>
           </div>
         </div>
-        <p class="stream-note">Demo streams are public sample videos — the production module delivers venue programmes over the streaming pipeline (DRM, scheduled premieres, live Q&amp;As).</p>
+        <p class="stream-credit" id="streamCredit"></p>
+        <p class="stream-note">Streams are authorized public-domain copies from the Internet Archive — the production module delivers venue programmes over the streaming pipeline (DRM, scheduled premieres, live Q&amp;As).</p>
       </div>
       <aside>
         <p class="eyebrow" style="margin-bottom:14px">This week</p>
@@ -197,7 +227,8 @@
 </section>
 
 <!-- ======================= Store (scaffold) ======================= -->
-<section id="store" class="store">
+<section id="store" class="store sec-media">
+  <img class="sec-bg" src="assets/img/demo_visitor.jpg" alt="" />
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -374,7 +405,7 @@
         <p style="font-size:13px;color:var(--paper-dim);max-width:300px;margin-top:14px">The app-service for venues with collections — online presence, interactive 3D, digital twins, streaming and an AI that knows the collection.</p>
       </div>
       <div class="foot-col"><p>Visit</p>
-        <a href="#collections">Collections</a><a href="#gallery-3d">3D Gallery</a><a href="#digital-twin">Digital Twin</a><a href="#cinema">Cinema</a>
+        <a href="#collections">Collections</a><a href="#salon">Salon</a><a href="#gallery-3d">3D Gallery</a><a href="#digital-twin">Digital Twin</a><a href="#cinema">Cinema</a>
       </div>
       <div class="foot-col"><p>Venues</p>
         <a href="#plans">Plans &amp; modules</a><a href="#store">Store</a><a href="#" id="footLogin">Venue sign-in</a>

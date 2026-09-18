@@ -108,9 +108,23 @@ window.MusaItemViewer = {
     loadingEl.style.display = "grid";
     loadingEl.textContent = "Loading “" + item.titulo + "”…";
 
+    // Never leave the stage stuck on "Preparing the piece": if the loader
+    // neither resolves nor fails (a stalled fetch), surface a fallback.
+    let settled = false;
+    const guard = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      loadingEl.style.display = "none";
+      fallbackEl.style.display = "grid";
+      fallbackEl.innerHTML =
+        "The 3D asset is taking too long to load.<br/>" +
+        "The record card still carries the full provenance of this piece.";
+    }, 30000);
+
     new GLTFLoader().load(
       item.model_primary,
       (gltf) => {
+        settled = true; clearTimeout(guard);
         const model = gltf.scene;
         model.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
         scene.add(model);
@@ -122,6 +136,7 @@ window.MusaItemViewer = {
         if (ev.total) loadingEl.textContent = `Loading “${item.titulo}”… ${Math.round(ev.loaded / ev.total * 100)}%`;
       },
       (err) => {
+        settled = true; clearTimeout(guard);
         console.error("GLB load failed", err);
         loadingEl.style.display = "none";
         fallbackEl.style.display = "grid";

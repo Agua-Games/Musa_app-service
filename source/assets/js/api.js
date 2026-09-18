@@ -154,7 +154,7 @@ const MusaAPI = (() => {
     } else if (/(tour|visit|ticket|hour|open)/.test(q)) {
       answer = "The venue is open Tue–Sun, 10:00–18:00. A guided virtual tour of Room A is available in the Digital Twin section — the full narrated tour ships with the Gold tier.";
     } else if (/(film|cinema|screening|movie)/.test(q)) {
-      answer = "This week's art-cinema programme: Metropolis (now showing), Nosferatu and Modern Times premiering Friday and Saturday. See the Screening Room section for times.";
+      answer = "This week's art-cinema programme: Metropolis (now showing), The Cabinet of Dr. Caligari and Nosferatu premiering Friday and Saturday. See the Screening Room section for times.";
     } else if (/(ticket|store|buy|shop|souvenir|merch)/.test(q)) {
       answer = "The museum store carries exhibition posters, plaster casts, textiles and catalogues — take a look at the Store section. Online checkout plugs into the commerce module.";
     } else {

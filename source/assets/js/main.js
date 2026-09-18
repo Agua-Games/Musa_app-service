@@ -41,6 +41,98 @@
     t._h = setTimeout(() => t.classList.remove("show"), 2600);
   };
 
+  /* ===================================================== HERO BACKGROUND == */
+  /* The hero plays the venue's montage behind the headline. One path only: the
+     YouTube player mounts into #heroVideo and fades in when it is ready. It
+     deliberately does not consult the motion preference — the film is muted and
+     decorative, and on a machine with "animations off" it would otherwise never
+     be seen at all.
+     To self-host instead (ADR 0004): put a <video autoplay muted loop playsinline>
+     inside #heroVideo and drop the iframe_api script below. The file MUST be a
+     codec the browser decodes (H.264/AVC or VP9) — an HEVC/H.265 mp4 reports
+     readyState 4 and paints nothing, failing silently. The montage currently in
+     source/assets/video/ is HEVC, so it cannot be used as-is. */
+  (function heroFilm() {
+    const mount = $("#heroVideo");
+    if (!mount) return;
+
+    const YOUTUBE_ID = "siuAaTMil6g"; // the venue montage, hosted online
+
+    window.onYouTubeIframeAPIReady = () => {
+      const host = document.createElement("div");
+      mount.replaceChildren(host);
+      new window.YT.Player(host, {
+        videoId: YOUTUBE_ID,
+        playerVars: {
+          autoplay: 1, mute: 1, controls: 0, loop: 1, playlist: YOUTUBE_ID,
+          modestbranding: 1, rel: 0, iv_load_policy: 3, disablekb: 1,
+          fs: 0, playsinline: 1, cc_load_policy: 0
+        },
+        events: {
+          onReady: (e) => { e.target.mute(); e.target.playVideo(); mount.classList.add("on"); },
+          onError: () => mount.classList.remove("on")
+        }
+      });
+    };
+
+    const api = document.createElement("script");
+    api.src = "https://www.youtube.com/iframe_api";
+    api.async = true;
+    document.head.appendChild(api);
+  })();
+
+  /* =================================================== SALON (carousel) === */
+  const salon = { idx: 0, timer: null };
+  const SALON_WORKS = [
+    { src: "assets/img/demo_paintings%20(1).jpg",  title: "The Assembly",        meta: "Oil on canvas · c. 1904 · 142 × 96 cm", note: "An invented attribution on a study of a crowded hall, light gathering on the steps." },
+    { src: "assets/img/demo_statues%20(1).jpg",    title: "Head of a Youth",      meta: "Marble · Roman, 2nd c. CE · 48 cm",   note: "A carved portrait head, the gaze turned just off the axis of the block." },
+    { src: "assets/img/demo_paintings%20(10).jpg", title: "Nocturne in Ochre",    meta: "Oil on canvas · c. 1899 · 110 × 78 cm", note: "Warm ochres worked down into shadow — a small interior late in the day." },
+    { src: "assets/img/demo_statues%20(6).jpg",    title: "Standing Figure",      meta: "Parian marble · c. 340 BCE · 176 cm",  note: "A draped figure on a shallow plinth, weight carried on one leg." },
+    { src: "assets/img/demo_paintings%20(14).jpg", title: "Interior, Late Light", meta: "Oil on panel · c. 1911 · 64 × 48 cm",  note: "The room as it empties — a still life of furniture and air." },
+    { src: "assets/img/demo_statues%20(12).jpg",   title: "Torso of an Athlete",  meta: "Marble · 1st c. CE · 92 cm",           note: "The surface worn to a soft sheen; the missing limbs left as they were found." }
+  ];
+
+  function paintSalon(i) {
+    salon.idx = (i + SALON_WORKS.length) % SALON_WORKS.length;
+    $("#carouselTrack").style.transform = `translateX(-${salon.idx * 100}%)`;
+    $$("#carouselDots button").forEach((b, n) => b.classList.toggle("active", n === salon.idx));
+  }
+  const advanceSalon = () => paintSalon(salon.idx + 1);
+
+  function renderSalon() {
+    const track = $("#carouselTrack");
+    const dots = $("#carouselDots");
+    if (!track || !dots) return;
+    track.innerHTML = SALON_WORKS.map((w) => `
+      <figure class="carousel-slide">
+        <div class="cs-img"><img src="${w.src}" alt="${w.title}" loading="lazy" /></div>
+        <figcaption class="carousel-caption">
+          <h3 class="serif">${w.title}</h3>
+          <p class="cs-meta">${w.meta}</p>
+          <p class="cs-note">${w.note}</p>
+        </figcaption>
+      </figure>`).join("");
+    dots.innerHTML = SALON_WORKS.map((w, n) =>
+      `<button type="button" data-i="${n}" aria-label="Show ${w.title}"></button>`).join("");
+
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let running = false;
+    const stop = () => { clearInterval(salon.timer); salon.timer = null; };
+    const start = () => { if (!reduced && !salon.timer) salon.timer = setInterval(advanceSalon, 5600); };
+    function restartSalon() { if (running) { stop(); start(); } }
+    $$("#carouselDots button").forEach((b) => b.addEventListener("click", () => {
+      paintSalon(Number(b.dataset.i));
+      restartSalon();
+    }));
+    paintSalon(0);
+
+    new IntersectionObserver(([e]) => {
+      running = e.isIntersecting;
+      running ? start() : stop();
+    }, { threshold: 0.25 }).observe($("#salonCarousel"));
+    watchFx();
+  }
+
   /* ====================================================== COLLECTIONS ==== */
   async function renderCollections() {
     const cols = await MusaAPI.listCollections();
@@ -223,21 +315,44 @@
   const vm = $("#viewerModal");
   let currentItem = null;
 
-  function ensureViewer(timeout = 3000) {
-    return new Promise((resolve) => {
-      if (window.MusaItemViewer) return resolve(true);
-      const t0 = Date.now();
-      (function poll() {
-        if (window.MusaItemViewer) return resolve(true);
-        if (Date.now() - t0 > timeout) return resolve(false);
-        setTimeout(poll, 100);
-      })();
-    });
+  /* Make sure the WebGL viewer module is present, and report *why* it is not
+     when it fails, so a failure is actionable instead of a bare "unreachable". */
+  async function ensureViewer(timeout = 3000) {
+    if (window.MusaItemViewer) return { ok: true, error: "" };
+    let error = "";
+    try {
+      // A dynamic import re-attempts the module graph and surfaces the real
+      // reason: a 404, a blocked request, or ES modules being refused under
+      // file:// (where browsers refuse to load module scripts at all).
+      await import("./three-item.js");
+    } catch (err) {
+      error = (err && err.message) || String(err);
+    }
+    const t0 = Date.now();
+    while (!window.MusaItemViewer && Date.now() - t0 < timeout) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    return { ok: !!window.MusaItemViewer, error };
+  }
+
+  const escHtml = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+  function viewerFailureHtml(error) {
+    if (location.protocol === "file:") {
+      return "The 3D viewer needs the site served over http:// — browsers refuse to load ES modules opened straight from a file.<br/>" +
+        "Run <code>npm run dev</code> inside <code>source/</code> and open <code>http://localhost:7100/</code>.<br/>" +
+        "The record card still carries the full provenance of this piece.";
+    }
+    return "The WebGL viewer could not load (Three.js bundle unreachable)." +
+      (error ? `<br/><code>${escHtml(error)}</code>` : "") +
+      "<br/>The record card still carries the full provenance of this piece.";
   }
 
   async function openViewer(id) {
     currentItem = await MusaAPI.getItem(id);
     const i = currentItem;
+    if (!i) { toast("That record could not be found."); return; }
+    if (window.MusaItemViewer) window.MusaItemViewer.dispose();
     vm.classList.add("open");
     document.body.style.overflow = "hidden";
 
@@ -270,37 +385,48 @@
         <iframe data-sketchfab loading="lazy" title="Sketchfab embed" hidden></iframe>
       </div>`;
 
-    // View pane content depends on the viewer the record declares.
-    const view = $("#paneView");
+    // The WebGL stage fills the left column; the tabs on the right describe the
+    // record. Every record keeps the same modal shape — only the stage changes.
+    const stage = $("#vmStage");
+    const loading = $("#vmLoading");
+    const fallback = $("#vmFallback");
+    stage.querySelector(".viewer-mount")?.remove();
+    fallback.style.display = "none";
+    fallback.innerHTML = "";
+    loading.textContent = "Preparing the piece…";
+
+    const placeholder = (html) => {
+      loading.style.display = "none";
+      fallback.style.display = "grid";
+      fallback.innerHTML = html;
+    };
+
     if (i.model_viewer === "three_js" && i.model_status === "available") {
-      view.innerHTML = `<div id="vmMount" style="position:absolute;inset:0"></div>`;
-      $("#vmLoading").style.display = "grid";
-      $("#vmFallback").style.display = "none";
-      const ok = await ensureViewer();
+      const mount = document.createElement("div");
+      mount.className = "viewer-mount";
+      mount.style.cssText = "position:absolute;inset:0";
+      stage.appendChild(mount);
+      loading.style.display = "grid";
+      const { ok, error } = await ensureViewer();
       if (ok && window.MusaItemViewer) {
-        window.MusaItemViewer.load(i, $("#vmMount"), $("#vmLoading"), $("#vmFallback"));
+        window.MusaItemViewer.load(i, mount, loading, fallback);
       } else {
-        $("#vmLoading").style.display = "none";
-        const f = $("#vmFallback");
-        f.style.display = "grid";
-        f.innerHTML = "The WebGL viewer could not load (Three.js CDN unreachable).<br/>The record card still carries the full provenance of this piece.";
+        mount.remove();
+        placeholder(viewerFailureHtml(error));
       }
     } else if (i.model_viewer === "kit_stream") {
-      view.innerHTML = `<div class="kit-placeholder" style="margin:4px">
-        <p class="eyebrow" style="margin-bottom:10px">Omniverse Kit App streaming</p>
-        This piece is delivered in production via the Omniverse Kit App Streaming pipeline
-        (<code>model_viewer: kit_stream</code>). The embedded stream session would initialize here:
-        <br/><br/>▸ session request → <code>GET /streaming/session</code><br/>▸ QoS metrics surfaced in the HUD
-      </div>`;
+      placeholder(`<p class="eyebrow" style="margin-bottom:10px">Omniverse Kit App streaming</p>This piece is delivered in production via the Omniverse Kit App Streaming pipeline (<code>model_viewer: kit_stream</code>). The embedded stream session would initialize here.`);
     } else if (i.model_status === "processing") {
-      view.innerHTML = `<div class="kit-placeholder" style="margin:4px">
-        <p class="eyebrow" style="margin-bottom:10px">In the 3D pipeline</p>
-        Photogrammetry for this piece is in progress. The <code>model_status</code> field flips to
-        <code>available</code> when the optimized GLB lands on the CDN, and this slot becomes a live viewer.
-      </div>`;
+      placeholder(`<p class="eyebrow" style="margin-bottom:10px">In the 3D pipeline</p>Photogrammetry for this piece is in progress. The <code>model_status</code> field flips to <code>available</code> when the optimized GLB lands on the CDN, and this slot becomes a live viewer.`);
     } else {
-      view.innerHTML = `<div class="kit-placeholder" style="margin:4px">This piece is published as photography only — no 3D model is attached to its record yet.</div>`;
+      placeholder(`This piece is published as photography only — no 3D model is attached to its record yet.`);
     }
+
+    // The "3D View" tab carries the short note; the stage is the picture.
+    $("#paneView").innerHTML = `
+      <p class="eyebrow">Interactive view</p>
+      <h3 class="serif">${i.titulo}</h3>
+      <p class="viewer-desc">${i.model_status === "available" ? "Drag to orbit, scroll to zoom. Use the “Record card” tab for the full catalogue entry." : "See the stage for this record's 3D status. The “Record card” tab carries the full catalogue entry."}</p>`;
     switchTab("view");
   }
 
@@ -332,6 +458,13 @@
         </div>
       </div>`).join("");
     $$("#playlist .playlist-item").forEach((el) => el.addEventListener("click", () => playFilm(el.dataset.id)));
+    // Playlist posters fall back to a plain label when an off-site image is blocked.
+    $$("#playlist img").forEach((img) => img.addEventListener("error", () => {
+      const span = document.createElement("span");
+      span.className = "poster-fallback";
+      span.textContent = img.alt;
+      img.replaceWith(span);
+    }, { once: true }));
     const first = films.find((f) => f.status === "now-showing") || films[0];
     selectFilm(first.id, false);
   }
@@ -340,10 +473,12 @@
   function selectFilm(id, autoplay = true) {
     const f = films.find((x) => x.id === id);
     $$("#playlist .playlist-item").forEach((el) => el.classList.toggle("active", el.dataset.id === id));
-    const q = $("#pbQuality").value === "auto" ? "1080p" : $("#pbQuality").value;
+    const q = $("#pbQuality").value === "auto" ? "480p" : $("#pbQuality").value;
     video.src = f.sources[q] || Object.values(f.sources)[0];
+    video.poster = f.poster;
     $("#ptTitle").textContent = f.title;
     $("#ptMeta").textContent = `${f.director} · ${f.year} · ${f.duration}`;
+    $("#streamCredit").textContent = f.credit || "";
     $("#player").classList.add("paused");
     $("#pbPlay").textContent = "▶";
     if (autoplay) video.play().catch(() => {});
@@ -753,6 +888,7 @@
   /* =============================================================== INIT == */
   renderCollections();
   renderWall();
+  renderSalon();
   renderBronze();
   renderSilver();
   renderCinema();

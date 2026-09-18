@@ -4,5 +4,7 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"reasonix.model": "deepseek-flash/deepseek-v4-flash-vision-exp"
+	}
 }

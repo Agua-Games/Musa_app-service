@@ -63,7 +63,7 @@
       "id": "gallery-rooms",
       "title": "Permanent Galleries (Digital Twin)",
       "description": "Rooms of the venue, mirrored online as an explorable digital twin.",
-      "cover": "assets/img/twin-wall.jpg",
+      "cover": "assets/img/demo_room%20(16).jpg",
       "tier": "gold",
       "subcollections": [
         {
@@ -405,7 +405,7 @@
         "room",
         "webgl"
       ],
-      "image": "assets/img/twin-wall.jpg",
+      "image": "assets/img/demo_room%20(16).jpg",
       "tier": "gold",
       "hero": true,
       "website_status": "published",

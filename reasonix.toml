@@ -1,0 +1,14 @@
+# Reasonix project settings for the MUSA app-service workspace.
+# Resolution order: CLI flag > ./reasonix.toml (this file) > global
+# %APPDATA%\reasonix\config.toml > built-in defaults.
+#
+# Committed on purpose, like .vscode/, .cursor/, .zed/ and AGENTS.md: the team
+# needs the same agent behaviour in this workspace.
+
+[tools.shell]
+# Git-for-Windows (MSYS) bash cannot start under the restricted token that the
+# default `workspace-write` permission preset applies on Windows -- it dies with
+# "couldn't create signal pipe, Win32 error 5" before running the command. Pin
+# the shell tool to Windows PowerShell instead: `git`, `gh`, `node`, `npm` and
+# `python` all work from it. Remove this block (or set "auto") on macOS/Linux.
+prefer = "powershell"   # auto|bash|powershell|pwsh

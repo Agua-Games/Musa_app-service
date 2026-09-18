@@ -58,7 +58,7 @@ window.MUSA_MOCK = {
       id: "gallery-rooms",
       title: "Permanent Galleries (Digital Twin)",
       description: "Rooms of the venue, mirrored online as an explorable digital twin.",
-      cover: "assets/img/twin-wall.jpg",
+      cover: "assets/img/demo_room%20(16).jpg",
       tier: "gold",
       subcollections: [
         { id: "room-a", title: "Room A — Northern Masters" }
@@ -310,7 +310,7 @@ window.MUSA_MOCK = {
       colecao: "gallery-rooms",
       subcolecao: "room-a",
       tags: ["digital-twin", "room", "webgl"],
-      image: "assets/img/twin-wall.jpg",
+      image: "assets/img/demo_room%20(16).jpg",
       tier: "gold",
       hero: true,
       website_status: "published",
@@ -354,32 +354,35 @@ window.MUSA_MOCK = {
       synopsis: "The silent-era cornerstone of science-fiction cinema — a dystopia of workers, machines and catacombs.",
       poster: "assets/img/film-metropolis.jpg",
       status: "now-showing",
-      sources: { "1080p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                 "720p":  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }
+      credit: "Public domain · Internet Archive",
+      sources: { "480p": "https://archive.org/download/metropolis-1927-bdrip-1080p-x-265-dts-hd-ma-5.1-d-0ct-0r-lew-sev/Metropolis%201927%20BDrip%201080p%20x265%20DTS-HD%20MA%205.1%20D0ct0rLew%5BSEV%5D.mp4" }
     },
     {
       id: "f-nosferatu",
       title: "Nosferatu — A Symphony of Horror",
       director: "F. W. Murnau",
       year: "1922",
-      duration: "1h 34m",
+      duration: "1h 32m",
       synopsis: "The unauthorised Dracula adaptation that defined screen vampires and German Expressionist shadow.",
       poster: "assets/img/film-nosferatu.jpg",
       status: "upcoming",
-      premiere: "Fri 20:00 — Restoration DCP",
-      sources: { "1080p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" }
+      premiere: "Sat 18:00 — Restoration DCP",
+      credit: "CC0 · Internet Archive",
+      sources: { "480p": "https://archive.org/download/Nosferatu1922/Nosferatu.mp4",
+                 "240p": "https://archive.org/download/Nosferatu1922/Nosferatu-smaller2.mp4" }
     },
     {
-      id: "f-modern-times",
-      title: "Modern Times",
-      director: "Charlie Chaplin",
-      year: "1936",
-      duration: "1h 27m",
-      synopsis: "Chaplin's tramp versus the assembly line — a farewell to silence and a satire of industrial modernity.",
-      poster: "assets/img/film-modern-times.jpg",
+      id: "f-caligari",
+      title: "The Cabinet of Dr. Caligari",
+      director: "Robert Wiene",
+      year: "1920",
+      duration: "1h 11m",
+      synopsis: "German Expressionism's founding nightmare — a fairground somnambulist, a warped painted world and cinema's first twist ending.",
+      poster: "https://archive.org/services/img/thecabinetofdrcaligari",
       status: "upcoming",
-      premiere: "Sat 18:00 — 35mm print",
-      sources: { "1080p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" }
+      premiere: "Fri 20:00 — 4K restoration",
+      credit: "Public domain · Internet Archive",
+      sources: { "240p": "https://archive.org/download/thecabinetofdrcaligari/KabinettDesDoktorCaligariDas_512kb.mp4" }
     }
   ],
 

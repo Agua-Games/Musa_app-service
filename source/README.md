@@ -2,8 +2,10 @@
 
 The service frontend for **MUSA**, the app-service for museums, galleries, art
 cinema rooms, bookstores and other venues with collections. Static, dependency
-free at runtime except CDN fonts/Three.js, and shaped to plug into the backend
-milestones without view-layer changes.
+free at runtime except web fonts and the art-cinema streams; **three.js is
+vendored locally** (`tools/fetch_vendor.py`, see `docs/adr/0004`), so the 3D
+viewer works even where third-party CDNs are blocked. Shaped to plug into the
+backend milestones without view-layer changes.
 
 ## Run
 
@@ -18,13 +20,14 @@ or simply serve this folder with any static server and open `index.html`.
 
 | Section | Tier | Notes |
 |---|---|---|
-| Hero + AI assistant field | — | Translucent glass ask-box wired to `MusaAPI.assistantAsk` (mock RAG answers until `/assistant/ask` exists) |
+| Hero + AI assistant field | — | Chrome-free YouTube montage of the venue behind the headline (looping, still-photo fallback) + translucent glass ask-box wired to `MusaAPI.assistantAsk` |
 | Collections overview | — | Cards generated from the API layer |
 | The Room (clickable gallery wall) | any | High-aesthetic gallery photograph as backdrop; pulsing hotspot markers (`wallHotspots` in the catalog, percent coordinates) open an elegant popup frame — large artwork, caption/ficha, prev/next for multi-piece areas, and a direct handoff to the 3D viewer for modeled pieces |
+| Salon (featured works) | — | Auto-advancing works carousel — one piece at a time, inventorial captions on a black plate, dots to browse; pauses off-screen and under reduced motion |
 | Old Masters photo gallery | Bronze | Masonry grid, lightbox with zoom/pan/maximize |
 | Interactive 3D gallery | Silver | Grid with label overlays; cards open a WebGL viewer (local GLB: Venus de Milo scan from SMK/Sketchfab CC0, corset, kabuto). `kit_stream` records render a streaming placeholder; `processing` records show pipeline status |
 | Digital twin "Room A" | Gold | Procedural WebGL twin: parquet floor, framed works as textures, pedestal sculptures, track lighting, click-to-inspect |
-| Screening room | module | Video player scaffold (quality ladder, CC, fullscreen) + playlist/schedule; demo sample streams |
+| Screening room | module | Video player (quality ladder, CC, fullscreen) + playlist/schedule; streams are authorized public-domain copies from the Internet Archive (Metropolis 1927, The Cabinet of Dr. Caligari 1920, Nosferatu 1922) |
 | Store | module | Product grid + cart drawer scaffold, template for the commerce module |
 | Plans | — | Bronze/Silver/Gold tiers + module add-ons with a live price estimator (BRL, from the design doc) |
 | Sign-in & admin | — | Two admin tiers (demo: `owner@musa.demo` / `team@musa.demo`, password `demo`): venue owner gets a folder-style collection browser (checkboxes, publish/demote, hero promotion, per-item visibility); MUSA team gets an ops console. Tier switch enforces credentials |
@@ -62,4 +65,8 @@ All imagery is public-domain / open-license material downloaded from
 **Wikimedia Commons** (`tools/fetch_assets.py` reproduces the set). 3D models:
 Venus de Milo scan (CC0, National Gallery of Denmark via Sketchfab cultural
 heritage), Corset / Lantern / DamagedHelmet (Khronos glTF sample assets).
-Demo video streams are public Google sample videos.
+Demo video streams are authorized public-domain copies from the **Internet
+Archive** (Metropolis 1927, The Cabinet of Dr. Caligari 1920, Nosferatu 1922 —
+see `source/data/catalog.js`). Landing-page photography in the `demo_*` family is
+the venue's own material. three.js is vendored locally (`tools/fetch_vendor.py`),
+not fetched from a CDN at runtime.
