@@ -852,13 +852,31 @@ footer { border-top: 1px solid var(--line); padding: 60px 0 40px; background: va
   opacity: 0; transition: opacity 1.6s var(--ease);
 }
 .hero-video.on { opacity: 1; }
+
+/* .hero-film — the header's backdrop layer, deliberately separate from the
+   section backdrops (.sec-bg). Different role: .sec-bg is an <img> carrying its
+   own opacity (0.1) and the slow zoom; .hero-film is the container the player is
+   mounted into, so it takes its geometry from .hero-video and only keeps this
+   layer's strength here. That is the point of splitting them — tune the film
+   without touching the stills.
+   Its opacity is applied to the PLAYER, not to the layer: `opacity` on the layer
+   is the fade-in channel (.hero-video 0 -> .on 1) and would be overridden.
+   Test values below: 0 = black hero, 1 = untouched film. */
+.hero-film {
+  --hero-film-opacity: 1;    /* film strength — lower it to mute the montage */
+  --hero-film-brightness: 0.6;
+}
+.hero-film iframe,
+.hero-film video {
+  opacity: var(--hero-film-opacity);
+  filter: brightness(var(--hero-film-brightness)) saturate(0.95);
+}
 .hero-video iframe {
   position: absolute; top: 50%; left: 50%;
   width: 100vw; height: 56.25vw;                /* 16 : 9 */
   min-width: 177.78vh; min-height: 100vh;        /* cover the hero on any ratio */
   transform: translate(-50%, -50%) scale(1.22);  /* push YT chrome off-frame */
   border: 0; pointer-events: none;
-  filter: brightness(0.6) saturate(0.95);
 }
 /* Drop-in self-hosted montage (see heroFilm() in main.js). The container/codec
    must be one the browser decodes — an HEVC/H.265 mp4 reports readyState 4 and
@@ -866,7 +884,6 @@ footer { border-top: 1px solid var(--line); padding: 60px 0 40px; background: va
 .hero-video video {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; border: 0; pointer-events: none;
-  filter: brightness(0.6) saturate(0.95);
 }
 
 /* --------------------------------------------------------------------------
