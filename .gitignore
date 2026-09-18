@@ -8,6 +8,11 @@
 # Codebase Memory MCP local index; rebuildable with index_repository.
 .codebase-memory/
 
+# Reasonix task/session state (events.jsonl, snapshots, task locks). It is local
+# to one machine and churns on every tool call, so it is not project content.
+# The extension's configuration is reasonix.toml, which IS tracked.
+.reasonix/
+
 # --- Build output ---------------------------------------------------------
 build/
 _build/
@@ -27,12 +32,25 @@ scratch/
 # adjust theirs. If that becomes a real problem, version a .dist template
 # instead of ignoring the folder.
 
-# --- 3D models kept out of git on purpose ---------------------------------
-# ~26 MB of GLB. Three of the four are the Khronos glTF Sample Assets and are
-# reproduced byte-for-byte by tools/fetch_models.py; the fourth is a manual
-# download. Binary payloads belong in a CDN or an object store, not in the
-# history of a code repository.
-*.glb
+# --- 3D models are TRACKED (deliberate reversal, 2026-09-18) --------------
+# The `*.glb` rule was removed so the four models in source/assets/models/
+# (~29.6 MB) ship with the repository. Reason: docs/adr/0005 publishes
+# `source/` to GitHub Pages and the WebGL viewers fetch the models over http.
+# There is no object store yet and 29.6 MB is cheaper than standing one up for
+# a demo. This knowingly breaks invariant 3 of docs/HANDOFF.md §5 ("zero
+# binário grande versionado") -- see the note under §5 and the item in §11.
+# To revert: restore the rule, move the models to a bucket and keep only the
+# URL in the ficha. Note that tools/fetch_models.py skips any file already
+# present at the exact expected size, so a Pages build with the models
+# committed stays green (it reports "skip <name> (already present)").
+
+# --- The hero montage stays out of git ------------------------------------
+# source/assets/video/Musa_montage_02_web.mp4 (4.3 MB) is referenced by NO
+# markup any more, and its video track is HEVC/H.265 -- a codec no browser
+# decodes, so it reports readyState 4 and paints nothing (HANDOFF §7).
+# Versioning 4.3 MB of an unplayable, unreferenced blob is pure history weight.
+# Transcode to H.264/AVC before tracking it again.
+source/assets/video/Musa_montage_02_web.mp4
 
 # --- Deliberately NOT ignored ---------------------------------------------
 # .git/    Not a worktree path: it IS the repository. Git never tracks paths

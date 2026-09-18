@@ -1,3 +1,19 @@
 # Normalize line endings in the repository, check out native per platform.
 # Keeps future diffs free of whole-file CRLF churn on mixed Windows/Linux teams.
 * text=auto
+
+# --- Binaries: never touch their bytes -------------------------------------
+# `text=auto` decides by sniffing the first 8000 bytes for NULs, so a model
+# whose JSON chunk fits inside that window can be mistaken for text. Any
+# conversion would change the file size, and tools/fetch_models.py refuses a
+# model whose size does not match its pinned expectation byte-for-byte -- so a
+# mangled checkout becomes a silent re-download or a broken WebGL viewer.
+# Pin the media types instead of trusting the heuristic (HANDOFF §5.3).
+*.glb   binary
+*.mp4   binary
+*.webm  binary
+*.jpg   binary
+*.jpeg  binary
+*.png   binary
+*.webp  binary
+*.ico   binary
