@@ -24,4 +24,13 @@
 # obey it -- if plain PowerShell text fails with "'...' is not recognized as an
 # internal or external command", wrap explicitly in `pwsh -NoProfile -Command
 # "..."` (PowerShell 7) or `powershell -NoProfile -Command "..."`.
+# Which of the two shells an assistant wraps with, when it has the choice: `pwsh` first, and the difference is not
+# cosmetic. Measured 2026-09-21 in both shells: `Set-Content` of `([char]0xA7 + ' test')` gives `C2 A7 ...` (valid
+# UTF-8) under 7.6.3 and `A7 20 ...` (the ANSI codepage, so not UTF-8 at all) under 5.1; and `'one' && 'two'` runs in
+# 7.6.3 while 5.1 refuses it at *parse* time, so the whole line is lost and not just the chaining. That is why
+# `powershell` below is the *declared* value and `pwsh` is what a wrapper should name: the declaration is about what
+# a machine certainly has, the wrapper about which dialect the payload is parsed in -- and they do not have to agree.
+# If 5.1 is what runs, sequence with `;` and write no-BOM UTF-8 with
+# `[IO.File]::WriteAllText($p, $t, (New-Object Text.UTF8Encoding($false)))` (there is no `utf8NoBOM` flag in 5.1,
+# and `-Encoding utf8` writes a BOM).
 prefer = "powershell"   # auto|bash|powershell|pwsh
