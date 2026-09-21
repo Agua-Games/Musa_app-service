@@ -11,4 +11,17 @@
 # "couldn't create signal pipe, Win32 error 5" before running the command. Pin
 # the shell tool to Windows PowerShell instead: `git`, `gh`, `node`, `npm` and
 # `python` all work from it. Remove this block (or set "auto") on macOS/Linux.
+#
+# Verified 2026-09-21 (Origami workspace, same machine): the engine does honour
+# this. `reasonix doctor` prints the resolved shell -- `shell powershell
+# (... pwsh.exe)` there -- and an end-to-end probe ($PSVersionTable.PSVersion)
+# returned the version with the preference set and the same signal-pipe failure
+# with `auto`. `pwsh` (PowerShell 7) is the better value *where it is installed*,
+# because 5.1 does not parse `&&` or `||`; `powershell` stays the committed value
+# here because it ships with every Windows, and the engine warns and falls back to
+# auto-detection when a named shell is missing. Two caveats: the setting is read
+# when a session starts, and a client that executes the command itself need not
+# obey it -- if plain PowerShell text fails with "'...' is not recognized as an
+# internal or external command", wrap explicitly in `pwsh -NoProfile -Command
+# "..."` (PowerShell 7) or `powershell -NoProfile -Command "..."`.
 prefer = "powershell"   # auto|bash|powershell|pwsh
