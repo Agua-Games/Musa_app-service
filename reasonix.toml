@@ -17,9 +17,11 @@
 # (... pwsh.exe)` there -- and an end-to-end probe ($PSVersionTable.PSVersion)
 # returned the version with the preference set and the same signal-pipe failure
 # with `auto`. `pwsh` (PowerShell 7) is the better value *where it is installed*,
-# because 5.1 does not parse `&&` or `||`; `powershell` stays the committed value
-# here because it ships with every Windows, and the engine warns and falls back to
-# auto-detection when a named shell is missing. Two caveats: the setting is read
+# because 5.1 does not parse `&&` or `||`. The declaration below is **commented out** (2026-09-21, the owner's
+# choice) so that the *machine* decides: with the key absent, resolution falls through to the user config, and on
+# the machine this was tested on that config says `prefer = "pwsh"`. A committed file that pins a shell
+# overrides the machine everywhere -- which is how a declared shell and an executing shell came to disagree.
+# Uncomment the line below, and give it a `path`, on a machine that has to be pinned. Two caveats: the setting is read
 # when a session starts, and a client that executes the command itself need not
 # obey it -- if plain PowerShell text fails with "'...' is not recognized as an
 # internal or external command", wrap explicitly in `pwsh -NoProfile -Command
@@ -33,4 +35,4 @@
 # If 5.1 is what runs, sequence with `;` and write no-BOM UTF-8 with
 # `[IO.File]::WriteAllText($p, $t, (New-Object Text.UTF8Encoding($false)))` (there is no `utf8NoBOM` flag in 5.1,
 # and `-Encoding utf8` writes a BOM).
-prefer = "powershell"   # auto|bash|powershell|pwsh
+# prefer = "powershell"   # auto|bash|powershell|pwsh; empty/default = auto-detect (see the note above)
