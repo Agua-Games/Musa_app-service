@@ -1,3 +1,14 @@
+
+O documento abaixo considera o usd como base para os digital twins online. Isso vai depender da viabilidade de implementação, no início,
+já que ainda é preciso testar a conversão de usd para web assembly, e webGL já funciona no momento normalmente. Então, ao ler
+considere que talvez seja uma implementação para ser testada mais adiante.
+A vantagem da implementação dos digital twins (peças do acervo e alas inteiras de um museu) em usd tem ganhos consideráveis ao suportar
+payloads/references (nesting de stages/cenas) e a natureza modular e extensível do formato usd, bom também para lookdev, mas requer
+um tanto mais recursos e essa fase de testes da pipeline usd -> web assembly, já que browsers não suportam usd nativamente, e o 
+frontend do serviço é um website/webUI.
+
+---------------------------------------------------------------------------------------------------------------------
+
 # 🔧 MUSA — Implementação: o asset USD
 
 > **Documento de implementação.** Complementa a especificação técnica
