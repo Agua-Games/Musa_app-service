@@ -4,7 +4,7 @@
 > não redescubra na prática o que já foi aprendido, e para que não desfaça decisões que custaram
 > sessões para serem tomadas.
 >
-> Última atualização: **2026-09-18**.
+> Última atualização: **2026-09-23**.
 
 ---
 
@@ -47,7 +47,7 @@ default prim.
 |---|---|---|
 | **`Agua-Games/Musa_app-service`** | a **plataforma**: documentos, contrato, frontend, ferramentas | privado, `main`, 6 commits |
 | **`Agua-Games/DemoMuseum`** | **repositório cliente** — e o cliente virtual dos testes | privado, esqueleto (`a1f1204`) |
-| `Agua-Games/musa-museum-template` | template do qual repos de clientes nascem | **não existe ainda** (M0) |
+| `Agua-Games/musa-museum-template` | template do qual repos de clientes nascem | esqueleto versionado em `templates/museum-template/` (M0.2); **repo remoto pendente** |
 
 Local (este computador): plataforma em `H:\Musa_app-service\alpha`, DemoMuseum em
 `H:\Musa_app-service\DemoMuseum` (irmão, **fora** da árvore da plataforma — não aninhe repos).
@@ -90,21 +90,31 @@ reasonix.toml                                 # preferências do agente neste wo
 | Frontend estático completo (hero, galerias, viewer 3D, digital twin, triagem, loja, planos, admin) | `source/`, servido por `npm run dev` (porta 7100) |
 | Camada de dados contract-first com modos `mock` e `live` | `source/assets/js/api.js` |
 | Contrato que o catálogo **realmente** satisfaz | `python tools/validate_catalog.py` → **14 itens, 0 violações** |
+| **Contrato congelado como v1** (M0.1) | `$id` versionado + `x-contract-version: 1.0.0` + `schemas/COMPATIBILITY.md` |
+| **Builder `musa-app`** (M0.3/0.5/0.6): validação, gating de status/tier, build report | `builder/`; 26 testes (`python -m unittest discover -s tests` em `builder/`) → **OK** |
+| **Frontend genérico (template separável do demo)** (M0.2) | chrome data-driven via `data-skin` + `museum.skin`/`salon`/`heroVideo` no catálogo; verificado em Chrome headless em 2026-09-23 |
+| **Template de cliente** | `templates/museum-template/` — constrói verde com o próprio builder |
+| **Dockerfile do artefato + workflows de CI/release** (M0.4/0.7) | `Dockerfile`, `.github/workflows/ci.yml` + `release.yml`, `templates/client-deploy.yml` — **ainda não exercitados na nuvem** |
 | Fetchers de assets reproduzíveis | 3 modelos Khronos com tamanho exato verificado; 14 imagens Wikimedia; three.js r160 vendorizado (`tools/fetch_vendor.py`) |
-| Decisões registradas | 4 ADRs |
+| Decisões registradas | 7 ADRs |
 | Repositório cliente | `DemoMuseum`, esqueleto commitado e publicado |
 
 **O que NÃO existe ainda** (e por isso o M0 é onde o trabalho começa):
 
-- ❌ **Nenhum CI** no repo da plataforma (zero workflows) e **nenhum teste automatizado** (zero
-  arquivos de teste).
-- ❌ **Nenhum artefato publicável**: não há `@musa/app`, nem imagem de container, nem builder. O
-  `source/` é uma pasta, não um produto consumível por um repo de cliente.
+- ⚠️ **CI e release escritos, não exercitados**: `ci.yml`, `release.yml` e o
+  `templates/client-deploy.yml` foram validados em sintaxe, mas nenhum rodou na nuvem —
+  falta o push, a tag `v0.1.0` e o primeiro `gh workflow run` no DemoMuseum.
+- ⚠️ **Imagem do artefato não publicada**: o `Dockerfile` existe; a imagem ainda não foi
+  construída nem enviada ao ghcr.io (não há Docker local nesta máquina — o build acontece
+  no workflow de release).
 - ❌ **Nenhum backend**: o frontend roda 100% sobre um mock em memória (`window.MUSA_MOCK`). Não há
   API, banco, autenticação real nem upload.
 - ❌ **Nenhum logger, nenhuma observabilidade.**
-- ❌ **Gating só cosmético**: o filtro de `website_status` e de tier acontece no browser.
-- ❌ **Nenhum entitlements**: tier é um campo do mock.
+- ⚠️ **Gating correto só nos builds do builder**: o demo da plataforma (Pages) ainda
+  carrega o item `draft` no payload de propósito — ele é o material da demo do admin.
+  Nos sites de cliente, o gating é no build e auditável (M0.6).
+- ❌ **Nenhum entitlements**: tier é um campo do mock (no builder, vem do
+  `museum.config.json` com *warning* de assinatura ausente até o M1).
 
 ### O defeito conhecido que precisa ser corrigido (e como confirmar)
 
@@ -170,10 +180,10 @@ USD como fonte + `ficha.json` derivada), Qdrant como backend do acervo (pgvector
 **.exe` + DLLs copiados para repos de clientes, admin versionando conteúdo em git, `config.json` do
 cliente definindo o próprio tier.
 
-> ⚠️ **Divergência em aberto do ADR 0004 (2026-09-18):** o vídeo do hero passou a depender do
-> YouTube em tempo de execução (`https://www.youtube.com/iframe_api`), o que o ADR 0004 proíbe
-> ("sem CDN em runtime"). Não é decisão registrada ainda — ver §11 (candidato ao ADR 0006). Se uma
-> rede de museu bloquear terceiros, o hero fica **preto**, porque a foto deixou de ser camada base.
+> ✅ **Divergência do ADR 0004 resolvida (2026-09-23):** o vídeo do hero fica no YouTube —
+> decisão do dono registrada na **ADR 0007** (exceção única e explícita; o resto da ADR 0004
+> segue valendo). O ID do vídeo é do cliente (`site.heroVideo`), e a foto de base pode voltar
+> por `site.skin.hero` sem editar o template.
 
 ---
 
@@ -293,23 +303,28 @@ critério não atingido — o projeto não tem folga para dívida escondida.
 **Objetivo:** transformar a pasta `source/` em um artefato que um repositório de cliente possa
 consumir. Hoje a arquitetura está desenhada e não é executável.
 
-**Entregáveis**
-1. Contrato congelado como **v1** (versão no `$id` do schema, e uma nota de compatibilidade).
-2. **Extrair `musa-museum-template`** de `source/` — hoje o demo e o template são a mesma coisa.
-3. **Builder** que consome `content/` + `museum.config.json` e emite site estático.
-4. **Publicar o artefato** (`@musa/app@<versão>` em GitHub Packages, ou imagem de container).
-5. **Mover `tools/validate_catalog.py` para dentro do artefato** — o portão tem de viajar com o
-   produto, senão cada cliente tem a sua versão do portão.
-6. **Gating no build**: filtrar `website_status` e tier, e emitir um **build report** dizendo o que
-   entrou, o que saiu e **por quê**.
-7. **CI**: workflow na plataforma (lint, validação, testes) e no cliente (build real, substituindo o
-   placeholder `deploy.yml`).
+**Entregáveis** — estado em 2026-09-23:
+1. ✅ Contrato congelado como **v1** (`$id` versionado, `x-contract-version`, `schemas/COMPATIBILITY.md`).
+2. ✅ **Template extraído** — o chrome do site virou dados (`data-skin`, `museum.skin`, `salon`,
+   `heroVideo`); esqueleto de cliente em `templates/museum-template/`. Falta só o repo remoto.
+3. ✅ **Builder** (`builder/`) consome `content/` + `museum.config.json` e emite site estático.
+4. ⚠️ **Artefato = imagem de contêiner no ghcr.io + GitHub Releases** (ADR 0006): `Dockerfile` e
+   `release.yml` escritos; a imagem só é publicada na primeira tag.
+5. ✅ **O portão viaja no artefato** — `musa_build/schemas/` embute o contrato, com teste de
+   sincronia contra `schemas/`.
+6. ✅ **Gating no build + build report** (`build-report.json|.md`): draft e tier acima do
+   contratado ficam fora do payload, com a razão em uma linha.
+7. ⚠️ **CI escrito** (`ci.yml` plataforma, `templates/client-deploy.yml` cliente) — pendente o
+   primeiro run real.
 
 **Critérios de saída (os três primeiros são falsificáveis)**
-- [ ] `gh workflow run` no DemoMuseum produz um **site acessível**.
-- [ ] Inserir um item com `website_status: "draft"` **não** o faz aparecer no payload publicado.
-- [ ] Corromper uma ficha de propósito **faz o build falhar** (e o site anterior continua no ar).
-- [ ] Repo de cliente com **zero** código do MUSA e com apenas conteúdo/config/CI.
+- [ ] `gh workflow run` no DemoMuseum produz um **site acessível**. *(depende do push + tag + Pages do cliente)*
+- [x] Inserir um item com `website_status: "draft"` **não** o faz aparecer no payload publicado.
+      *(verificado localmente: 0 ocorrências no payload, 0 bytes copiados)*
+- [x] Corromper uma ficha de propósito **faz o build falhar** (e o site anterior continua no ar).
+      *(verificado localmente: exit 1, report com o erro, nenhum site emitido)*
+- [x] Repo de cliente com **zero** código do MUSA e com apenas conteúdo/config/CI.
+      *(o template instancia exatamente isso; o build roda dentro da imagem)*
 
 **Não faça em M0:** autenticação, banco, multi-tenant, OCR.
 
@@ -480,9 +495,12 @@ onboarding self-service; marketplace de módulos; suporte N1 com runbook.
 ## 11. Pendências herdadas
 
 - [ ] `README.md` da raiz da plataforma está **vazio** — escrever a porta de entrada do repositório.
-- [ ] Corrigir o gating (o `draft` que chega ao payload) — item do M0.
-- [ ] Extrair o `musa-museum-template` do `source/`.
-- [ ] Mover `tools/validate_catalog.py` para dentro do artefato publicado.
+- [x] Corrigir o gating (o `draft` que chega ao payload) — **resolvido no builder** (M0.6); o demo
+      da plataforma mantém o draft de propósito (material da demo do admin).
+- [x] Extrair o `musa-museum-template` do `source/` — **feito** (chrome data-driven +
+      `templates/museum-template/`); falta criar o repo remoto.
+- [x] Mover `tools/validate_catalog.py` para dentro do artefato publicado — **feito**:
+      `musa_build/contract.py` + schema embutido com teste de sincronia.
 - [ ] Registrar a URL de origem do `venus-de-milo.glb` em `tools/fetch_models.py`.
 - [ ] §8.1 da spec (métricas) tem valores **propostos**, não medidos — substituir por medição no M3.
 - [ ] `source/README.md` descreve o estado do frontend, mas o README do DemoMuseum precisa ganhar o
@@ -507,11 +525,10 @@ onboarding self-service; marketplace de módulos; suporte N1 com runbook.
       referência** no markup e foi para o `.gitignore` com essa justificativa. Para voltar ao
       auto-hospedado (ADR 0004), transcodifique para H.264/AVC e devolva o `<video>` a `#heroVideo`:
       `ffmpeg -i Musa_montage_02_web.mp4 -c:v libx264 -crf 23 -preset slow -pix_fmt yuv420p -movflags +faststart -an montage_h264.mp4`
-- [ ] **ADR 0006 (candidato): o vídeo do hero depende do YouTube em runtime.** Contradiz o ADR 0004
-      ("sem CDN em runtime"). Se uma rede de museu bloquear terceiros, o hero fica **preto** — a foto
-      deixou de ser camada base. Registre o ADR se a decisão ficar; caso contrário, auto-hospede.
-- [ ] **Decidir sobre a foto do hero:** `hero-museum-hall.jpg` está fora de `.hero-bg` **de
-      propósito** (linha comentada em `source/index.html`). Restaurar como camada base ou remover.
+- [x] **ADR do vídeo do hero** — registrada como **ADR 0007** (YouTube, exceção à ADR 0004).
+- [x] **Decidir sobre a foto do hero** — resolvido pelo refactor do M0.2: a foto voltou a ser
+      **camada configurável** (`data-skin="hero"` + `site.skin.hero` no `museum.config.json`);
+      o demo a deixa desligada de propósito enquanto o filme é verificado.
 - [ ] **Reavaliar os binários versionados.** ~29,6 MB de GLB e ~50 MB de JPEG do demo entraram no git
       para o Pages funcionar sem object store (viola o §5.3 de propósito). Quando houver bucket, tire
       os binários do git **e reescreva a história** (`reflog expire --all` + `gc --prune=now`) — sem

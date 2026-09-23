@@ -1,0 +1,38 @@
+# Platform CI (M0.7): the gates that must stay green on every push.
+#
+# - the demo catalog validates against the frozen contract (schemas/ v1),
+# - the frontend's module plumbing is sound (import map, vendored three.js),
+# - the builder's test suite passes — including the test that fails if the
+#   schema bundled in the artifact drifts from schemas/ (one source of truth).
+
+name: platform CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the validation dependency
+        run: python -m pip install --disable-pip-version-check jsonschema
+
+      - name: Validate the catalog against the contract
+        run: python tools/validate_catalog.py
+
+      - name: Check the frontend's module plumbing
+        run: python tools/check_frontend.py
+
+      - name: Run the builder test suite
+        working-directory: builder
+        run: python -m unittest discover -s tests

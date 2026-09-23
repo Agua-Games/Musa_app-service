@@ -1,0 +1,23 @@
+{
+  "museum": {
+    "id": "{{museum-id}}",
+    "name": "{{Museum Name}}",
+    "tagline": "{{One line about the venue}}",
+    "locale": "pt-BR",
+    "domain": "{{museum.example.com}}"
+  },
+  "musa": "0.1.0",
+  "entitlements": {
+    "tier": "bronze",
+    "modules": [],
+    "issued": "{{YYYY-MM-DD}}",
+    "signature": null
+  },
+  "storage": {
+    "assetsBaseUrl": ""
+  },
+  "site": {
+    "heroVideo": null,
+    "skin": {}
+  }
+}

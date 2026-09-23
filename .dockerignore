@@ -1,0 +1,17 @@
+.git
+.github
+docs
+_build
+compiler
+licenses
+scratch
+templates
+tools/ReasonixCrashCacheRemover
+**/__pycache__
+**/*.pyc
+.codebase-memory
+.claude
+.cursor
+.reasonix
+.vscode
+.zed

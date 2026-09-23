@@ -1,0 +1,12 @@
+{
+  "asset_id": "peca-exemplo",
+  "titulo": "Peça Exemplo",
+  "colecao": "colecao-exemplo",
+  "autor": "Autor Desconhecido",
+  "data": "1900",
+  "material": "Óleo sobre tela",
+  "descricao": "Uma peça de exemplo para o primeiro build do site. Substitua pelo seu acervo.",
+  "website_status": "published",
+  "tier": "bronze",
+  "tags": ["exemplo"]
+}
