@@ -1,0 +1,11 @@
+{
+  "asset_id": "statue-one",
+  "titulo": "Statue One",
+  "colecao": "sculptures",
+  "website_status": "published",
+  "tier": "silver",
+  "model_primary": "models/e1.glb",
+  "model_formats": ["glb"],
+  "model_viewer": "three_js",
+  "model_status": "available"
+}

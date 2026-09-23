@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Agua-Games/Musa_app-service/schemas/ficha/v1/ficha.schema.json",
+  "x-contract-version": "1.0.0",
+  "title": "MUSA collection item record",
+  "description": "Single contract of the collection layer, frozen as v1 (see schemas/COMPATIBILITY.md). See docs/Musa_design document_technical-specs_v1.1.md section 3.2 and docs/adr/0001-camada-de-acervo.md. A record that does not validate against this schema must not enter the index.",
+  "type": "object",
+  "required": ["asset_id", "titulo", "colecao"],
+  "additionalProperties": true,
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._-]+$",
+      "description": "Unique asset identifier. Also the folder name of the item."
+    },
+    "titulo": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Title of the piece."
+    },
+    "autor": {
+      "type": "string",
+      "description": "Author or creator."
+    },
+    "data": {
+      "type": "string",
+      "description": "YYYY, YYYY-MM or YYYY-MM-DD. BCE dates are negative numbers (e.g. -500)."
+    },
+    "material": {
+      "type": "string",
+      "description": "Predominant material."
+    },
+    "dimensoes": {
+      "type": "string",
+      "description": "Physical dimensions as free text (e.g. 30cm x 20cm)."
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Long description."
+    },
+    "colecao": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Collection this item belongs to; must match a top-level folder under acervo/."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Keywords."
+    },
+    "model_primary": {
+      "type": "string",
+      "description": "Asset the frontend loads today (e.g. model.glb). Required when model_status is available."
+    },
+    "model_source": {
+      "type": "string",
+      "description": "Source asset for editing and archiving (e.g. asset.usda). Optional; absent in the GLB-only MVP."
+    },
+    "model_formats": {
+      "type": "array",
+      "items": { "enum": ["glb", "gltf", "usd", "usda", "usdc", "usdz"] },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Formats actually available for this item."
+    },
+    "model_viewer": {
+      "enum": ["three_js", "usd_wasm", "kit_stream"],
+      "description": "Viewer that must be used to render model_primary."
+    },
+    "model_status": {
+      "enum": ["available", "processing", "unavailable"],
+      "description": "State of the 3D pipeline for this item."
+    },
+    "digital_twin_sala": {
+      "type": "string",
+      "description": "Reference to the digital twin of the room where the piece is displayed."
+    },
+    "embedding": {
+      "type": "array",
+      "items": { "type": "number" },
+      "description": "Semantic embedding of the record, used for retrieval (RAG)."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["model_status"],
+        "properties": { "model_status": { "const": "available" } }
+      },
+      "then": { "required": ["model_primary"] }
+    }
+  ]
+}

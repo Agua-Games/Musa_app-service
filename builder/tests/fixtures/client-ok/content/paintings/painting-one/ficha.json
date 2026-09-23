@@ -1,0 +1,11 @@
+{
+  "asset_id": "painting-one",
+  "titulo": "Painting One",
+  "colecao": "paintings",
+  "autor": "Fixture Artist",
+  "data": "1901",
+  "website_status": "published",
+  "tier": "bronze",
+  "image": "images/f1.jpg",
+  "tags": ["fixture"]
+}

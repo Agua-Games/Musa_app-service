@@ -1,0 +1,110 @@
+{
+  "tiers": [
+    {
+      "id": "bronze",
+      "name": "Bronze",
+      "title": "Digital Museum",
+      "price": 597,
+      "blurb": "A complete online home for your collection.",
+      "features": [
+        "Full responsive venue website",
+        "2D catalog with high-quality photos",
+        "Search & filters by collection / period",
+        "Technical record cards per item",
+        "Cloud backup",
+        "Owner admin panel"
+      ]
+    },
+    {
+      "id": "silver",
+      "name": "Silver",
+      "title": "Interactive Museum",
+      "price": 1197,
+      "blurb": "Your hero pieces, in the round.",
+      "features": [
+        "Everything in Bronze",
+        "Up to 50 hero pieces on rotation",
+        "Interactive 3D models (WebGL)",
+        "Exploded-view study mode",
+        "AR on visitors' phones",
+        "Thematic virtual galleries",
+        "Automatic OCR import of new items"
+      ],
+      "popular": true
+    },
+    {
+      "id": "gold",
+      "name": "Gold",
+      "title": "Immersive Museum",
+      "price": 3197,
+      "blurb": "The whole venue, mirrored online.",
+      "features": [
+        "Everything in Silver",
+        "Full digital twin of the venue",
+        "Every piece modeled in 3D",
+        "Narrated guided virtual tour",
+        "Immersive room scenes",
+        "On-site interactive displays synced",
+        "Permanent data export for archiving"
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "id": "m-assistant",
+      "name": "Virtual AI Assistant",
+      "price": 249,
+      "unit": "/mo",
+      "desc": "Conversational guide answering visitor questions about the collection, on site and online."
+    },
+    {
+      "id": "m-displays",
+      "name": "On-location Interactive Displays",
+      "price": 300,
+      "unit": "/mo",
+      "desc": "Sync with kiosks and touchscreens inside the venue (pairing & content push)."
+    },
+    {
+      "id": "m-streaming",
+      "name": "Art-Cinema Streaming",
+      "price": 400,
+      "unit": "/mo",
+      "desc": "Online screening room with scheduled programmes, playlists and DRM-ready delivery."
+    },
+    {
+      "id": "m-twin-items",
+      "name": "Digital Twin — Additional Items",
+      "price": 90,
+      "unit": "/item/mo",
+      "desc": "Extend the twin with new modeled pieces, added to rooms on demand."
+    },
+    {
+      "id": "m-twin-areas",
+      "name": "Digital Twin — Additional Areas",
+      "price": 650,
+      "unit": "/area/mo",
+      "desc": "Scan and publish extra rooms, wings or outdoor areas of the venue."
+    },
+    {
+      "id": "m-store",
+      "name": "Integrated Web Store",
+      "price": 180,
+      "unit": "/mo",
+      "desc": "Sell tickets, prints and merchandising with the venue's own branding."
+    },
+    {
+      "id": "m-api",
+      "name": "Data Export API",
+      "price": 400,
+      "unit": "/mo",
+      "desc": "REST/GraphQL export of records for archival and third-party systems (OAI-PMH ready)."
+    },
+    {
+      "id": "m-multilingual",
+      "name": "Multilingual Visitor Layer",
+      "price": 150,
+      "unit": "/mo",
+      "desc": "Interface and assistant answers in up to 8 languages for international audiences."
+    }
+  ]
+}
