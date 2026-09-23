@@ -46,10 +46,10 @@
 
 <!-- ======================= Hero + AI assistant ======================= -->
 <header class="hero" id="top">
-  <div class="hero-bg">
-    <!-- TEMPORARY: the still photograph is removed so the film is the only thing
-         filling the hero while we verify it. Restore the base layer with:
-         <img src="assets/img/hero-museum-hall.jpg" alt="Museum hall ceiling" /> -->
+  <div class="hero-bg" data-skin="hero">
+    <!-- The hero photograph renders when the museum's skin provides one
+         (client: site.skin.hero in museum.config.json). The demo keeps it off
+         while the film is the only layer being verified. -->
     <div class="hero-video hero-film" id="heroVideo" aria-hidden="true"></div>
   </div>
   <div class="hero-veil"></div>
@@ -74,8 +74,7 @@
 </header>
 
 <!-- ======================= Collections overview ======================= -->
-<section id="collections" class="sec-media">
-  <img class="sec-bg" src="assets/img/demo_room%20(11).jpg" alt="" />
+<section id="collections" class="sec-media" data-skin="collections">
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -101,7 +100,7 @@
       <p class="side">A photographic backdrop of the venue's gallery wall. Every glowing marker is a piece on view — select one to open its frame and record card.</p>
     </div>
     <div class="wall-shell fx" id="wallShell">
-      <img src="assets/img/demo_room%20(16).jpg" alt="Gallery room backdrop" />
+      <img data-skin="wall" alt="Gallery room backdrop" />
       <div class="wall-veil"></div>
       <div class="wall-spots" id="wallSpots"><!-- markers injected from the catalog --></div>
       <p class="wall-hint">Click a marker to reveal the piece</p>
@@ -110,8 +109,7 @@
 </section>
 
 <!-- ======================= Salon — featured works carousel ======================= -->
-<section id="salon" class="sec-media">
-  <img class="sec-bg" src="assets/img/demo_paintings%20(5).jpg" alt="" />
+<section id="salon" class="sec-media" data-skin="salon">
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -131,8 +129,7 @@
 </section>
 
 <!-- ======================= Tier I · Bronze photo gallery ======================= -->
-<section id="bronze-gallery" class="gallery-bronze sec-media">
-  <img class="sec-bg" src="assets/img/demo_paintings%20(1).jpg" alt="" />
+<section id="bronze-gallery" class="gallery-bronze sec-media" data-skin="bronze">
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -147,8 +144,7 @@
 </section>
 
 <!-- ======================= Tier II · Silver 3D gallery ======================= -->
-<section id="gallery-3d" class="sec-media">
-  <img class="sec-bg" src="assets/img/demo_statues%20(1).jpg" alt="" />
+<section id="gallery-3d" class="sec-media" data-skin="silver">
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -163,8 +159,7 @@
 </section>
 
 <!-- ======================= Tier III · Gold digital twin ======================= -->
-<section id="digital-twin" class="twin sec-media">
-  <img class="sec-bg" src="assets/img/demo_room%20(16).jpg" alt="" />
+<section id="digital-twin" class="twin sec-media" data-skin="twin">
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -232,8 +227,7 @@
 </section>
 
 <!-- ======================= Store (scaffold) ======================= -->
-<section id="store" class="store sec-media">
-  <img class="sec-bg" src="assets/img/demo_visitor.jpg" alt="" />
+<section id="store" class="store sec-media" data-skin="store">
   <div class="wrap">
     <div class="sec-head fx">
       <div>
@@ -321,7 +315,7 @@
           <div class="fb-list" id="fbList"></div>
         </div>
         <aside class="item-panel" id="itemPanel">
-          <div class="ip-img"><img id="ipImg" src="assets/img/art-night-watch.jpg" alt="" /></div>
+          <div class="ip-img"><img id="ipImg" data-skin="admin-placeholder" alt="" /></div>
           <div class="ip-body">
             <p class="eyebrow" id="ipId">—</p>
             <h4 id="ipTitle">Select an item</h4>

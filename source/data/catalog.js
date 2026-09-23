@@ -17,8 +17,30 @@ window.MUSA_MOCK = {
     id: "musa-demo",
     name: "MUSA Atelier Museum",
     tagline: "A demo venue running on the MUSA app-service",
-    tier: "gold"
+    tier: "gold",
+    heroVideo: "siuAaTMil6g",
+    skin: {
+      // Decorative section backdrops (data-skin slots in index.html). The hero
+      // photograph is intentionally absent while the film is the only layer.
+      collections: "assets/img/demo_room (11).jpg",
+      wall: "assets/img/demo_room (16).jpg",
+      salon: "assets/img/demo_paintings (5).jpg",
+      bronze: "assets/img/demo_paintings (1).jpg",
+      silver: "assets/img/demo_statues (1).jpg",
+      twin: "assets/img/demo_room (16).jpg",
+      store: "assets/img/demo_visitor.jpg",
+      "admin-placeholder": "assets/img/art-night-watch.jpg"
+    }
   },
+
+  salon: [
+    { src: "assets/img/demo_paintings%20(1).jpg",  title: "The Assembly",        meta: "Oil on canvas · c. 1904 · 142 × 96 cm", note: "An invented attribution on a study of a crowded hall, light gathering on the steps." },
+    { src: "assets/img/demo_statues%20(1).jpg",    title: "Head of a Youth",      meta: "Marble · Roman, 2nd c. CE · 48 cm",   note: "A carved portrait head, the gaze turned just off the axis of the block." },
+    { src: "assets/img/demo_paintings%20(10).jpg", title: "Nocturne in Ochre",    meta: "Oil on canvas · c. 1899 · 110 × 78 cm", note: "Warm ochres worked down into shadow — a small interior late in the day." },
+    { src: "assets/img/demo_statues%20(6).jpg",    title: "Standing Figure",      meta: "Parian marble · c. 340 BCE · 176 cm",  note: "A draped figure on a shallow plinth, weight carried on one leg." },
+    { src: "assets/img/demo_paintings%20(14).jpg", title: "Interior, Late Light", meta: "Oil on panel · c. 1911 · 64 × 48 cm",  note: "The room as it empties — a still life of furniture and air." },
+    { src: "assets/img/demo_statues%20(12).jpg",   title: "Torso of an Athlete",  meta: "Marble · 1st c. CE · 92 cm",           note: "The surface worn to a soft sheen; the missing limbs left as they were found." }
+  ],
 
   collections: [
     {

@@ -5,7 +5,18 @@
     "id": "musa-demo",
     "name": "MUSA Atelier Museum",
     "tagline": "A demo venue running on the MUSA app-service",
-    "tier": "gold"
+    "tier": "gold",
+    "heroVideo": "siuAaTMil6g",
+    "skin": {
+      "collections": "assets/img/demo_room (11).jpg",
+      "wall": "assets/img/demo_room (16).jpg",
+      "salon": "assets/img/demo_paintings (5).jpg",
+      "bronze": "assets/img/demo_paintings (1).jpg",
+      "silver": "assets/img/demo_statues (1).jpg",
+      "twin": "assets/img/demo_room (16).jpg",
+      "store": "assets/img/demo_visitor.jpg",
+      "admin-placeholder": "assets/img/art-night-watch.jpg"
+    }
   },
   "collections": [
     {

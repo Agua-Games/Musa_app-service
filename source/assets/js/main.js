@@ -41,6 +41,41 @@
     t._h = setTimeout(() => t.classList.remove("show"), 2600);
   };
 
+  /* ====================================================== SKIN / IDENTITY == */
+  /* The template is generic: every decorative image and the museum's name come
+     from the generated catalog (window.MUSA_MOCK.museum), so the same frontend
+     serves any client. Slots are declared in index.html as data-skin="..." —
+     on a <section class="sec-media"> an <img class="sec-bg"> is injected as the
+     first child; on an <img> the src is set in place (and the element is hidden
+     when the client provides no image for the slot). */
+  function applySkin() {
+    const skin = (window.MUSA_MOCK && window.MUSA_MOCK.museum && window.MUSA_MOCK.museum.skin) || {};
+    $$("[data-skin]").forEach((el) => {
+      const src = skin[el.dataset.skin];
+      if (el.tagName === "IMG") {
+        if (src) el.src = src; else el.hidden = true;
+        return;
+      }
+      if (!src) return;
+      const img = document.createElement("img");
+      if (el.classList.contains("sec-media")) img.className = "sec-bg";
+      img.src = src;
+      img.alt = "";
+      el.prepend(img);
+    });
+  }
+
+  function applyIdentity() {
+    const museum = (window.MUSA_MOCK && window.MUSA_MOCK.museum) || {};
+    if (!museum.name) return;
+    document.title = museum.name;
+    const brand = $(".brand");
+    if (brand) brand.innerHTML = `<span class="mark">${museum.name.charAt(0)}</span>${museum.name}`;
+  }
+
+  applySkin();
+  applyIdentity();
+
   /* ===================================================== HERO BACKGROUND == */
   /* The hero plays the venue's montage behind the headline. One path only: the
      YouTube player mounts into #heroVideo and fades in when it is ready. It
@@ -56,7 +91,11 @@
     const mount = $("#heroVideo");
     if (!mount) return;
 
-    const YOUTUBE_ID = "siuAaTMil6g"; // the venue montage, hosted online
+    // The montage is the client's: it comes from the generated catalog
+    // (museum.config.json → site.heroVideo). With no film configured the hero
+    // keeps its skin photograph (data-skin="hero") or the plain background.
+    const YOUTUBE_ID = (window.MUSA_MOCK && window.MUSA_MOCK.museum && window.MUSA_MOCK.museum.heroVideo) || null;
+    if (!YOUTUBE_ID) return;
 
     window.onYouTubeIframeAPIReady = () => {
       const host = document.createElement("div");
@@ -82,15 +121,11 @@
   })();
 
   /* =================================================== SALON (carousel) === */
+  /* The rotating hang is content, not template: it comes from the generated
+     catalog (client: the "salon" list in content/site.json). A museum without
+     a salon configured simply does not show the section. */
   const salon = { idx: 0, timer: null };
-  const SALON_WORKS = [
-    { src: "assets/img/demo_paintings%20(1).jpg",  title: "The Assembly",        meta: "Oil on canvas · c. 1904 · 142 × 96 cm", note: "An invented attribution on a study of a crowded hall, light gathering on the steps." },
-    { src: "assets/img/demo_statues%20(1).jpg",    title: "Head of a Youth",      meta: "Marble · Roman, 2nd c. CE · 48 cm",   note: "A carved portrait head, the gaze turned just off the axis of the block." },
-    { src: "assets/img/demo_paintings%20(10).jpg", title: "Nocturne in Ochre",    meta: "Oil on canvas · c. 1899 · 110 × 78 cm", note: "Warm ochres worked down into shadow — a small interior late in the day." },
-    { src: "assets/img/demo_statues%20(6).jpg",    title: "Standing Figure",      meta: "Parian marble · c. 340 BCE · 176 cm",  note: "A draped figure on a shallow plinth, weight carried on one leg." },
-    { src: "assets/img/demo_paintings%20(14).jpg", title: "Interior, Late Light", meta: "Oil on panel · c. 1911 · 64 × 48 cm",  note: "The room as it empties — a still life of furniture and air." },
-    { src: "assets/img/demo_statues%20(12).jpg",   title: "Torso of an Athlete",  meta: "Marble · 1st c. CE · 92 cm",           note: "The surface worn to a soft sheen; the missing limbs left as they were found." }
-  ];
+  const SALON_WORKS = (window.MUSA_MOCK && window.MUSA_MOCK.salon) || [];
 
   function paintSalon(i) {
     salon.idx = (i + SALON_WORKS.length) % SALON_WORKS.length;
@@ -103,6 +138,7 @@
     const track = $("#carouselTrack");
     const dots = $("#carouselDots");
     if (!track || !dots) return;
+    if (!SALON_WORKS.length) { $("#salon").hidden = true; return; }
     track.innerHTML = SALON_WORKS.map((w) => `
       <figure class="carousel-slide">
         <div class="cs-img"><img src="${w.src}" alt="${w.title}" loading="lazy" /></div>
