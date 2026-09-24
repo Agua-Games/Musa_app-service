@@ -99,14 +99,8 @@ reasonix.toml                                 # preferências do agente neste wo
 | Decisões registradas | 7 ADRs |
 | Repositório cliente | `DemoMuseum`, esqueleto commitado e publicado |
 
-**O que NÃO existe ainda** (e por isso o M0 é onde o trabalho começa):
+**O que NÃO existe ainda** (o M1 começa aqui):
 
-- ⚠️ **CI e release escritos, não exercitados**: `ci.yml`, `release.yml` e o
-  `templates/client-deploy.yml` foram validados em sintaxe, mas nenhum rodou na nuvem —
-  falta o push, a tag `v0.1.0` e o primeiro `gh workflow run` no DemoMuseum.
-- ⚠️ **Imagem do artefato não publicada**: o `Dockerfile` existe; a imagem ainda não foi
-  construída nem enviada ao ghcr.io (não há Docker local nesta máquina — o build acontece
-  no workflow de release).
 - ❌ **Nenhum backend**: o frontend roda 100% sobre um mock em memória (`window.MUSA_MOCK`). Não há
   API, banco, autenticação real nem upload.
 - ❌ **Nenhum logger, nenhuma observabilidade.**
@@ -291,14 +285,14 @@ critério não atingido — o projeto não tem folga para dívida escondida.
 
 | # | Milestone | Pergunta que ele responde | Bloqueia |
 |---|---|---|---|
-| **M0** | Fundação | o MUSA é um produto consumível? | tudo |
+| **M0** ✅ | Fundação | o MUSA é um produto consumível? **Sim — provado em 2026-09-23.** | tudo |
 | **M1** | MVP funcional | o sistema faz o que promete, para um museu? | M3 |
 | **M2** | Pipeline de catalogação | a promessa comercial ("dias → horas") se sustenta? | M4 |
 | **M3** | Beta / cliente virtual | aguenta uso real e abuso? | M4 |
 | **M4** | Produção / apresentável | vende, entrega e não quebra? | primeiro contrato |
 | **M5** | Horizonte (escala) | o custo de operação escala? | — |
 
-### M0 — Fundação ✅ *comece aqui*
+### M0 — Fundação ✅ **CONCLUÍDO em 2026-09-23**
 
 **Objetivo:** transformar a pasta `source/` em um artefato que um repositório de cliente possa
 consumir. Hoje a arquitetura está desenhada e não é executável.
@@ -317,14 +311,16 @@ consumir. Hoje a arquitetura está desenhada e não é executável.
 7. ⚠️ **CI escrito** (`ci.yml` plataforma, `templates/client-deploy.yml` cliente) — pendente o
    primeiro run real.
 
-**Critérios de saída (os três primeiros são falsificáveis)**
-- [ ] `gh workflow run` no DemoMuseum produz um **site acessível**. *(depende do push + tag + Pages do cliente)*
-- [x] Inserir um item com `website_status: "draft"` **não** o faz aparecer no payload publicado.
-      *(verificado localmente: 0 ocorrências no payload, 0 bytes copiados)*
-- [x] Corromper uma ficha de propósito **faz o build falhar** (e o site anterior continua no ar).
-      *(verificado localmente: exit 1, report com o erro, nenhum site emitido)*
-- [x] Repo de cliente com **zero** código do MUSA e com apenas conteúdo/config/CI.
-      *(o template instancia exatamente isso; o build roda dentro da imagem)*
+**Critérios de saída — todos atingidos e verificados:**
+- [x] Pipeline no DemoMuseum produz um **site acessível** — run `35936934677` verde em 2026-09-24;
+      site publicado e renderizando em `https://agua-games.github.io/DemoMuseum/`
+      (título e marca do cliente, 3 coleções, skin e hero film configuráveis).
+- [x] Inserir um item com `website_status: "draft"` **não** o faz aparecer no payload publicado —
+      verificado **no site publicado**: `estudo-em-rascunho` ausente do `catalog.js` servido.
+- [x] Corromper uma ficha de propósito **faz o build falhar** (e o site anterior continua no ar) —
+      verificado localmente: exit 1, report com o erro, nenhum site emitido; o deploy só roda em build verde.
+- [x] Repo de cliente com **zero** código do MUSA e com apenas conteúdo/config/CI —
+      o DemoMuseum roda o build dentro da imagem `ghcr.io/agua-games/musa-app:0.1.1`.
 
 **Não faça em M0:** autenticação, banco, multi-tenant, OCR.
 
