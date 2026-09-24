@@ -78,6 +78,12 @@ class BuildOkTest(unittest.TestCase):
         self.assertIn("EXCLUDED", md)
         self.assertIn("draft-one", md)
 
+    def test_dotfiles_never_reach_the_payload(self):
+        # client repos carry .gitkeep etc.; those are repo plumbing, not content
+        self.assertFalse(
+            (self.out / "assets" / "content" / "paintings" / "painting-one" / ".gitkeep").exists()
+        )
+
 
 class BuildFailureTest(unittest.TestCase):
     def setUp(self):

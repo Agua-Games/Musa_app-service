@@ -140,7 +140,7 @@ def _rewrite_item_assets(repo: Path, item_dir: Path, item: dict, out: Path, repo
     base = f"{CONTENT_ASSETS_PREFIX}/{collection_id}/{asset_id}"
 
     for path in sorted(item_dir.rglob("*")):
-        if path.is_dir() or path.name == "ficha.json":
+        if path.is_dir() or path.name == "ficha.json" or path.name.startswith("."):
             continue
         rel_in_item = path.relative_to(item_dir).as_posix()
         _copy_asset(repo, path.relative_to(repo).as_posix(), f"{base}/{rel_in_item}", out, report, asset_id)
