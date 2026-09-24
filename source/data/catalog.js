@@ -15,7 +15,7 @@ window.MUSA_MOCK = {
 
   museum: {
     id: "musa-demo",
-    name: "MUSA Atelier Museum",
+    name: "MUSA Museum Suite Service",
     tagline: "A demo venue running on the MUSA app-service",
     tier: "gold",
     heroVideo: "siuAaTMil6g",
@@ -478,7 +478,7 @@ window.MUSA_MOCK = {
 
   /* Demo identities for the login panel (two admin tiers). */
   accounts: [
-    { email: "owner@musa.demo", password: "demo", role: "client", name: "Helena Duarte", org: "MUSA Atelier Museum",
+    { email: "owner@musa.demo", password: "demo", role: "client", name: "Helena Duarte", org: "MUSA Museum Suite Service",
       note: "Tier: client admin — the museum owner. Manages own collections, hero pieces and website visibility." },
     { email: "team@musa.demo", password: "demo", role: "musa", name: "MUSA Operations", org: "MUSA team",
       note: "Tier: Musa team member. Cross-venue oversight, modules, billing and pipeline status." }

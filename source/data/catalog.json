@@ -3,7 +3,7 @@
   "contract": "schemas/ficha.schema.json",
   "museum": {
     "id": "musa-demo",
-    "name": "MUSA Atelier Museum",
+    "name": "MUSA Museum Suite Service",
     "tagline": "A demo venue running on the MUSA app-service",
     "tier": "gold",
     "heroVideo": "siuAaTMil6g",
