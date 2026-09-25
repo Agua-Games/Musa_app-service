@@ -1,2 +1,0 @@
-[console_scripts]
-musa-build = musa_build.cli:main

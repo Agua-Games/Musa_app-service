@@ -69,3 +69,4 @@ source/assets/video/Musa_montage_02_web.mp4
 desktop.ini
 Thumbs.db
 .DS_Store
+*.egg-info/
