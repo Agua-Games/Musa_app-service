@@ -2,7 +2,7 @@
 
 Three roles at once (docs/M1_plano.md): development ergonomics, the base of the
 AI assistant, and an operations channel. Every answer that states something
-about the collection cites its sources (ficha paths and asset_ids) — the rule
+about the collection cites its sources (card paths and asset_ids) — the rule
 from docs/Musa_design implementacao-usd.md §7.
 
 Run against a client repository:

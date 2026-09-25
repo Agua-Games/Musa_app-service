@@ -1,7 +1,7 @@
-"""Collection contract loading and ficha validation.
+"""Collection contract loading and card validation.
 
 M0.5: the gate travels with the artifact. The schema bundled here is a copy of
-``schemas/ficha.schema.json`` from the platform repository, kept in sync by
+``schemas/card.schema.json`` from the platform repository, kept in sync by
 ``tests/test_schema_sync.py`` — a client can never run a private version of
 the gate (docs/HANDOFF.md §5.1).
 """
@@ -13,7 +13,7 @@ from jsonschema import Draft202012Validator
 
 from . import CONTRACT_VERSION
 
-SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "ficha.schema.json"
+SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "card.schema.json"
 
 
 def load_schema() -> dict:
@@ -32,10 +32,10 @@ def make_validator() -> Draft202012Validator:
     return Draft202012Validator(load_schema())
 
 
-def validate_ficha(ficha: dict, validator: Draft202012Validator) -> list[str]:
-    """Return the list of contract violations for one ficha (empty = valid)."""
+def validate_card(card: dict, validator: Draft202012Validator) -> list[str]:
+    """Return the list of contract violations for one card (empty = valid)."""
     problems = []
-    for error in sorted(validator.iter_errors(ficha), key=lambda e: list(e.path)):
+    for error in sorted(validator.iter_errors(card), key=lambda e: list(e.path)):
         location = "/".join(str(part) for part in error.path) or "<root>"
         problems.append(f"{location} :: {error.message}")
     return problems

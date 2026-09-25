@@ -1,6 +1,6 @@
 """Validate the frontend catalog against the collection contract.
 
-The contract (schemas/ficha.schema.json) is what makes "asset watertight"
+The contract (schemas/card.schema.json) is what makes "asset watertight"
 verifiable rather than aspirational: see docs/adr/0001-camada-de-acervo.md.
 This is the local equivalent of the build gate described in the technical spec,
 section 6.2 -- a record that does not validate must not reach the site.
@@ -16,7 +16,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parent.parent
-SCHEMA_PATH = ROOT / "schemas" / "ficha.schema.json"
+SCHEMA_PATH = ROOT / "schemas" / "card.schema.json"
 CATALOG_PATH = ROOT / "source" / "data" / "catalog.json"
 
 

@@ -44,7 +44,7 @@ scratch/
 # a demo. This knowingly breaks invariant 3 of docs/HANDOFF.md §5 ("zero
 # binário grande versionado") -- see the note under §5 and the item in §11.
 # To revert: restore the rule, move the models to a bucket and keep only the
-# URL in the ficha. Note that tools/fetch_models.py skips any file already
+# URL in the card. Note that tools/fetch_models.py skips any file already
 # present at the exact expected size, so a Pages build with the models
 # committed stays green (it reports "skip <name> (already present)").
 

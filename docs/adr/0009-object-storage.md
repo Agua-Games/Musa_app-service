@@ -7,7 +7,7 @@
 ## Contexto
 
 O M1.3 tira a mídia do repo do cliente: imagens e GLBs passam a viver em object
-storage, e a ficha referencia URL pública em vez de caminho local. Isso resolve de
+storage, e o card referencia URL pública em vez de caminho local. Isso resolve de
 vez o problema já vivido no M0 (repo do DemoMuseum inchado por dezenas de MB de
 fotos; push de 40 MB+ estourando timeouts) e é pré-requisito para o admin mínimo
 fazer upload (M1.4).
@@ -48,7 +48,7 @@ O que pesa:
    a origem do site e acesso público de leitura (ou domínio customizado por
    cliente, quando houver).
 3. **Fluxo de upload no builder**: `python -m musa_build upload` envia o asset,
-   reescreve a ficha com a URL pública e valida contra o contrato — o repo do
+   reescreve o card com a URL pública e valida contra o contrato — o repo do
    cliente nunca mais versiona binário pesado.
 4. **Azure Blob** fica como alternativa documentada para clientes que exigirem
    consolidação de fornecedor (tudo na Azure); **Backblaze B2** como opção de
@@ -70,10 +70,10 @@ O que pesa:
   tráfego não escala a conta.
 - Tooling de upload é S3-compatível: migrar de fornecedor é trocar endpoint e
   credenciais, sem reescrever código.
-- O repo do cliente encolhe para fichas + config + seed leve — o problema de push
+- O repo do cliente encolhe para cards + config + seed leve — o problema de push
   do M0 desaparece estruturalmente.
 - Dependência nova: conta Cloudflare da plataforma (R2 é pago além do free tier,
   exige cartão mesmo no tier gratuito) — provisionamento é passo manual do dono,
   como o PAT do GHCR foi.
 - Risco aceito: R2 não tem SLA de disponibilidade tão formal quanto Azure/AWS;
-  mitigado pelo uso (mídia pública de sites, re-uploadável a partir das fichas).
+  mitigado pelo uso (mídia pública de sites, re-uploadável a partir dos cards).

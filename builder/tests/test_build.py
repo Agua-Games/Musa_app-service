@@ -98,12 +98,12 @@ class BuildFailureTest(unittest.TestCase):
         shutil.copytree(CLIENT_OK, repo)
         return repo
 
-    def test_a_corrupted_ficha_fails_the_build(self):
+    def test_a_corrupted_card_fails_the_build(self):
         repo = self._copy_client()
-        ficha = repo / "content" / "paintings" / "painting-one" / "ficha.json"
-        data = json.loads(ficha.read_text(encoding="utf-8"))
+        card = repo / "content" / "paintings" / "painting-one" / "card.json"
+        data = json.loads(card.read_text(encoding="utf-8"))
         del data["titulo"]
-        ficha.write_text(json.dumps(data), encoding="utf-8")
+        card.write_text(json.dumps(data), encoding="utf-8")
         with self.assertRaises(BuildFailure) as ctx:
             build_site(repo, FRONTEND, self.tmp / "site")
         self.assertTrue(any("titulo" in e for e in ctx.exception.report.errors))
@@ -119,10 +119,10 @@ class BuildFailureTest(unittest.TestCase):
 
     def test_folder_identity_mismatch_fails_the_build(self):
         repo = self._copy_client()
-        ficha = repo / "content" / "paintings" / "painting-one" / "ficha.json"
-        data = json.loads(ficha.read_text(encoding="utf-8"))
+        card = repo / "content" / "paintings" / "painting-one" / "card.json"
+        data = json.loads(card.read_text(encoding="utf-8"))
         data["colecao"] = "elsewhere"
-        ficha.write_text(json.dumps(data), encoding="utf-8")
+        card.write_text(json.dumps(data), encoding="utf-8")
         with self.assertRaises(BuildFailure) as ctx:
             build_site(repo, FRONTEND, self.tmp / "site")
         self.assertTrue(any("colecao" in e for e in ctx.exception.report.errors))

@@ -1,7 +1,7 @@
 /**
  * MUSA — sample collection catalog (frontend mock data).
  *
- * This data follows the contract in `schemas/ficha.schema.json`
+ * This data follows the contract in `schemas/card.schema.json`
  * (see docs/adr/0001-camada-de-acervo.md). In production it is served
  * by the collection API (`GET /collections`, `GET /collections/{id}/items`,
  * `GET /items/{id}`); while the backend milestone is pending, the frontend

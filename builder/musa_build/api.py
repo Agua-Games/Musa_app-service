@@ -6,7 +6,7 @@ dynamic backend tomorrow — same shapes, same envelope, no view changes.
 
 Emitted layout (gating already applied — only INCLUDED records exist here):
 
-    api/schema.json                    the ficha contract, verbatim
+    api/schema.json                    the card contract, verbatim
     api/collections.json               envelope: list of collections
     api/collections/<id>/items.json    envelope: the collection's items
     api/items/<id>.json                envelope: one full record
@@ -41,7 +41,7 @@ def _tokenize(text: str) -> list[str]:
 
 def _envelope(data, *, museum_id: str, generated: str, count: int | None = None) -> dict:
     meta = {
-        "contract": "schemas/ficha/v1/ficha.schema.json",
+        "contract": "schemas/card/v1/card.schema.json",
         "generated": generated,
         "museum": museum_id,
     }
@@ -81,7 +81,7 @@ def emit_api(out: Path, *, museum_id: str, generated: str, collections: list[dic
     api = Path(out) / "api"
     meta = {"museum_id": museum_id, "generated": generated}
 
-    schema_src = Path(__file__).parent / "schemas" / "ficha.schema.json"
+    schema_src = Path(__file__).parent / "schemas" / "card.schema.json"
     _write(api / "schema.json", json.loads(schema_src.read_text(encoding="utf-8")),
            logger, "api/schema.json")
 

@@ -6,7 +6,7 @@
 #
 # What it enforces (docs/HANDOFF.md §5):
 #   - the build runs INSIDE the pinned artifact image — zero MUSA code here;
-#   - a ficha outside the contract FAILS the build (the previous site stays up,
+#   - a card outside the contract FAILS the build (the previous site stays up,
 #     because the deploy job only runs on a green build);
 #   - gating happens in the build: no draft and nothing above the entitled tier
 #     reaches the published payload;
@@ -62,7 +62,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PULL_TOKEN }}
 
-      # The build fails (and the deploy below never runs) if any ficha violates
+      # The build fails (and the deploy below never runs) if any card violates
       # the contract or the pin does not match an existing artifact version.
       - name: Build the site with the pinned artifact
         run: |

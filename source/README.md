@@ -22,7 +22,7 @@ or simply serve this folder with any static server and open `index.html`.
 |---|---|---|
 | Hero + AI assistant field | — | Chrome-free YouTube montage of the venue behind the headline (looping, still-photo fallback) + translucent glass ask-box wired to `MusaAPI.assistantAsk` |
 | Collections overview | — | Cards generated from the API layer |
-| The Room (clickable gallery wall) | any | High-aesthetic gallery photograph as backdrop; pulsing hotspot markers (`wallHotspots` in the catalog, percent coordinates) open an elegant popup frame — large artwork, caption/ficha, prev/next for multi-piece areas, and a direct handoff to the 3D viewer for modeled pieces |
+| The Room (clickable gallery wall) | any | High-aesthetic gallery photograph as backdrop; pulsing hotspot markers (`wallHotspots` in the catalog, percent coordinates) open an elegant popup frame — large artwork, caption/card, prev/next for multi-piece areas, and a direct handoff to the 3D viewer for modeled pieces |
 | Salon (featured works) | — | Auto-advancing works carousel — one piece at a time, inventorial captions on a black plate, dots to browse; pauses off-screen and under reduced motion |
 | Old Masters photo gallery | Bronze | Masonry grid, lightbox with zoom/pan/maximize |
 | Interactive 3D gallery | Silver | Grid with label overlays; cards open a WebGL viewer (local GLB: Venus de Milo scan from SMK/Sketchfab CC0, corset, kabuto). `kit_stream` records render a streaming placeholder; `processing` records show pipeline status |
@@ -48,7 +48,7 @@ the REST contract from `docs/Musa_design document_technical-specs_v1.1.md`:
 | `login()` | `POST /auth/login` (JWT) |
 
 Today `MusaAPI` runs in `mock` mode over `data/catalog.js` (records shaped
-after `schemas/ficha.schema.json`, plus website-presentation fields). Switch to
+after `schemas/card.schema.json`, plus website-presentation fields). Switch to
 live with:
 
 ```js

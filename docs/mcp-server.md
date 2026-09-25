@@ -33,13 +33,13 @@ Zero dependências além do builder: o loop JSON-RPC stdio é implementado em
 | Ferramenta | O que faz | Escreve? |
 |---|---|---|
 | `list_collections` | Coleções com tier, contagem de itens e status no portão | — |
-| `get_item` | Ficha completa de uma peça + decisão do portão | — |
-| `search` | Busca por termos; **todo resultado cita `asset_id` e o caminho da ficha** | — |
-| `validate_ficha` | Valida uma ficha contra o contrato v1 congelado | — |
-| `propose_ficha_correction` | Corrige o que é mecânico (identidade da pasta, status default) e **sinaliza** o que é conteúdo (nunca inventa) | — |
-| `set_status` | Publica/despublica uma peça (`website_status` na ficha) | ✅ ficha.json |
+| `get_item` | Card completa de uma peça + decisão do portão | — |
+| `search` | Busca por termos; **todo resultado cita `asset_id` e o caminho do card** | — |
+| `validate_card` | Valida um card contra o contrato v1 congelado | — |
+| `propose_card_correction` | Corrige o que é mecânico (identidade da pasta, status default) e **sinaliza** o que é conteúdo (nunca inventa) | — |
+| `set_status` | Publica/despublica uma peça (`website_status` no card) | ✅ card.json |
 | `build_report` | Roda o build real e devolve o relatório — "por que esta peça não apareceu?" em uma linha | — (temp dir) |
-| `upload_asset` | **Stub honesto**: bloqueado na M1.3 (ADR 0009); indica o workaround (arquivo ao lado da ficha) | — |
+| `upload_asset` | **Stub honesto**: bloqueado na M1.3 (ADR 0009); indica o workaround (arquivo ao lado do card) | — |
 
 ## Regras que o servidor obedece
 
@@ -51,7 +51,7 @@ Zero dependências além do builder: o loop JSON-RPC stdio é implementado em
    operação: `search` encontra `draft`s (e diz o status); o site publicado
    continua sem servi-los nem como arquivo.
 3. **Toda afirmação sobre o acervo cita fontes** (`asset_id:…`, caminho da
-   ficha) — a regra de `implementacao-usd.md` §7.
+   card) — a regra de `implementacao-usd.md` §7.
 4. **`set_status` é a única escrita** e é atômica por arquivo; o efeito no site
    vem no build seguinte (o portão fica no build — HANDOFF §0.2).
 

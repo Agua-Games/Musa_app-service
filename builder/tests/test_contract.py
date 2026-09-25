@@ -4,10 +4,10 @@ import json
 import unittest
 from pathlib import Path
 
-from musa_build.contract import load_schema, make_validator, validate_ficha
+from musa_build.contract import load_schema, make_validator, validate_card
 
 PLATFORM_SCHEMA = (
-    Path(__file__).resolve().parent.parent.parent / "schemas" / "ficha.schema.json"
+    Path(__file__).resolve().parent.parent.parent / "schemas" / "card.schema.json"
 )
 
 
@@ -25,23 +25,23 @@ class ContractTest(unittest.TestCase):
     def test_load_schema_asserts_version(self):
         self.assertEqual(load_schema()["x-contract-version"], "1.0.0")
 
-    def test_minimal_valid_ficha(self):
-        ficha = {"asset_id": "a-1", "titulo": "Piece", "colecao": "gallery"}
-        self.assertEqual(validate_ficha(ficha, self.validator), [])
+    def test_minimal_valid_card(self):
+        card = {"asset_id": "a-1", "titulo": "Piece", "colecao": "gallery"}
+        self.assertEqual(validate_card(card, self.validator), [])
 
     def test_missing_required_field_fails(self):
-        ficha = {"asset_id": "a-1", "colecao": "gallery"}
-        problems = validate_ficha(ficha, self.validator)
+        card = {"asset_id": "a-1", "colecao": "gallery"}
+        problems = validate_card(card, self.validator)
         self.assertTrue(any("titulo" in p for p in problems), problems)
 
     def test_available_model_requires_model_primary(self):
-        ficha = {
+        card = {
             "asset_id": "a-1",
             "titulo": "Piece",
             "colecao": "gallery",
             "model_status": "available",
         }
-        problems = validate_ficha(ficha, self.validator)
+        problems = validate_card(card, self.validator)
         self.assertTrue(any("model_primary" in p for p in problems), problems)
 
 

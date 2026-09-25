@@ -225,7 +225,7 @@
     $("#wfArea").textContent = `${wallState.spot.label} · ${i.asset_id}`;
     $("#wfTitle").textContent = i.titulo;
     $("#wfAuthor").textContent = `${i.autor} · ${i.data}`;
-    $("#wfFicha").innerHTML = `
+    $("#wfCard").innerHTML = `
       <div><dt>Material</dt><dd>${i.material}</dd></div>
       <div><dt>Dimensions</dt><dd>${i.dimensoes}</dd></div>
       <div><dt>Collection</dt><dd>${i.colecao}${i.subcolecao ? " / " + i.subcolecao : ""}</dd></div>
@@ -280,7 +280,7 @@
   });
 
   /* ==================================================== BRONZE GALLERY === */
-  /* Curation rule: an item whose ficha has NO featured_on appears in its
+  /* Curation rule: an item whose card has NO featured_on appears in its
      tier's default gallery; an explicit featured_on lists exactly the
      sections it joins (an empty list hides it everywhere). Galleries are
      filled from the collections of the matching tier — no hardcoded ids. */
@@ -417,7 +417,7 @@
       <p class="eyebrow">${i.asset_id} · ${i.colecao}</p>
       <h3 class="serif">${i.titulo}</h3>
       <p class="author">${i.autor}</p>
-      <dl class="ficha">
+      <dl class="card">
         <div><dt>Date</dt><dd>${i.data}</dd></div>
         <div><dt>Material</dt><dd>${i.material}</dd></div>
         <div><dt>Dimensions</dt><dd>${i.dimensoes}</dd></div>
@@ -430,7 +430,7 @@
     $("#paneSource").innerHTML = `
       <p class="eyebrow">Provenance & pipeline</p>
       <h3 class="serif" style="font-size:22px">Scan source</h3>
-      <dl class="ficha">
+      <dl class="card">
         <div><dt>Formats</dt><dd>${(i.model_formats || []).join(", ") || "photo only"}</dd></div>
         <div><dt>Delivery</dt><dd>${i.model_primary || "—"}</dd></div>
         ${i.model_source ? `<div><dt>Source</dt><dd><a href="${i.model_source}" target="_blank" rel="noopener" style="color:var(--gold)">Sketchfab / museum record ↗</a></dd></div>` : ""}

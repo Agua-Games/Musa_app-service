@@ -27,8 +27,8 @@ python -m unittest discover -s tests                                            
 1. **Lê `museum.config.json`** — identidade, versão fixada do MUSA, entitlements.
    Um pin que não corresponde à versão do builder **falha o build** (atualizar é trocar
    a tag da imagem, não editar código).
-2. **Valida cada `ficha.json`** contra o contrato v1 embutido
-   (`musa_build/schemas/ficha.schema.json`, mantido idêntico a `schemas/` por teste).
+2. **Valida cada `card.json`** contra o contrato v1 embutido
+   (`musa_build/schemas/card.schema.json`, mantido idêntico a `schemas/` por teste).
    Qualquer violação → o build falha e o site anterior continua no ar.
 3. **Aplica o gating** — `website_status != "published"` fica de fora; item ou coleção
    com `tier` acima do tier contratado fica de fora. *Fail closed*: status ausente é
@@ -49,14 +49,14 @@ content/
   <colecao>/
     collection.json         (opcional) title, description, cover, tier, subcollections
     <item>/
-      ficha.json            campos do contrato + website_status, tier, image, hero…
-      images/ models/       assets locais (ou URLs de object storage na ficha)
+      card.json            campos do contrato + website_status, tier, image, hero…
+      images/ models/       assets locais (ou URLs de object storage na card)
 ```
 
-Regras de identidade: o `asset_id` da ficha **é** o nome da pasta do item, e `colecao`
+Regras de identidade: o `asset_id` da card **é** o nome da pasta do item, e `colecao`
 **é** o nome da pasta da coleção — divergência falha o build.
 
-Campos de apresentação (não fazem parte do contrato, vivem na ficha):
+Campos de apresentação (não fazem parte do contrato, vivem na card):
 `website_status` (`published`/`draft`), `tier` (`bronze`/`silver`/`gold` — o mínimo para
 exibir), `image`, `hero`, `featured_on`, `subcolecao`.
 
@@ -76,7 +76,7 @@ exibir), `image`, `hero`, `featured_on`, `subcolecao`.
 ## Códigos de saída
 
 - `0` — build verde; site emitido com o report.
-- `1` — build falhou (ficha fora do contrato, config inválida, pin errado); o report é
+- `1` — build falhou (card fora do contrato, config inválida, pin errado); o report é
   escrito mesmo assim, com os erros.
 
 ## Avisos conhecidos (por desenho, não defeito)

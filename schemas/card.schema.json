@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Agua-Games/Musa_app-service/schemas/ficha/v1/ficha.schema.json",
+  "$id": "https://github.com/Agua-Games/Musa_app-service/schemas/card/v1/card.schema.json",
   "x-contract-version": "1.0.0",
   "title": "MUSA collection item record",
   "description": "Single contract of the collection layer, frozen as v1 (see schemas/COMPATIBILITY.md). See docs/Musa_design document_technical-specs_v1.1.md section 3.2 and docs/adr/0001-camada-de-acervo.md. A record that does not validate against this schema must not enter the index.",

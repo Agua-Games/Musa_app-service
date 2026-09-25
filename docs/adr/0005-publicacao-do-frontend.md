@@ -26,7 +26,7 @@ projeto — nenhuma das duas opções serve.
    vendorizado, não versionado) seguem valendo. O workflow **materializa** os assets em
    tempo de build, rodando `tools/fetch_vendor.py` e `tools/fetch_models.py` — o artefato
    publicado é completo sem que o repositório carregue binário grande.
-3. **O portão viaja com o build.** `tools/validate_catalog.py` roda no workflow: uma ficha
+3. **O portão viaja com o build.** `tools/validate_catalog.py` roda no workflow: um card
    fora do contrato **falha o deploy**, em vez de chegar ao site (invariante §5).
 
 ## Consequências

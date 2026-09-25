@@ -14,7 +14,7 @@ Payload, ou há um estágio intermediário que vale a pena?
 
 O que pesa:
 
-1. **O builder já é Python e já serve o contrato.** A imagem `musa-app` valida fichas,
+1. **O builder já é Python e já serve o contrato.** A imagem `musa-app` valida cards,
    aplica gating e emite o site. Uma API mínima em **FastAPI** reutiliza o mesmo código
    de contrato/gating e a mesma estratégia de artefato (ADR 0006) — um `serve` ao lado do
    `build`, na mesma imagem ou em imagem irmã.

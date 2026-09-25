@@ -54,7 +54,7 @@ def gate_tier(tier: str | None, entitled_tier: str) -> Decision:
 
 
 def gate_record(record: dict, entitled_tier: str) -> Decision:
-    """Combine both gates for one ficha or collection record."""
+    """Combine both gates for one card or collection record."""
     status = gate_status(record.get("website_status"))
     tier = gate_tier(record.get("tier"), entitled_tier)
     reasons = status.reasons + tier.reasons

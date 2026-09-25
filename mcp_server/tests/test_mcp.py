@@ -38,7 +38,7 @@ class ToolboxTest(unittest.TestCase):
         self.assertEqual(result["item"]["titulo"], "Painting One")
         self.assertTrue(result["published"])
         self.assertIn("asset_id:painting-one", result["sources"])
-        self.assertTrue(any(s.endswith("ficha.json") for s in result["sources"]))
+        self.assertTrue(any(s.endswith("card.json") for s in result["sources"]))
 
     def test_get_item_reports_the_gate(self):
         result = self.toolbox.tools["get_item"](asset_id="draft-one")
@@ -56,7 +56,7 @@ class ToolboxTest(unittest.TestCase):
         hit = result["results"][0]
         self.assertEqual(hit["asset_id"], "statue-one")
         self.assertIn("asset_id:statue-one", hit["sources"])
-        self.assertTrue(any(s.endswith("statue-one/ficha.json") for s in hit["sources"]))
+        self.assertTrue(any(s.endswith("statue-one/card.json") for s in hit["sources"]))
 
     def test_search_sees_drafts_the_site_never_serves(self):
         # The MCP is a dev/ops tool: it reads the repo (source of truth), not
@@ -64,17 +64,17 @@ class ToolboxTest(unittest.TestCase):
         result = self.toolbox.tools["search"](query="draft")
         self.assertEqual({h["asset_id"] for h in result["results"]}, {"draft-one"})
 
-    def test_validate_ficha(self):
-        ok = self.toolbox.tools["validate_ficha"](ficha={
+    def test_validate_card(self):
+        ok = self.toolbox.tools["validate_card"](card={
             "asset_id": "x", "titulo": "X", "colecao": "paintings"})
         self.assertTrue(ok["valid"])
-        bad = self.toolbox.tools["validate_ficha"](ficha={"asset_id": "x"})
+        bad = self.toolbox.tools["validate_card"](card={"asset_id": "x"})
         self.assertFalse(bad["valid"])
         self.assertTrue(any("titulo" in p for p in bad["problems"]))
 
     def test_propose_correction_fixes_identity_and_flags_content(self):
-        result = self.toolbox.tools["propose_ficha_correction"](
-            ficha={"asset_id": "wrong", "colecao": "elsewhere"},
+        result = self.toolbox.tools["propose_card_correction"](
+            card={"asset_id": "wrong", "colecao": "elsewhere"},
             folder="new-piece", collection="paintings",
         )
         self.assertEqual(result["corrected"]["asset_id"], "new-piece")
@@ -87,7 +87,7 @@ class ToolboxTest(unittest.TestCase):
         result = self.toolbox.tools["upload_asset"](asset_id="x", path="y.glb")
         self.assertIn("M1.3", result["error"])
 
-    def test_set_status_writes_the_ficha(self):
+    def test_set_status_writes_the_card(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp) / "client"
             shutil.copytree(CLIENT_OK, repo)
@@ -95,14 +95,14 @@ class ToolboxTest(unittest.TestCase):
             result = toolbox.tools["set_status"](asset_id="draft-one", status="published")
             self.assertTrue(result["changed"])
             self.assertEqual(result["previous"], "draft")
-            ficha = json.loads(
-                (repo / "content" / "paintings" / "draft-one" / "ficha.json").read_text(encoding="utf-8"))
-            self.assertEqual(ficha["website_status"], "published")
+            card = json.loads(
+                (repo / "content" / "paintings" / "draft-one" / "card.json").read_text(encoding="utf-8"))
+            self.assertEqual(card["website_status"], "published")
             # and back
             toolbox.tools["set_status"](asset_id="draft-one", status="draft")
-            ficha = json.loads(
-                (repo / "content" / "paintings" / "draft-one" / "ficha.json").read_text(encoding="utf-8"))
-            self.assertEqual(ficha["website_status"], "draft")
+            card = json.loads(
+                (repo / "content" / "paintings" / "draft-one" / "card.json").read_text(encoding="utf-8"))
+            self.assertEqual(card["website_status"], "draft")
 
     def test_build_report_runs_the_real_build(self):
         result = self.toolbox.tools["build_report"]()

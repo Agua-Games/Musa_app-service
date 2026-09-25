@@ -7,10 +7,10 @@
 ## Layout emitido
 
 ```
-api/schema.json                    o contrato da ficha, verbatim
+api/schema.json                    o contrato do card, verbatim
 api/collections.json               lista de coleções incluídas
 api/collections/<id>/items.json    itens incluídos da coleção
-api/items/<id>.json                ficha completa de uma peça
+api/items/<id>.json                card completa de uma peça
 api/search.json                    índice de termos pré-computado + registros resumidos
 ```
 
@@ -26,7 +26,7 @@ Todo recurso (exceto `schema.json`, que é o contrato verbatim) usa o envelope:
 {
   "data": { },
   "meta": {
-    "contract": "schemas/ficha/v1/ficha.schema.json",
+    "contract": "schemas/card/v1/card.schema.json",
     "generated": "2026-09-25",
     "museum": "demo-museum",
     "count": 5
@@ -72,7 +72,7 @@ Sem backend, a busca é um índice invertido pré-computado no build:
   tokens com ≥ 2 caracteres. Campos indexados: `titulo`, `autor`, `descricao`,
   `material`, `colecao`, `subcolecao`, `tags`.
 - `items` — registros **resumidos** (suficientes para renderizar o cartão de
-  resultado sem segundo request). A ficha completa vem de `api/items/<id>.json`.
+  resultado sem segundo request). A card completa vem de `api/items/<id>.json`.
 - Consulta = interseção dos buckets dos tokens; sem interseção, o frontend cai
   para substring sobre os resumos (mesma semântica do mock). Busca **semântica
   (RAG)** é M2 — o shape já comporta trocar o miolo.

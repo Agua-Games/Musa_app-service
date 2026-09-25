@@ -33,9 +33,9 @@ encarece qualquer evolução independente.
 
 A camada de acervo passa a ser **contract-first e backend-agnóstica**:
 
-- **Contrato único:** `schemas/ficha.schema.json` (JSON Schema) define a ficha universal.
+- **Contrato único:** `schemas/card.schema.json` (JSON Schema) define o card universal.
   Fonte de verdade dos dados: o diretório `acervo/` em disco (pastas = coleções/subcoleções;
-  arquivos = fichas + assets), versionado em Git.
+  arquivos = cards + assets), versionado em Git.
 - **API estável:** `/collections`, `/collections/{id}/items`, `/items/{id}`, `/schema`,
   `/search` — recursos que não mudam quando a implementação muda.
 - **Sem WordPress**, em nenhum estágio.
@@ -47,7 +47,7 @@ A camada de acervo passa a ser **contract-first e backend-agnóstica**:
   | Escala | **Payload** (TypeScript/Next.js) sobre PostgreSQL (+ `pgvector`) | Node.js, PostgreSQL |
   | Padrões | Omeka S ou CollectiveAccess 2.0 | PHP, MySQL |
 
-- **Ficha valida o build:** ficha fora do contrato **falha o build**, e não é publicada.
+- **Card valida o build:** card fora do contrato **falha o build**, e não é publicada.
 - **Campos de asset agnósticos de formato:** `model_primary` (o que o frontend carrega),
   `model_source` (arquivo-fonte, opcional), `model_formats`, `model_viewer`. Isso permite
   "GLB puro" no MVP e "USD contendo GLB" depois, sem mudar o contrato.
@@ -87,14 +87,14 @@ cliente, a obrigação de fornecer o código-fonte correspondente passa a valer.
 
 - O contrato de dados é independente de qualquer fornecedor; trocar de backend não migra dados.
 - O MVP não tem PHP, MySQL nem WordPress: iteração rápida com assistentes de IA sobre HTML/CSS/JS.
-- Validação no build mantém o "asset watertight" verificável (ficha inválida não publica).
+- Validação no build mantém o "asset watertight" verificável (card inválida não publica).
 - O frontend decide o viewer por dado (`model_viewer`), permitindo evoluir de Three.js para
   USD/WASM sem reescrever a camada de dados.
 
 **Negativas / riscos**
 
 - No MVP não há UI de catalogação nem controle de acesso: a edição é feita por arquivo (e por
-  revisão de código). Aceitável enquanto o volume de fichas for gerido pelo pipeline.
+  revisão de código). Aceitável enquanto o volume de cards for gerido pelo pipeline.
 - Recursos de acervo presentes no Tainacan/Omeka (busca facetada avançada, histórico de
   proveniência, controle de autoridade) só chegam nos estágios seguintes.
 - A estratégia "modelos por estágio" exige disciplina: o contrato não pode vazar detalhes de
@@ -106,4 +106,4 @@ cliente, a obrigação de fornecer o código-fonte correspondente passa a valer.
 - `docs/Musa_design document_v1.0.md` — tabela de tecnologia e diferenciais
 - `docs/Musa_design implementacao-usd.md` — implementação USD consolidada
 - `docs/adr/0002-tooling-de-desenvolvimento.md` — tooling de desenvolvimento assistido por IA
-- `schemas/ficha.schema.json` — o contrato em si
+- `schemas/card.schema.json` — o contrato em si

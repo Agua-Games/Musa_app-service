@@ -93,7 +93,7 @@ estáticos; um item `draft` não existe em `api/items/` (nem como arquivo).
 
 1. Bucket/container por cliente (`musa-assets-<museum-id>`), ciclo de vida e CORS.
 2. `python -m musa_build upload --repo .` — sobe os assets locais de `content/` e
-   **reescreve a ficha** para a URL pública (a ficha versionada fica com a URL, não o
+   **reescreve o card** para a URL pública (o card versionada fica com a URL, não o
    binário — o repo do cliente emagrece com o tempo, não engorda).
 3. O builder resolve `storage.assetsBaseUrl` e valida que os assets respondem (HEAD 200)
    antes de publicar.
@@ -137,7 +137,7 @@ das inclusões/exclusões (já é critério do M0 para o repo — estender ao ba
 ## Fase M1.6 — Servidor MCP do MUSA
 
 Ferramentas mínimas sobre a API: `list_collections` · `get_item` · `search` ·
-`validate_ficha` · `propose_ficha_correction` · `upload_asset` · `set_status` ·
+`validate_card` · `propose_card_correction` · `upload_asset` · `set_status` ·
 `build_report`. Toda resposta que afirma algo sobre o acervo **cita as fontes**
 (regra já escrita em `implementacao-usd.md` §7). Três papéis ao mesmo tempo: ergonomia de
 desenvolvimento, base do assistente de IA, canal de operação.
@@ -150,7 +150,7 @@ desenvolvimento, base do assistente de IA, canal de operação.
 > repo do cliente com a **mesma maquinaria do builder** (read_content, contrato, portão,
 > índice de busca), então nunca divergem do build; rascunhos são visíveis no MCP e
 > continuam fora do site. Uso e config de cliente em `docs/mcp-server.md`. 13 testes
-> (critério de saída coberto: hits citam `asset_id` + caminho da ficha) e smoke test
+> (critério de saída coberto: hits citam `asset_id` + caminho do card) e smoke test
 > real contra o DemoMuseum.
 
 ## Fase M1.7 — DemoMuseum com conteúdo real

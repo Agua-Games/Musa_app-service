@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "builder"))
 
 from musa_build.build import BuildFailure, build_site, read_content  # noqa: E402
-from musa_build.contract import make_validator, validate_ficha  # noqa: E402
+from musa_build.contract import make_validator, validate_card  # noqa: E402
 from musa_build.gate import gate_record  # noqa: E402
 from musa_build.report import BuildReport  # noqa: E402
 from musa_build import CONTRACT_VERSION, __version__ as BUILDER_VERSION  # noqa: E402
@@ -52,9 +52,9 @@ class MusaRepo:
         return ((config.get("entitlements") or {}).get("tier") or "bronze").lower()
 
     def item_dir(self, asset_id: str) -> Path | None:
-        for ficha_path in self.repo.glob("content/*/*/ficha.json"):
-            if ficha_path.parent.name == asset_id:
-                return ficha_path.parent
+        for card_path in self.repo.glob("content/*/*/card.json"):
+            if card_path.parent.name == asset_id:
+                return card_path.parent
         return None
 
 
@@ -92,13 +92,13 @@ def get_item(repo: MusaRepo, asset_id: str) -> dict:
         return {"error": f"item {asset_id!r} not found",
                 "hint": "use list_collections to see what exists"}
     decision = gate_record(item, repo.tier())
-    ficha_path = _src(item["_dir"] / "ficha.json", repo.repo)
+    card_path = _src(item["_dir"] / "card.json", repo.repo)
     record = {k: v for k, v in item.items() if not k.startswith("_")}
     return {
         "item": record,
         "published": decision.included,
         "reasons": decision.reasons,
-        "sources": [ficha_path, f"asset_id:{asset_id}"],
+        "sources": [card_path, f"asset_id:{asset_id}"],
     }
 
 
@@ -120,26 +120,26 @@ def search(repo: MusaRepo, query: str) -> dict:
         hits.append({
             **summary,
             "sources": [f"asset_id:{asset_id}",
-                        f"content/{summary['colecao']}/{asset_id}/ficha.json"],
+                        f"content/{summary['colecao']}/{asset_id}/card.json"],
         })
     return {"query": query, "count": len(hits), "results": hits}
 
 
-def validate_ficha_tool(repo: MusaRepo, ficha: dict) -> dict:
+def validate_card_tool(repo: MusaRepo, card: dict) -> dict:
     validator = make_validator()
-    problems = validate_ficha(ficha, validator)
+    problems = validate_card(card, validator)
     return {
         "valid": not problems,
         "problems": problems,
-        "contract": f"schemas/ficha/v{CONTRACT_VERSION}/ficha.schema.json",
-        "sources": ["schemas/ficha.schema.json"],
+        "contract": f"schemas/card/v{CONTRACT_VERSION}/card.schema.json",
+        "sources": ["schemas/card.schema.json"],
     }
 
 
-def propose_ficha_correction(repo: MusaRepo, ficha: dict, folder: str | None = None,
+def propose_card_correction(repo: MusaRepo, card: dict, folder: str | None = None,
                              collection: str | None = None) -> dict:
-    """Propose — never silently apply — fixes for a ficha outside the contract."""
-    corrected = dict(ficha)
+    """Propose — never silently apply — fixes for a card outside the contract."""
+    corrected = dict(card)
     changes: list[str] = []
 
     # Mechanical identity fixes: the folder IS the identity (contract field docs).
@@ -158,7 +158,7 @@ def propose_ficha_correction(repo: MusaRepo, ficha: dict, folder: str | None = N
         corrected["tags"] = [str(corrected["tags"])]
         changes.append("tags: wrapped into a list")
 
-    remaining = validate_ficha(corrected, make_validator())
+    remaining = validate_card(corrected, make_validator())
     # Missing required content fields are not invented — they are flagged.
     for problem in remaining:
         changes.append(f"NEEDS HUMAN INPUT: {problem}")
@@ -167,8 +167,8 @@ def propose_ficha_correction(repo: MusaRepo, ficha: dict, folder: str | None = N
         "corrected": corrected,
         "changes": changes,
         "valid_after": not remaining,
-        "note": "nothing was written — apply the corrected ficha to the repo and rebuild",
-        "sources": ["schemas/ficha.schema.json"],
+        "note": "nothing was written — apply the corrected card to the repo and rebuild",
+        "sources": ["schemas/card.schema.json"],
     }
 
 
@@ -178,21 +178,21 @@ def set_status(repo: MusaRepo, asset_id: str, status: str) -> dict:
     item_dir = repo.item_dir(asset_id)
     if item_dir is None:
         return {"error": f"item {asset_id!r} not found"}
-    ficha_path = item_dir / "ficha.json"
-    ficha = json.loads(ficha_path.read_text(encoding="utf-8"))
-    old = ficha.get("website_status")
+    card_path = item_dir / "card.json"
+    card = json.loads(card_path.read_text(encoding="utf-8"))
+    old = card.get("website_status")
     if old == status:
         return {"asset_id": asset_id, "status": status, "changed": False,
-                "sources": [_src(ficha_path, repo.repo)]}
-    ficha["website_status"] = status
-    ficha_path.write_text(json.dumps(ficha, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                "sources": [_src(card_path, repo.repo)]}
+    card["website_status"] = status
+    card_path.write_text(json.dumps(card, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return {
         "asset_id": asset_id,
         "status": status,
         "previous": old,
         "changed": True,
         "note": "the change reaches the site on the next build (the gate is in the build)",
-        "sources": [_src(ficha_path, repo.repo), f"asset_id:{asset_id}"],
+        "sources": [_src(card_path, repo.repo), f"asset_id:{asset_id}"],
     }
 
 
@@ -200,7 +200,7 @@ def upload_asset(repo: MusaRepo, **_) -> dict:
     return {
         "error": "blocked on M1.3 (object storage)",
         "reason": "binary assets move to per-client buckets (ADR 0009: Cloudflare R2); "
-                  "until then, place the file next to the ficha in content/ and reference it by name",
+                  "until then, place the file next to the card in content/ and reference it by name",
         "sources": ["docs/adr/0009-object-storage.md"],
     }
 

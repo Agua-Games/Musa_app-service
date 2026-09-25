@@ -19,7 +19,7 @@ TOOL_SCHEMAS = [
     },
     {
         "name": "get_item",
-        "description": "Get the full record (ficha) of one piece, with its gate decision and sources.",
+        "description": "Get the full record (card) of one piece, with its gate decision and sources.",
         "inputSchema": {
             "type": "object",
             "properties": {"asset_id": {"type": "string", "description": "the piece's asset_id"}},
@@ -28,7 +28,7 @@ TOOL_SCHEMAS = [
     },
     {
         "name": "search",
-        "description": "Search the collection; every result cites its asset_id and ficha path.",
+        "description": "Search the collection; every result cites its asset_id and card path.",
         "inputSchema": {
             "type": "object",
             "properties": {"query": {"type": "string"}},
@@ -36,25 +36,25 @@ TOOL_SCHEMAS = [
         },
     },
     {
-        "name": "validate_ficha",
-        "description": "Validate a ficha against the frozen collection contract (v1).",
+        "name": "validate_card",
+        "description": "Validate a card against the frozen collection contract (v1).",
         "inputSchema": {
             "type": "object",
-            "properties": {"ficha": {"type": "object"}},
-            "required": ["ficha"],
+            "properties": {"card": {"type": "object"}},
+            "required": ["card"],
         },
     },
     {
-        "name": "propose_ficha_correction",
-        "description": "Propose fixes for a ficha outside the contract — mechanical fixes applied, content fields flagged for human input. Never writes.",
+        "name": "propose_card_correction",
+        "description": "Propose fixes for a card outside the contract — mechanical fixes applied, content fields flagged for human input. Never writes.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "ficha": {"type": "object"},
+                "card": {"type": "object"},
                 "folder": {"type": "string", "description": "the item's folder name (identity rule)"},
                 "collection": {"type": "string", "description": "the collection folder it lives in"},
             },
-            "required": ["ficha"],
+            "required": ["card"],
         },
     },
     {
@@ -67,7 +67,7 @@ TOOL_SCHEMAS = [
     },
     {
         "name": "set_status",
-        "description": "Publish or unpublish a piece (writes website_status in its ficha.json).",
+        "description": "Publish or unpublish a piece (writes website_status in its card.json).",
         "inputSchema": {
             "type": "object",
             "properties": {

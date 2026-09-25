@@ -45,7 +45,7 @@ jobs:
       - name: Install the validation dependency
         run: python -m pip install --disable-pip-version-check jsonschema
 
-      # The gate travels with the build: a ficha that violates the contract
+      # The gate travels with the build: a card that violates the contract
       # fails the deploy instead of reaching the site (docs/HANDOFF.md §5).
       - name: Validate the catalog against the contract
         run: python tools/validate_catalog.py

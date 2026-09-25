@@ -13,7 +13,7 @@
  * The builder emits data/runtime.js with the client's config; main.js applies
  * it at boot via MusaAPI.configure(window.MUSA_RUNTIME).
  *
- * Live responses must match the ficha contract (schemas/ficha.schema.json).
+ * Live responses must match the card contract (schemas/card.schema.json).
  */
 const MusaAPI = (() => {
   const state = {

@@ -14,12 +14,12 @@ Cinco princípios explicam quase todas as decisões que você vai encontrar aqui
 dúvida, decida por eles:
 
 1. **Contrato primeiro.** A forma dos dados é definida antes da implementação e é verificável
-   (`schemas/ficha.schema.json`). O que não valida não entra.
+   (`schemas/card.schema.json`). O que não valida não entra.
 2. **O portão fica no build, nunca no cliente.** Filtrar no browser equivale a não filtrar: o
    payload é público. Isso vale para `draft` e para tier.
 3. **Binário grande não entra no git.** Um repositório que carrega mídia para sempre é um
    repositório lento para sempre — e o git nunca esquece.
-4. **Uma fonte de verdade por assunto.** O `.usd` para o asset, a `ficha.json` para o curadorial, o
+4. **Uma fonte de verdade por assunto.** O `.usd` para o asset, a `card.json` para o curadorial, o
    repo do cliente para o conteúdo, o servidor para o tier. Duas cópias divergem.
 5. **Verifique, não presuma.** Neste projeto já houve um "teste verde" que não testava nada e um
    índice que dizia estar atualizado sem estar. Prefira medir a afirmar.
@@ -32,7 +32,7 @@ dúvida, decida por eles:
 com acervo: digitaliza, cataloga, preserva e exibe coleções online, em **tiers** (Bronze: catálogo
 2D · Silver: peças em 3D · Gold: digital twins), com um **assistente de IA** que responde sobre o
 acervo no site e em quiosques físicos. O valor comercial central é uma **pipeline de catalogação
-automatizada**: fotos das fichas físicas entram, fichas estruturadas e validadas saem — "dias de
+automatizada**: fotos dos cards físicas entram, cards estruturadas e validadas saem — "dias de
 trabalho viram horas".
 
 O detalhe técnico que diferencia o produto é tratar o **OpenUSD** como formato-fonte do asset 3D
@@ -67,7 +67,7 @@ docs/
     ├── 0003-onboarding-de-clientes.md         # artefato versionado, tenancy, gating
     ├── 0004-frontend-auto-hospedado.md         # three.js vendorizado, mídia licenciada
     └── 0005-publicacao-do-frontend.md          # GitHub Pages + assets materializados no CI
-schemas/ficha.schema.json                     # O CONTRATO
+schemas/card.schema.json                     # O CONTRATO
 source/                                       # frontend estático (o site)
 tools/
 ├── fetch_assets.py                           # baixa 14 imagens do Wikimedia
@@ -170,8 +170,8 @@ Estado desta sessão (mudanças **ainda não commitadas** quando isto foi escrit
 | **0004** | Frontend **auto-hospedado**: three.js vendorizado (sem CDN em runtime) e mídia licenciada. | — |
 | **0005** | Demonstração publicada no **GitHub Pages via GitHub Actions** (a Pages recusa um subdiretório como raiz). Os binários seguem fora do git e são **materializados no build** pelos próprios fetchers. | traga números; um 6º ADR substitui |
 
-**Descartado de propósito:** Tainacan/WordPress (bloat e acoplamento), `ficha.toml` (substituído pelo
-USD como fonte + `ficha.json` derivada), Qdrant como backend do acervo (pgvector junto ao Postgres),
+**Descartado de propósito:** Tainacan/WordPress (bloat e acoplamento), `card.toml` (substituído pelo
+USD como fonte + `card.json` derivada), Qdrant como backend do acervo (pgvector junto ao Postgres),
 **.exe` + DLLs copiados para repos de clientes, admin versionando conteúdo em git, `config.json` do
 cliente definindo o próprio tier.
 
@@ -184,10 +184,10 @@ cliente definindo o próprio tier.
 
 ## 5. Invariantes (violar isto é regressão)
 
-1. **Ficha fora do contrato falha o build.** Sem exceção, sem aviso.
+1. **Card fora do contrato falha o build.** Sem exceção, sem aviso.
 2. **Nada `draft` e nada de tier acima do contratado chega ao payload.**
 3. **Zero binário grande versionado** (`*.glb`, `*.usd`, `*.jpg` de alta). Vai para o bucket, com
-   URL na ficha. ⚠️ **Violado de propósito em 2026-09-18**: os quatro GLB (~29,6 MB) e ~50 MB de JPEG
+   URL no card. ⚠️ **Violado de propósito em 2026-09-18**: os quatro GLB (~29,6 MB) e ~50 MB de JPEG
    do demo entraram no git para o Pages funcionar sem object store. É decisão temporária — ver §11.
 4. **Zero código do MUSA dentro de um repo de cliente.**
 5. **Entitlements nunca são editáveis pelo cliente.**
@@ -318,7 +318,7 @@ consumir. Hoje a arquitetura está desenhada e não é executável.
       (título e marca do cliente, 3 coleções, skin e hero film configuráveis).
 - [x] Inserir um item com `website_status: "draft"` **não** o faz aparecer no payload publicado —
       verificado **no site publicado**: `estudo-em-rascunho` ausente do `catalog.js` servido.
-- [x] Corromper uma ficha de propósito **faz o build falhar** (e o site anterior continua no ar) —
+- [x] Corromper um card de propósito **faz o build falhar** (e o site anterior continua no ar) —
       verificado localmente: exit 1, report com o erro, nenhum site emitido; o deploy só roda em build verde.
 - [x] Repo de cliente com **zero** código do MUSA e com apenas conteúdo/config/CI —
       o DemoMuseum roda o build dentro da imagem `ghcr.io/agua-games/musa-app:0.1.1`.
@@ -363,8 +363,8 @@ Ele serve três coisas ao mesmo tempo, o que é raro:
 - **superfície de produto**: é a base do assistente (o "cérebro" que responde sobre o acervo);
 - **canal de operação**: a equipe MUSA resolve pedidos de cliente sem abrir o painel.
 
-Ferramentas mínimas: `list_collections` · `get_item` · `search` · `validate_ficha` ·
-`propose_ficha_correction` · `upload_asset` · `set_status` · `build_report`. Toda resposta que
+Ferramentas mínimas: `list_collections` · `get_item` · `search` · `validate_card` ·
+`propose_card_correction` · `upload_asset` · `set_status` · `build_report`. Toda resposta que
 afirme algo sobre o acervo **deve citar as fontes** (a regra que já está em
 `docs/Musa_design implementacao-usd.md` §7).
 
@@ -381,19 +381,19 @@ afirme algo sobre o acervo **deve citar as fontes** (a regra que já está em
 **Objetivo:** provar que a promessa central do produto é verdadeira, com números.
 
 **Entregáveis**
-1. **OCR em lote headless** sobre fotos de fichas (§2.3.2 da spec).
-2. **Agente de correção/estruturação** → `ficha.json`.
+1. **OCR em lote headless** sobre fotos de cards (§2.3.2 da spec).
+2. **Agente de correção/estruturação** → `card.json`.
 3. **Relatório de confiança por campo**: separar o que foi **lido** do que foi **inferido**. É o que
    permite revisão humana dirigida em vez de revisão total.
 4. **Fila de revisão** só para campos de baixa confiança.
 5. **Embeddings + índice vetorial** (pgvector) para busca semântica.
-6. **Importação de um acervo de teste** de 500–5.000 fichas.
+6. **Importação de um acervo de teste** de 500–5.000 cards.
 
 **Critérios de saída**
-- [ ] 500 fotos entram; 500 fichas válidas saem; **X% dos campos passam sem revisão humana**
+- [ ] 500 fotos entram; 500 cards válidas saem; **X% dos campos passam sem revisão humana**
       (meça e publique X — ele define o preço do serviço).
-- [ ] Custo por ficha em R$ medido (OCR + LLM + armazenamento).
-- [ ] Nenhuma ficha entra no índice sem validação.
+- [ ] Custo por card em R$ medido (OCR + LLM + armazenamento).
+- [ ] Nenhum card entra no índice sem validação.
 
 **Trilha paralela:** se houver uma segunda pessoa, o M2 é independente do M1 (é Python, offline) e
 pode correr em paralelo.
@@ -407,7 +407,7 @@ pode correr em paralelo.
 **O cliente virtual (no `DemoMuseum`) não é um teste de fumaça — é um ator.**
 
 1. **Personas sintéticas** — `owner@demo` e `team@demo` com rotinas:
-   - *diária*: publicar 2 itens, corrigir uma ficha, subir uma imagem;
+   - *diária*: publicar 2 itens, corrigir um card, subir uma imagem;
    - *semanal*: criar coleção, reorganizar subcoleção, promover hero;
    - *pontual*: despublicar, desfazer, pedir um módulo novo.
 2. **Gerador de uso indevido** — arquivo grande demais, MIME errado, campo obrigatório ausente,
@@ -486,7 +486,7 @@ onboarding self-service; marketplace de módulos; suporte N1 com runbook.
 
 1. **USD no navegador.** As bibliotecas citadas nas sessões de design vêm de conversa, não de
    medição. Antes de prometer 3D avançado, faça o spike e meça.
-2. **Qualidade do OCR em fichas manuscritas.** O produto assume que dá para automatizar; ninguém
+2. **Qualidade do OCR em cards manuscritas.** O produto assume que dá para automatizar; ninguém
    mediu X% ainda. É o risco número um da promessa comercial.
 3. **Custo de LLM por tier.** O RAG barato é premissa, não fato. Meça por consulta antes de fixar
    preço.

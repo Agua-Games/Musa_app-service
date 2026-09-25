@@ -1,6 +1,6 @@
 {
   "generated": "2026-09-16",
-  "contract": "schemas/ficha.schema.json",
+  "contract": "schemas/card.schema.json",
   "museum": {
     "id": "musa-demo",
     "name": "MUSA Museum Suite Service",

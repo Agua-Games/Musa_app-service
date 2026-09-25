@@ -32,14 +32,14 @@ class StaticApiTest(unittest.TestCase):
     def test_envelope_shape(self):
         body = self.read("collections.json")
         self.assertEqual(set(body), {"data", "meta"})
-        self.assertEqual(body["meta"]["contract"], "schemas/ficha/v1/ficha.schema.json")
+        self.assertEqual(body["meta"]["contract"], "schemas/card/v1/card.schema.json")
         self.assertEqual(body["meta"]["museum"], "fixture-museum")
         self.assertEqual(body["meta"]["count"], len(body["data"]))
 
     def test_schema_endpoint_serves_the_bundled_contract(self):
         served = self.read("schema.json")
         bundled = json.loads(
-            (Path(__file__).resolve().parent.parent / "musa_build" / "schemas" / "ficha.schema.json")
+            (Path(__file__).resolve().parent.parent / "musa_build" / "schemas" / "card.schema.json")
             .read_text(encoding="utf-8")
         )
         self.assertEqual(served, bundled)

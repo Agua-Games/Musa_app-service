@@ -100,10 +100,10 @@ class FailedBuildLogTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp) / "client"
             shutil.copytree(CLIENT_OK, repo)
-            ficha = repo / "content" / "paintings" / "painting-one" / "ficha.json"
-            data = json.loads(ficha.read_text(encoding="utf-8"))
+            card = repo / "content" / "paintings" / "painting-one" / "card.json"
+            data = json.loads(card.read_text(encoding="utf-8"))
             del data["titulo"]
-            ficha.write_text(json.dumps(data), encoding="utf-8")
+            card.write_text(json.dumps(data), encoding="utf-8")
             out = Path(tmp) / "site"
             with self.assertRaises(BuildFailure) as ctx:
                 build_site(repo, FRONTEND, out)
