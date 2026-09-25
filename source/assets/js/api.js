@@ -73,6 +73,16 @@ const MusaAPI = (() => {
   // demo keeps working — with a clear note that nothing persists.
   const staticReadOnly = () => state.mode === "live" && state.static;
 
+  /* Mirror a server-saved record into the local catalog so the admin views
+     (which render from window.MUSA_MOCK) reflect the change without a reload. */
+  function mirrorItem(item) {
+    if (!item || !item.asset_id || !window.MUSA_MOCK) return;
+    const list = window.MUSA_MOCK.items;
+    const i = list.findIndex((x) => x.asset_id === item.asset_id);
+    if (i >= 0) list[i] = { ...list[i], ...item };
+    else list.push(item);
+  }
+
   /* Tokenizing mirrors builder/musa_build/api.py: lowercase, split on
      non-word characters, drop tokens shorter than 2. */
   const tokenize = (text) => text.toLowerCase().split(/[^\w]+/u).filter((t) => t.length >= 2);
@@ -145,12 +155,55 @@ const MusaAPI = (() => {
         return Promise.reject(new Error(
           "The static API is read-only — this change needs the MUSA backend (M1.4). Nothing was persisted."));
       }
-      return via("/items", () => request("/items", { method: "POST", body: JSON.stringify(patch) }),
+      return via("/items", async () => {
+        const saved = await request("/items", { method: "POST", body: JSON.stringify(patch) });
+        mirrorItem(saved); // keep the admin's local catalog in sync with the server
+        return saved;
+      },
         () => {
           const item = mock().items.find((i) => i.asset_id === patch.asset_id);
           if (item) Object.assign(item, patch);
           return item;
         });
+    },
+
+    /** POST /collections — create a collection (id, title, description?, tier?). */
+    createCollection(meta) {
+      if (staticReadOnly()) {
+        return Promise.reject(new Error(
+          "The static API is read-only — this change needs the MUSA backend (M1.4). Nothing was persisted."));
+      }
+      return via("/collections", async () => {
+        const created = await request("/collections", { method: "POST", body: JSON.stringify(meta) });
+        if (created && created.id && !mock().collections.find((c) => c.id === created.id)) {
+          mock().collections.push({ subcollections: [], ...created });
+        }
+        return created;
+      },
+        () => {
+          const col = { tier: "bronze", subcollections: [], ...meta };
+          mock().collections.push(col);
+          return col;
+        });
+    },
+
+    /** True when talking to the dynamic MUSA backend (writes enabled). */
+    isLive() { return state.mode === "live" && !state.static; },
+
+    /**
+     * Dynamic mode only: after login, pull collections AND drafts into the
+     * local catalog so the admin browser sees everything the tenant may edit.
+     * No-op in mock/static modes.
+     */
+    async hydrateMock() {
+      if (!this.isLive() || !state.token) return;
+      const cols = await request("/collections");
+      const items = [];
+      for (const c of cols) {
+        items.push(...await request(`/collections/${c.id}/items?include_drafts=1`));
+      }
+      mock().collections = cols;
+      mock().items = items;
     },
 
     /* ---- Assistant API (§6.4) ------------------------------------------ */

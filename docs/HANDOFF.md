@@ -101,11 +101,13 @@ reasonix.toml                                 # preferências do agente neste wo
 
 **O que NÃO existe ainda** (o M1 começa aqui):
 
-- ⚠️ **Backend parcial (M1.4 fase 1)**: o builder ganhou `musa-build serve` (FastAPI,
-  mesma imagem) — API de leitura dinâmica com os mesmos shapes/gating da API estática
-  (`/collections`, `/items/{id}`, `/search`, `/schema`, assets gated). **Ainda não há
-  escritas nem banco** (fase 2: token por tenant + SQLite); sem elas, o frontend de
-  cliente segue no modo estático e o admin segue mockado.
+- ⚠️ **Backend M1.4 no ar (fases 1+2 de código)**: `musa-build serve` (FastAPI, mesma
+  imagem) — leitura com os mesmos shapes/gating da API estática **e escritas**
+  (`POST /items`, `POST /collections`, `POST /auth/login`) atrás do bearer
+  `MUSA_ADMIN_TOKEN`, persistidas em overlay SQLite (`<repo>/.musa/state.db`) — o repo
+  do cliente segue intacto como seed. O admin do frontend já fala com a API de verdade
+  (login, criar coleção/item, publicar, hero). **Pendente:** medir o critério do
+  curador < 15 min com usuário real, upload de assets (M1.3) e release da imagem.
 - ✅ **Logger estruturado (M1.5)**: todo build emite `build-log.jsonl` com correlação tenant → build → asset; o report diz onde cada registro pousou. A API dinâmica (M1.4) reutiliza o mesmo logger.
 - ⚠️ **Gating correto só nos builds do builder**: o demo da plataforma (Pages) ainda
   carrega o item `draft` no payload de propósito — ele é o material da demo do admin.

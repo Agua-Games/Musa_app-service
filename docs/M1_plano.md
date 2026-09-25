@@ -112,7 +112,8 @@ do dia a dia vivem no banco (ADR 0003).
 **Verificação:** um curador não-técnico cria uma coleção e publica um item **sem ajuda**,
 cronometrado — o critério é **< 15 min**.
 
-> **Estado (2026-09-25): fase 1 (leitura) CONCLUÍDA.** O builder ganhou o comando
+> **Estado (2026-09-25): fase 1 (leitura) e fase 2 (escritas) CONCLUÍDAS no código.**
+> O builder ganhou o comando
 > `serve` (`builder/musa_build/serve.py`, FastAPI na mesma imagem): `GET /collections`,
 > `/collections/{id}/items`, `/items/{id}`, `/search?q=`, `/schema`, `/health` e assets
 > em `/assets/content/...`. Mesmos shapes e envelope da API estática (M1.1) — trocar
@@ -120,10 +121,24 @@ cronometrado — o critério é **< 15 min**.
 > do build (`gate_content`, extraído de `build.py`): draft/tier acima = 404, e os assets
 > de registros excluídos não são servidos (nem `card.json`/`collection.json` são
 > baixáveis). Entitlements assinados são verificados na subida (mesmo `check_config`).
-> Logger do M1.5 reutilizado em modo servidor (`buffer=False`, stderr). 17 testes novos
-> (71 no total) + smoke test real contra o DemoMuseum. **Falta a fase 2:** escritas
-> (criar coleção/item, publicar/despublicar, hero) atrás de token por tenant + SQLite —
-> e o admin real contra essas escritas.
+> Logger do M1.5 reutilizado em modo servidor (`buffer=False`, stderr).
+>
+> **Fase 2 (escritas):** `POST /items` (patch ou criação — novo item nasce `draft`,
+> fail closed), `POST /collections`, `POST /auth/login` (a senha é o token do tenant
+> nesta fase; contas de verdade vêm com o backend de escala). Tudo atrás do bearer
+> `MUSA_ADMIN_TOKEN`; sem a env, a instância é read-only (writes = 503). Persistência
+> em overlay SQLite (`store.py`, `<repo>/.musa/state.db` — gitignored nos clientes):
+> o repo segue sendo o *seed* e nunca é sujado por edições do admin (há teste disso).
+> Com token, o admin vê os próprios rascunhos (`include_drafts=1`); o portão de tier
+> **nunca** relaxa. O admin do frontend virou real contra a API: `saveItem`/
+> `createCollection` live, hidratação com rascunhos após o login e formulários de
+> nova coleção/novo item no painel. 38 testes novos (92 no total) + E2E em navegador
+> real (Chrome headless) contra a API: login → criar coleção → criar item (draft,
+> invisível ao público) → publicar → busca encontra — com escrita sem token = 401.
+>
+> **Falta para fechar a fase:** medir o critério real (curador não-técnico, < 15 min)
+> com o dono operando o admin, e o upload de assets (bloqueado na M1.3 — conta
+> Cloudflare pendente). Release da imagem com `serve` fica para esse ponto.
 
 ## Fase M1.5 — Logger estruturado + depurador de conteúdo
 

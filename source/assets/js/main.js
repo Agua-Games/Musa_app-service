@@ -703,6 +703,8 @@
     e.preventDefault();
     try {
       await MusaAPI.login($("#loginEmail").value.trim(), $("#loginPass").value);
+      // Dynamic backend: pull drafts into the admin view (no-op in mock/static).
+      await MusaAPI.hydrateMock();
       closeLogin();
       enterAdmin();
       toast("Welcome, " + MusaAPI.session.name);
@@ -726,6 +728,9 @@
     $("#adminAvatar").textContent = s.name[0];
     $("#adminSub").textContent = s.note;
     setView(s.role === "musa" ? "musa" : "client");
+    $("#ipNote").textContent = MusaAPI.isLive()
+      ? "Changes persist immediately via the collection API (POST /items)."
+      : "Changes persist via the collection API (POST /items) — in this scaffold they update the local catalog.";
     fbReset();
     refreshStats();
     $("#admin").scrollIntoView({ behavior: "smooth" });
@@ -759,6 +764,10 @@
     const { col, sub } = fbLocation();
     const list = $("#fbList");
     const crumb = $("#fbCrumb");
+
+    // Creation entry points: collections at the root, items inside a collection.
+    $("#fbNewCol").style.display = col ? "none" : "";
+    $("#fbNewItem").style.display = col ? "" : "none";
 
     if (!col) {
       crumb.innerHTML = "<b>acervo/</b>";
@@ -840,6 +849,53 @@
   }
 
   $("#fbUp").addEventListener("click", () => { fb.path.pop(); fb.selected.clear(); renderFb(); });
+
+  /* Creation forms (M1.4): live mode persists via the API; the mock mode keeps
+     the same flow in memory so the demo remains fully clickable. */
+  let fbFormKind = null;
+  function fbOpenForm(kind) {
+    fbFormKind = kind;
+    $("#fbFormTitle").textContent = kind === "col" ? "New collection" : `New item in ${fb.path.join(" / ")}`;
+    $$(".fb-only-item").forEach((el) => { el.style.display = kind === "item" ? "" : "none"; });
+    $$(".fb-only-col").forEach((el) => { el.style.display = kind === "col" ? "" : "none"; });
+    ["#ffId", "#ffTitle", "#ffDesc", "#ffAuthor", "#ffYear", "#ffImage"].forEach((s) => { $(s).value = ""; });
+    $("#ffErr").textContent = "";
+    $("#fbForm").style.display = "";
+    $("#ffId").focus();
+  }
+  $("#fbNewCol").addEventListener("click", () => fbOpenForm("col"));
+  $("#fbNewItem").addEventListener("click", () => fbOpenForm("item"));
+  $("#ffCancel").addEventListener("click", () => { $("#fbForm").style.display = "none"; });
+  $("#fbForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      if (fbFormKind === "col") {
+        await MusaAPI.createCollection({
+          id: $("#ffId").value.trim(),
+          title: $("#ffTitle").value.trim(),
+          description: $("#ffDesc").value.trim(),
+        });
+        toast("Collection created");
+      } else {
+        const [colId, subId] = fb.path;
+        await MusaAPI.saveItem({
+          asset_id: $("#ffId").value.trim(),
+          titulo: $("#ffTitle").value.trim(),
+          autor: $("#ffAuthor").value.trim(),
+          data: $("#ffYear").value.trim(),
+          image: $("#ffImage").value.trim() || undefined,
+          colecao: colId,
+          ...(subId ? { subcolecao: subId } : {}),
+          website_status: "draft",
+        });
+        toast("Item created as draft — publish it when ready");
+      }
+      $("#fbForm").style.display = "none";
+      renderFb(); refreshStats();
+    } catch (err) {
+      $("#ffErr").textContent = err.message;
+    }
+  });
 
   async function bulkPatch(patchFn, doneMsg) {
     for (const id of fb.selected) {

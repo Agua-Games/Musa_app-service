@@ -309,10 +309,45 @@
               <button id="fbUnpublish" disabled>Demote to draft</button>
               <button id="fbHeroOn" disabled>Set as hero</button>
               <button id="fbHeroOff" disabled>Remove hero</button>
+              <button id="fbNewCol" type="button">+ Collection</button>
+              <button id="fbNewItem" type="button" style="display:none">+ Item</button>
             </div>
           </div>
           <div class="fb-up" id="fbUp" style="display:none"><button type="button">← Up one level</button></div>
           <div class="fb-list" id="fbList"></div>
+          <form class="fb-form" id="fbForm" style="display:none">
+            <h4 id="fbFormTitle">New collection</h4>
+            <div class="field">
+              <label for="ffId">Slug (lowercase, a-z 0-9 -)</label>
+              <input id="ffId" required pattern="[a-z0-9][a-z0-9-]*" placeholder="ex.: barroco-mineiro" />
+            </div>
+            <div class="field">
+              <label for="ffTitle">Title</label>
+              <input id="ffTitle" required />
+            </div>
+            <div class="field fb-only-col">
+              <label for="ffDesc">Description</label>
+              <input id="ffDesc" />
+            </div>
+            <div class="field fb-only-item">
+              <label for="ffAuthor">Author</label>
+              <input id="ffAuthor" />
+            </div>
+            <div class="field fb-only-item">
+              <label for="ffYear">Date / year</label>
+              <input id="ffYear" placeholder="ex.: 1658" />
+            </div>
+            <div class="field fb-only-item">
+              <label for="ffImage">Image URL</label>
+              <input id="ffImage" type="url" placeholder="https://…" />
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button type="submit" class="btn">Save</button>
+              <button type="button" class="btn" id="ffCancel">Cancel</button>
+              <span class="ip-note" id="ffErr"></span>
+            </div>
+            <p class="ip-note">New items are created as <b>draft</b> — publish them when they are ready.</p>
+          </form>
         </div>
         <aside class="item-panel" id="itemPanel">
           <div class="ip-img"><img id="ipImg" data-skin="admin-placeholder" alt="" /></div>
