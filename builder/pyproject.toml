@@ -17,4 +17,4 @@ musa-build = "musa_build.cli:main"
 include = ["musa_build*"]
 
 [tool.setuptools.package-data]
-musa_build = ["schemas/*.json", "data/*.json"]
+musa_build = ["schemas/*.json", "data/*.json", "data/*.key"]
