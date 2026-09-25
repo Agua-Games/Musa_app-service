@@ -12,10 +12,12 @@ Output (the published site):
     data/catalog.js / data/catalog.json         generated payload (gated)
     assets/content/...                          copied client assets (included items only)
     build-report.json / build-report.md         what went in, what stayed out, why
+    build-log.jsonl                             every decision as a JSON line (M1.5)
 """
 
 import json
 import shutil
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -24,6 +26,7 @@ from .api import emit_api
 from .contract import make_validator, validate_ficha
 from .entitlements import load_public_key, verify_entitlements
 from .gate import check_tier, gate_record, gate_tier
+from .log import get_logger
 from .report import BuildReport, Entry
 
 # The frontend folder doubles as the platform's own published demo, so the
@@ -65,7 +68,7 @@ def _orphan_report(error: str) -> BuildReport:
         contract_version=CONTRACT_VERSION,
         entitled_tier="<unknown>",
     )
-    report.errors.append(error)
+    report.fail(error)
     return report
 
 
@@ -93,31 +96,38 @@ def check_config(config: dict, report: BuildReport, *, entitlements_key: Path | 
         )
 
     if errors:
-        report.errors.extend(errors)
+        for error in errors:
+            report.fail(error)
         raise BuildFailure(report)
 
     # Signed entitlements (ADR 0010): release builds must verify the platform's
     # Ed25519 signature; the dev pin keeps local iteration unsigned.
+    log = get_logger(report)
     if pin == "0.0.0-unreleased":
         if not entitlements.get("signature"):
-            report.warnings.append(
+            report.warn(
                 "unsigned entitlements accepted because this is a development build "
                 "(musa: 0.0.0-unreleased); release images require the platform's signature"
             )
+        log.log("entitlements", mode="dev-unsigned" if not entitlements.get("signature") else "dev-signed")
     else:
         signature_errors = verify_entitlements(config, load_public_key(entitlements_key))
         if signature_errors:
-            report.errors.extend(f"museum.config.json: {e}" for e in signature_errors)
+            for error in signature_errors:
+                report.fail(f"museum.config.json: {error}")
             raise BuildFailure(report)
+        log.log("entitlements", mode="signed", expires=entitlements.get("expires"))
 
+    log.log("config_validated", tier=tier, modules=list(entitlements.get("modules") or []))
     return {
         "tier": tier,
         "modules": list(entitlements.get("modules") or []),
     }
 
 
-def copy_frontend(frontend: Path, out: Path) -> None:
+def copy_frontend(frontend: Path, out: Path) -> int:
     """Copy the platform code, excluding the demo content and dev-server files."""
+    copied = 0
     for path in sorted(frontend.rglob("*")):
         rel = path.relative_to(frontend).as_posix()
         if any(rel == d or rel.startswith(d + "/") for d in FRONTEND_EXCLUDE_DIRS):
@@ -130,17 +140,20 @@ def copy_frontend(frontend: Path, out: Path) -> None:
         else:
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, target)
+            copied += 1
+    return copied
 
 
 def _copy_asset(repo: Path, rel_path: str, target_rel: str, out: Path, report: BuildReport, owner: str) -> str:
     """Copy one client asset into the payload, returning the site-relative path."""
     source = repo / rel_path
     if not source.is_file():
-        report.warnings.append(f"{owner}: referenced asset {rel_path!r} not found — left as-is")
+        report.warn(f"{owner}: referenced asset {rel_path!r} not found — left as-is")
         return rel_path
     target = out / target_rel
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, target)
+    get_logger(report).log("asset_write", asset=owner, path=target_rel, bytes=source.stat().st_size)
     return target_rel
 
 
@@ -176,7 +189,7 @@ def read_content(repo: Path, report: BuildReport) -> tuple[list[dict], list[dict
         site = json.loads(site_file.read_text(encoding="utf-8"))
 
     if not content.is_dir():
-        report.warnings.append("no content/ directory — building an empty museum")
+        report.warn("no content/ directory — building an empty museum")
         return collections, items, site
 
     validator = make_validator()
@@ -188,7 +201,7 @@ def read_content(repo: Path, report: BuildReport) -> tuple[list[dict], list[dict
             try:
                 meta = json.loads(meta_file.read_text(encoding="utf-8"))
             except json.JSONDecodeError as exc:
-                report.errors.append(f"{collection_id}/collection.json is not valid JSON: {exc}")
+                report.fail(f"{collection_id}/collection.json is not valid JSON: {exc}")
                 continue
         collections.append(
             {
@@ -205,24 +218,24 @@ def read_content(repo: Path, report: BuildReport) -> tuple[list[dict], list[dict
         for item_dir in sorted(p for p in collection_dir.iterdir() if p.is_dir()):
             ficha_path = item_dir / "ficha.json"
             if not ficha_path.is_file():
-                report.warnings.append(f"{collection_id}/{item_dir.name}: no ficha.json — skipped")
+                report.warn(f"{collection_id}/{item_dir.name}: no ficha.json — skipped")
                 continue
             try:
                 ficha = json.loads(ficha_path.read_text(encoding="utf-8"))
             except json.JSONDecodeError as exc:
-                report.errors.append(f"{collection_id}/{item_dir.name}/ficha.json is not valid JSON: {exc}")
+                report.fail(f"{collection_id}/{item_dir.name}/ficha.json is not valid JSON: {exc}")
                 continue
             problems = validate_ficha(ficha, validator)
             for problem in problems:
-                report.errors.append(f"{ficha.get('asset_id', item_dir.name)}: {problem}")
+                report.fail(f"{ficha.get('asset_id', item_dir.name)}: {problem}")
             # Folder identity IS the record identity (see the contract field docs).
             if ficha.get("colecao") and ficha["colecao"] != collection_id:
-                report.errors.append(
+                report.fail(
                     f"{ficha.get('asset_id', item_dir.name)}: colecao is {ficha['colecao']!r} "
                     f"but the folder is {collection_id!r}"
                 )
             if ficha.get("asset_id") and ficha["asset_id"] != item_dir.name:
-                report.errors.append(
+                report.fail(
                     f"{ficha['asset_id']}: asset_id must equal the item folder name {item_dir.name!r}"
                 )
             ficha["_dir"] = item_dir
@@ -242,6 +255,15 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
         contract_version=CONTRACT_VERSION,
         entitled_tier=(config.get("entitlements") or {}).get("tier", "<unknown>"),
     )
+    log = get_logger(report)
+    report.build_id = log.build_id
+    t0 = time.monotonic()
+    log.log(
+        "build_start",
+        repo=str(repo),
+        builder_version=__version__,
+        contract_version=CONTRACT_VERSION,
+    )
     entitlement = check_config(config, report, entitlements_key=entitlements_key)
     report.entitled_tier = entitlement["tier"]
     report.modules = entitlement["modules"]
@@ -249,6 +271,12 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
     collections, items, site = read_content(repo, report)
     if report.errors:
         raise BuildFailure(report)
+    log.log(
+        "content_read",
+        collections=len(collections),
+        items=len(items),
+        site_sections=sorted(site.keys()),
+    )
 
     # Gate collections first; items of an excluded collection are excluded too.
     included_collections: list[dict] = []
@@ -256,6 +284,8 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
     for collection in collections:
         decision = gate_record(collection, entitlement["tier"])
         report.entries.append(Entry("collection", collection["id"], decision.included, decision.reasons))
+        log.log("gate", asset=collection["id"], kind="collection",
+                included=decision.included, reasons=decision.reasons)
         if decision.included:
             included_collections.append(collection)
         else:
@@ -267,16 +297,20 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
         if item.get("colecao") in excluded_collections:
             reason = f"collection {item['colecao']!r} excluded: {excluded_collections[item['colecao']]}"
             report.entries.append(Entry("item", asset_id, False, [reason]))
+            log.log("gate", asset=asset_id, kind="item", included=False, reasons=[reason])
             continue
         decision = gate_record(item, entitlement["tier"])
         report.entries.append(Entry("item", asset_id, decision.included, decision.reasons))
+        log.log("gate", asset=asset_id, kind="item",
+                included=decision.included, reasons=decision.reasons)
         if decision.included:
             included_items.append(item)
 
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
-    copy_frontend(Path(frontend), out)
+    frontend_files = copy_frontend(Path(frontend), out)
+    log.log("frontend_copied", files=frontend_files)
 
     # Only INCLUDED records contribute bytes to the payload (invariant 5.2).
     emitted_items = [
@@ -301,7 +335,7 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
                     collection["id"],
                 )
             else:
-                report.warnings.append(f"{collection['id']}: cover {cover!r} not found — left as-is")
+                report.warn(f"{collection['id']}: cover {cover!r} not found — left as-is")
         entry.pop("website_status", None)
         emitted_collections.append(entry)
 
@@ -345,6 +379,7 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
     data_dir.mkdir(exist_ok=True)
     payload = json.dumps(catalog, ensure_ascii=False, indent=2)
     (data_dir / "catalog.json").write_text(payload + "\n", encoding="utf-8")
+    log.log("file_emitted", path="data/catalog.json", bytes=len(payload))
     (data_dir / "catalog.js").write_text(
         "/**\n"
         " * MUSA — generated catalog. Do not edit: this file is a build artifact.\n"
@@ -354,6 +389,7 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
         f"window.MUSA_MOCK = {payload};\n",
         encoding="utf-8",
     )
+    log.log("file_emitted", path="data/catalog.js")
 
     # The static collection API (ADR 0008, M1.1): same shapes the dynamic
     # backend will serve — already gated, so a draft is not even a file.
@@ -364,6 +400,7 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
         generated=generated,
         collections=emitted_collections,
         items=emitted_items,
+        logger=log,
     )
 
     # Runtime boot config: client sites read the collection data through the
@@ -376,6 +413,27 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
         'window.MUSA_RUNTIME = { mode: "live", baseUrl: "api", static: true };\n',
         encoding="utf-8",
     )
+    log.log("file_emitted", path="data/runtime.js")
 
+    # The report's API view (M1.5): each decision says WHERE the record landed.
+    # Excluded records keep an empty list — "not emitted anywhere" is the answer.
+    entries_by_ref = {(e.kind, e.ref): e for e in report.entries}
+    for collection in emitted_collections:
+        entry = entries_by_ref.get(("collection", collection["id"]))
+        if entry:
+            entry.artifacts = ["data/catalog.json", "api/collections.json",
+                               f"api/collections/{collection['id']}/items.json"]
+    for item in emitted_items:
+        entry = entries_by_ref.get(("item", item["asset_id"]))
+        if entry:
+            entry.artifacts = ["data/catalog.json", f"api/items/{item['asset_id']}.json",
+                               f"api/collections/{item['colecao']}/items.json", "api/search.json"]
+
+    log.log(
+        "build_end",
+        result="success" if report.ok else "failure",
+        duration_ms=int((time.monotonic() - t0) * 1000),
+        **report.counts(),
+    )
     report.write(out)
     return report

@@ -103,7 +103,7 @@ reasonix.toml                                 # preferências do agente neste wo
 
 - ❌ **Nenhum backend**: o frontend roda 100% sobre um mock em memória (`window.MUSA_MOCK`). Não há
   API, banco, autenticação real nem upload.
-- ❌ **Nenhum logger, nenhuma observabilidade.**
+- ✅ **Logger estruturado (M1.5)**: todo build emite `build-log.jsonl` com correlação tenant → build → asset; o report diz onde cada registro pousou. A API dinâmica (M1.4) reutiliza o mesmo logger.
 - ⚠️ **Gating correto só nos builds do builder**: o demo da plataforma (Pages) ainda
   carrega o item `draft` no payload de propósito — ele é o material da demo do admin.
   Nos sites de cliente, o gating é no build e auditável (M0.6).

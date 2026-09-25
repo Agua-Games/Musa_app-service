@@ -50,9 +50,12 @@ def _envelope(data, *, museum_id: str, generated: str, count: int | None = None)
     return {"data": data, "meta": meta}
 
 
-def _write(path: Path, payload: dict) -> None:
+def _write(path: Path, payload: dict, logger=None, log_path: str | None = None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    text = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+    path.write_text(text, encoding="utf-8")
+    if logger is not None and log_path:
+        logger.log("file_emitted", path=log_path, bytes=len(text.encode("utf-8")))
 
 
 def build_search_index(items: list[dict]) -> dict:
@@ -72,24 +75,31 @@ def build_search_index(items: list[dict]) -> dict:
     }
 
 
-def emit_api(out: Path, *, museum_id: str, generated: str, collections: list[dict], items: list[dict]) -> None:
+def emit_api(out: Path, *, museum_id: str, generated: str, collections: list[dict],
+             items: list[dict], logger=None) -> None:
     """Write the static API into ``out/api/``. Input records are already gated."""
     api = Path(out) / "api"
     meta = {"museum_id": museum_id, "generated": generated}
 
     schema_src = Path(__file__).parent / "schemas" / "ficha.schema.json"
-    _write(api / "schema.json", json.loads(schema_src.read_text(encoding="utf-8")))
+    _write(api / "schema.json", json.loads(schema_src.read_text(encoding="utf-8")),
+           logger, "api/schema.json")
 
-    _write(api / "collections.json", _envelope(collections, **meta, count=len(collections)))
+    _write(api / "collections.json", _envelope(collections, **meta, count=len(collections)),
+           logger, "api/collections.json")
 
     for collection in collections:
         collection_items = [item for item in items if item.get("colecao") == collection["id"]]
         _write(
             api / "collections" / collection["id"] / "items.json",
             _envelope(collection_items, **meta, count=len(collection_items)),
+            logger,
+            f"api/collections/{collection['id']}/items.json",
         )
 
     for item in items:
-        _write(api / "items" / f"{item['asset_id']}.json", _envelope(item, **meta))
+        _write(api / "items" / f"{item['asset_id']}.json", _envelope(item, **meta),
+               logger, f"api/items/{item['asset_id']}.json")
 
-    _write(api / "search.json", _envelope(build_search_index(items), **meta, count=len(items)))
+    _write(api / "search.json", _envelope(build_search_index(items), **meta, count=len(items)),
+           logger, "api/search.json")

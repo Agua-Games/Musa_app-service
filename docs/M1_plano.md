@@ -121,6 +121,19 @@ cronometrado — o critério é **< 15 min**.
 **Verificação:** reproduzir um build inteiro a partir dos logs; o report explica 100%
 das inclusões/exclusões (já é critério do M0 para o repo — estender ao banco).
 
+> **Estado (2026-09-25): CONCLUÍDO** (parte do builder; o banco só existe a partir do
+> M1.4 — o mesmo logger será reutilizado na API). `builder/musa_build/log.py`: eventos
+> JSONL com correlação `tenant → build → asset` (`build-log.jsonl` em todo build,
+> inclusive nos que falham; `MUSA_LOG=stderr` espelha em tempo real para o CI).
+> Eventos: `build_start`, `entitlements`, `config_validated`, `content_read`, `gate`
+> (por registro, com razões), `asset_write` (com bytes), `file_emitted`,
+> `frontend_copied`, `build_end` (com contagens e duração). O report ganhou `build_id`
+> e a coluna **"emitted to"** — cada decisão diz *onde* o registro pousou
+> (`api/items/<id>.json` etc.); registro excluído = lista vazia. O workflow do cliente
+> (DemoMuseum + template) sobe o `build-log.jsonl` como artifact. Prova falsificável:
+> `tests/test_log.py` rejoga o log e exige que **todo** arquivo de conteúdo em disco
+> tenha uma linha de log correspondente — 54 testes verdes (8 novos).
+
 ## Fase M1.6 — Servidor MCP do MUSA
 
 Ferramentas mínimas sobre a API: `list_collections` · `get_item` · `search` ·
