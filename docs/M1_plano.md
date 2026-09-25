@@ -83,7 +83,9 @@ estáticos; um item `draft` não existe em `api/items/` (nem como arquivo).
 > expirada, com `museum_id` casando; o pin `0.0.0-unreleased` mantém o modo dev com
 > warning. DemoMuseum assinado (gold, expira 2027-09-25). Prova local: config
 > assinado builda; módulo adulterado falha com "signature does not verify".
-> 46 testes verdes (11 novos). Operação e rotação de chave em `docs/entitlements.md`.
+> 46 testes verdes (11 novos). Prova remota: um branch do DemoMuseum com um módulo
+> adulterado falhou no CI com "signature does not verify" (branch de teste removido
+> depois da prova). Operação e rotação de chave em `docs/entitlements.md`.
 > O token de deploy por cliente ficou documentado como preparação de M3/M4 (não há
 > deploy fora do Pages para ele autenticar ainda).
 
