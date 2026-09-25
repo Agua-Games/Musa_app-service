@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from . import __version__
 from .build import BuildFailure, build_site
 from .report import BuildReport
 
@@ -41,6 +42,24 @@ def _cmd_validate(args) -> int:
         return code
 
 
+def _cmd_serve(args) -> int:
+    """Run the dynamic collection API (ADR 0008, M1.4) for one client repository."""
+    import uvicorn
+
+    from .serve import create_app
+
+    try:
+        app = create_app(Path(args.repo))
+    except BuildFailure as failure:
+        print(f"SERVE FAILED — {len(failure.report.errors)} error(s):")
+        for error in failure.report.errors:
+            print(f"  ERROR {error}")
+        return 1
+    print(f"musa-app {__version__} serving {args.repo} on http://{args.host}:{args.port}")
+    uvicorn.run(app, host=args.host, port=args.port)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="musa-build",
@@ -58,6 +77,12 @@ def main(argv: list[str] | None = None) -> int:
     validate.add_argument("--repo", required=True)
     validate.add_argument("--frontend", required=True)
     validate.set_defaults(func=_cmd_validate)
+
+    serve = commands.add_parser("serve", help="run the dynamic collection API (read-only in M1.4 phase 1)")
+    serve.add_argument("--repo", required=True, help="client repository root (museum.config.json + content/)")
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8000)
+    serve.set_defaults(func=_cmd_serve)
 
     args = parser.parse_args(argv)
     return args.func(args)

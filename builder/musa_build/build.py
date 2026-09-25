@@ -125,6 +125,42 @@ def check_config(config: dict, report: BuildReport, *, entitlements_key: Path | 
     }
 
 
+def gate_content(report: BuildReport, collections: list[dict], items: list[dict],
+                 entitled_tier: str) -> tuple[list[dict], list[dict]]:
+    """Apply the gate to collections, then to their items, recording every
+    decision. Shared by the static build and the dynamic API (M1.4) so both
+    publish exactly the same records for exactly the same reasons."""
+    log = get_logger(report)
+    included_collections: list[dict] = []
+    excluded_collections: dict[str, str] = {}
+    for collection in collections:
+        decision = gate_record(collection, entitled_tier)
+        report.entries.append(Entry("collection", collection["id"], decision.included, decision.reasons))
+        log.log("gate", asset=collection["id"], kind="collection",
+                included=decision.included, reasons=decision.reasons)
+        if decision.included:
+            included_collections.append(collection)
+        else:
+            excluded_collections[collection["id"]] = "; ".join(decision.reasons)
+
+    included_items: list[dict] = []
+    for item in items:
+        asset_id = item.get("asset_id", "?")
+        if item.get("colecao") in excluded_collections:
+            reason = f"collection {item['colecao']!r} excluded: {excluded_collections[item['colecao']]}"
+            report.entries.append(Entry("item", asset_id, False, [reason]))
+            log.log("gate", asset=asset_id, kind="item", included=False, reasons=[reason])
+            continue
+        decision = gate_record(item, entitled_tier)
+        report.entries.append(Entry("item", asset_id, decision.included, decision.reasons))
+        log.log("gate", asset=asset_id, kind="item",
+                included=decision.included, reasons=decision.reasons)
+        if decision.included:
+            included_items.append(item)
+
+    return included_collections, included_items
+
+
 def copy_frontend(frontend: Path, out: Path) -> int:
     """Copy the platform code, excluding the demo content and dev-server files."""
     copied = 0
@@ -279,32 +315,7 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
     )
 
     # Gate collections first; items of an excluded collection are excluded too.
-    included_collections: list[dict] = []
-    excluded_collections: dict[str, str] = {}
-    for collection in collections:
-        decision = gate_record(collection, entitlement["tier"])
-        report.entries.append(Entry("collection", collection["id"], decision.included, decision.reasons))
-        log.log("gate", asset=collection["id"], kind="collection",
-                included=decision.included, reasons=decision.reasons)
-        if decision.included:
-            included_collections.append(collection)
-        else:
-            excluded_collections[collection["id"]] = "; ".join(decision.reasons)
-
-    included_items: list[dict] = []
-    for item in items:
-        asset_id = item.get("asset_id", "?")
-        if item.get("colecao") in excluded_collections:
-            reason = f"collection {item['colecao']!r} excluded: {excluded_collections[item['colecao']]}"
-            report.entries.append(Entry("item", asset_id, False, [reason]))
-            log.log("gate", asset=asset_id, kind="item", included=False, reasons=[reason])
-            continue
-        decision = gate_record(item, entitlement["tier"])
-        report.entries.append(Entry("item", asset_id, decision.included, decision.reasons))
-        log.log("gate", asset=asset_id, kind="item",
-                included=decision.included, reasons=decision.reasons)
-        if decision.included:
-            included_items.append(item)
+    included_collections, included_items = gate_content(report, collections, items, entitlement["tier"])
 
     if out.exists():
         shutil.rmtree(out)

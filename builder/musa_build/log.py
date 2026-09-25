@@ -25,13 +25,21 @@ def new_build_id() -> str:
 
 
 class BuildLogger:
-    """JSONL logger with tenant/build/asset correlation ids."""
+    """JSONL logger with tenant/build/asset correlation ids.
 
-    def __init__(self, tenant: str, *, build_id: str | None = None):
+    ``buffer=False`` + ``mirror=True`` suits long-running servers (M1.4): lines
+    go straight to stderr and nothing accumulates in memory.
+    """
+
+    def __init__(self, tenant: str, *, build_id: str | None = None,
+                 buffer: bool = True, mirror: bool | None = None):
         self.tenant = tenant or "<unknown>"
         self.build_id = build_id or new_build_id()
         self.events: list[dict] = []
-        self._mirror = os.environ.get("MUSA_LOG", "").lower() == "stderr"
+        self._buffer = buffer
+        if mirror is None:
+            mirror = os.environ.get("MUSA_LOG", "").lower() == "stderr"
+        self._mirror = mirror
 
     def log(self, event: str, *, level: str = "info", asset: str | None = None, **fields) -> None:
         line = {
@@ -44,7 +52,8 @@ class BuildLogger:
         if asset is not None:
             line["asset"] = asset
         line.update(fields)
-        self.events.append(line)
+        if self._buffer:
+            self.events.append(line)
         if self._mirror:
             print(json.dumps(line, ensure_ascii=False), file=sys.stderr)
 

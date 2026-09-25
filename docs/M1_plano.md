@@ -112,6 +112,19 @@ do dia a dia vivem no banco (ADR 0003).
 **Verificação:** um curador não-técnico cria uma coleção e publica um item **sem ajuda**,
 cronometrado — o critério é **< 15 min**.
 
+> **Estado (2026-09-25): fase 1 (leitura) CONCLUÍDA.** O builder ganhou o comando
+> `serve` (`builder/musa_build/serve.py`, FastAPI na mesma imagem): `GET /collections`,
+> `/collections/{id}/items`, `/items/{id}`, `/search?q=`, `/schema`, `/health` e assets
+> em `/assets/content/...`. Mesmos shapes e envelope da API estática (M1.1) — trocar
+> estático ↔ dinâmico é mudar o `baseUrl`, nunca a view. O gating é o **mesmo código**
+> do build (`gate_content`, extraído de `build.py`): draft/tier acima = 404, e os assets
+> de registros excluídos não são servidos (nem `card.json`/`collection.json` são
+> baixáveis). Entitlements assinados são verificados na subida (mesmo `check_config`).
+> Logger do M1.5 reutilizado em modo servidor (`buffer=False`, stderr). 17 testes novos
+> (71 no total) + smoke test real contra o DemoMuseum. **Falta a fase 2:** escritas
+> (criar coleção/item, publicar/despublicar, hero) atrás de token por tenant + SQLite —
+> e o admin real contra essas escritas.
+
 ## Fase M1.5 — Logger estruturado + depurador de conteúdo
 
 1. Log JSON com correlation ids `tenant → build → asset` no builder e na API.
