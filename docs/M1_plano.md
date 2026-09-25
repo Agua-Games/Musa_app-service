@@ -144,6 +144,15 @@ desenvolvimento, base do assistente de IA, canal de operação.
 
 **Verificação:** `search` responde com fontes rastreáveis a `asset_id` (critério de saída).
 
+> **Estado (2026-09-25): CONCLUÍDO.** `mcp_server/` — servidor MCP stdio sem
+> dependências (JSON-RPC implementado em `server.py`, protocolo 2025-06-18), com as 8
+> ferramentas; `upload_asset` é um stub honesto que aponta a M1.3. As ferramentas leem o
+> repo do cliente com a **mesma maquinaria do builder** (read_content, contrato, portão,
+> índice de busca), então nunca divergem do build; rascunhos são visíveis no MCP e
+> continuam fora do site. Uso e config de cliente em `docs/mcp-server.md`. 13 testes
+> (critério de saída coberto: hits citam `asset_id` + caminho da ficha) e smoke test
+> real contra o DemoMuseum.
+
 ## Fase M1.7 — DemoMuseum com conteúdo real
 
 Migrar o acervo demo da plataforma (`source/data/catalog.json`, 14 itens) para

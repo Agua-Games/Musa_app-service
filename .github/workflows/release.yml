@@ -59,6 +59,10 @@ jobs:
         working-directory: builder
         run: python -m unittest discover -s tests
 
+      - name: Run the MCP server test suite
+        working-directory: mcp_server
+        run: python -m unittest discover -s tests
+
   image:
     needs: gate
     runs-on: ubuntu-latest
