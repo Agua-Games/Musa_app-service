@@ -335,8 +335,12 @@ consumir. Hoje a arquitetura está desenhada e não é executável.
 > aceitas: backend FastAPI mínimo, object storage Cloudflare R2, entitlements Ed25519
 > offline). **M1.1 concluída** (2026-09-25): API de acervo estática emitida pelo builder
 > (`api/*.json`, shapes em `docs/api-estatica.md`), frontend em modo live estático,
-> DemoMuseum servindo o acervo via API — 35 testes verdes. Próximo: M1.2 (entitlements
-> assinados) e M1.3 (object storage), independentes entre si.
+> DemoMuseum servindo o acervo via API. **M1.2 concluída** (2026-09-25): entitlements
+> assinados Ed25519 — release builds exigem assinatura válida; prova falsificável no CI
+> (adulterar o config quebra o build). **M1.5 concluída** (2026-09-25, builder): log
+> estruturado `build-log.jsonl` com correlação tenant → build → asset em todo build, e
+> report com a coluna "emitted to". Próximo: M1.3 (object storage — aguarda a conta
+> Cloudflare do dono) e M1.4 (admin mínimo + backend).
 
 **Entregáveis**
 1. **API de acervo** com o contrato de `/collections`, `/items/{id}`, `/search`, `/schema` (§6.1 da
