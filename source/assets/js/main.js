@@ -7,6 +7,10 @@
 (() => {
   "use strict";
 
+  // Deployment-specific API config, emitted by the builder as data/runtime.js
+  // (client sites: live mode against the static JSON API; demo: mock).
+  if (window.MUSA_RUNTIME) MusaAPI.configure(window.MUSA_RUNTIME);
+
   const $  = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
   const brl = (n) => "R$ " + n.toLocaleString("pt-BR");
@@ -179,7 +183,7 @@
       const n = window.MUSA_MOCK.items.filter((i) => i.colecao === c.id && i.website_status === "published").length;
       return `
       <a class="collection-card fx" href="${href[c.tier]}">
-        <img src="${c.cover}" alt="${c.title}" loading="lazy" />
+        ${c.cover ? `<img src="${c.cover}" alt="${c.title}" loading="lazy" />` : ""}
         <div class="cc-body">
           <span class="cc-tier">${tierLabel[c.tier]}</span>
           <h3 class="serif">${c.title}</h3>
@@ -276,12 +280,27 @@
   });
 
   /* ==================================================== BRONZE GALLERY === */
+  /* Curation rule: an item whose ficha has NO featured_on appears in its
+     tier's default gallery; an explicit featured_on lists exactly the
+     sections it joins (an empty list hides it everywhere). Galleries are
+     filled from the collections of the matching tier — no hardcoded ids. */
+  const inSection = (item, section) =>
+    item.featured_on == null ? true : item.featured_on.includes(section);
+
+  async function itemsOfTier(tier) {
+    const cols = (await MusaAPI.listCollections()).filter((c) => c.tier === tier);
+    const items = [];
+    for (const c of cols) items.push(...(await MusaAPI.listItems(c.id)));
+    return items;
+  }
+
   async function renderBronze() {
-    const items = (await MusaAPI.listItems("old-masters")).filter((i) => i.featured_on.includes("bronze-gallery"));
+    const items = (await itemsOfTier("bronze")).filter((i) => inSection(i, "bronze-gallery"));
+    if (!items.length) { $("#bronze-gallery").hidden = true; return; }
     $("#bronzeGrid").innerHTML = items.map((i, idx) => `
       <figure class="bronze-item fx" data-id="${i.asset_id}" style="transition-delay:${idx * 60}ms">
-        <img src="${i.image}" alt="${i.titulo}" loading="lazy" />
-        <figcaption><span class="zoomtag">Click to zoom</span><strong>${i.titulo}</strong>${i.autor}, ${i.data}</figcaption>
+        ${i.image ? `<img src="${i.image}" alt="${i.titulo}" loading="lazy" />` : `<div class="img-ph" aria-hidden="true">◈</div>`}
+        <figcaption><span class="zoomtag">Click to zoom</span><strong>${i.titulo}</strong>${[i.autor, i.data].filter(Boolean).join(", ")}</figcaption>
       </figure>`).join("");
     $$("#bronzeGrid .bronze-item").forEach((el) => el.addEventListener("click", () => openLightbox(el.dataset.id)));
     watchFx();
@@ -297,6 +316,8 @@
   }
   function openLightbox(id) {
     const item = window.MUSA_MOCK.items.find((i) => i.asset_id === id);
+    if (!item) return;
+    if (!item.image) { toast("This piece has no photograph yet — its record lives in the collection API"); return; }
     lbImg.src = item.image;
     lbImg.alt = item.titulo;
     $("#lbCap").innerHTML = `<strong>${item.titulo}</strong>${item.autor} · ${item.data} · ${item.material}`;
@@ -333,15 +354,14 @@
 
   /* ==================================================== SILVER GALLERY === */
   async function renderSilver() {
-    const cols = ["classical-antiquities", "decorative-arts"];
-    const items = [];
-    for (const c of cols) items.push(...(await MusaAPI.listItems(c)));
-    const shown = items.filter((i) => i.featured_on.includes("silver-gallery"));
+    const items = await itemsOfTier("silver");
+    const shown = items.filter((i) => inSection(i, "silver-gallery"));
+    if (!shown.length) { $("#gallery-3d").hidden = true; return; }
     $("#silverGrid").innerHTML = shown.map((i, idx) => `
       <div class="silver-item fx" data-id="${i.asset_id}" style="transition-delay:${idx * 60}ms">
-        <img src="${i.image}" alt="${i.titulo}" loading="lazy" />
+        ${i.image ? `<img src="${i.image}" alt="${i.titulo}" loading="lazy" />` : `<div class="img-ph" aria-hidden="true">◈</div>`}
         <span class="silver-badge ${i.model_status}">${i.model_status === "processing" ? "3D · in pipeline" : i.model_viewer === "kit_stream" ? "Streamed twin" : "Interactive 3D"}</span>
-        <div class="si-label"><h3 class="serif">${i.titulo}</h3><span>${i.autor} · ${i.data}</span></div>
+        <div class="si-label"><h3 class="serif">${i.titulo}</h3><span>${[i.autor, i.data].filter(Boolean).join(" · ")}</span></div>
       </div>`).join("");
     $$("#silverGrid .silver-item").forEach((el) => el.addEventListener("click", () => openViewer(el.dataset.id)));
     watchFx();
@@ -502,6 +522,7 @@
       img.replaceWith(span);
     }, { once: true }));
     const first = films.find((f) => f.status === "now-showing") || films[0];
+    if (!first) { $("#cinema").hidden = true; return; } // a venue without a programme
     selectFilm(first.id, false);
   }
 

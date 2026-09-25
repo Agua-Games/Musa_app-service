@@ -330,6 +330,13 @@ consumir. Hoje a arquitetura está desenhada e não é executável.
 
 **Objetivo:** um museu real consegue operar o sistema sozinho para o caso básico.
 
+> **Progresso:** plano de ataque em `docs/M1_plano.md`. **M1.0 concluída** (ADRs 0008–0010
+> aceitas: backend FastAPI mínimo, object storage Cloudflare R2, entitlements Ed25519
+> offline). **M1.1 concluída** (2026-09-25): API de acervo estática emitida pelo builder
+> (`api/*.json`, shapes em `docs/api-estatica.md`), frontend em modo live estático,
+> DemoMuseum servindo o acervo via API — 35 testes verdes. Próximo: M1.2 (entitlements
+> assinados) e M1.3 (object storage), independentes entre si.
+
 **Entregáveis**
 1. **API de acervo** com o contrato de `/collections`, `/items/{id}`, `/search`, `/schema` (§6.1 da
    spec). MVP pode ser estático; o caminho para Payload deve estar aberto.

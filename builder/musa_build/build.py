@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import CONTRACT_VERSION, __version__
+from .api import emit_api
 from .contract import make_validator, validate_ficha
 from .gate import check_tier, gate_record, gate_tier
 from .report import BuildReport, Entry
@@ -341,6 +342,28 @@ def build_site(repo: Path, frontend: Path, out: Path) -> BuildReport:
         " * client repository's content/. Edit the fichas and rebuild instead.\n"
         " */\n"
         f"window.MUSA_MOCK = {payload};\n",
+        encoding="utf-8",
+    )
+
+    # The static collection API (ADR 0008, M1.1): same shapes the dynamic
+    # backend will serve — already gated, so a draft is not even a file.
+    generated = catalog["generated"]
+    emit_api(
+        out,
+        museum_id=museum_cfg["id"],
+        generated=generated,
+        collections=emitted_collections,
+        items=emitted_items,
+    )
+
+    # Runtime boot config: client sites read the collection data through the
+    # static API (live mode); the platform demo keeps the in-browser mock.
+    (data_dir / "runtime.js").write_text(
+        "/**\n"
+        " * MUSA — generated runtime config. Do not edit: this file is a build artifact.\n"
+        " * The static API is read-only; writes arrive with the M1.4 backend.\n"
+        " */\n"
+        'window.MUSA_RUNTIME = { mode: "live", baseUrl: "api", static: true };\n',
         encoding="utf-8",
     )
 

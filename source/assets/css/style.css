@@ -406,6 +406,16 @@ section { padding: 120px 0; position: relative; }
 }
 .silver-item .si-label h3 { font-size: 20px; font-weight: 500; }
 .silver-item .si-label span { font-size: 11.5px; color: var(--paper-dim); letter-spacing: 0.04em; }
+
+/* Placeholder for pieces whose ficha has no image (e.g. 3D-only records) */
+.img-ph {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%; min-height: 220px;
+  font-size: 2.4rem; color: var(--gold); opacity: 0.55;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(216, 184, 120, 0.14), transparent 62%),
+    var(--ink-3, #171512);
+}
 .silver-badge {
   position: absolute; top: 12px; left: 12px; font-size: 9.5px; letter-spacing: 0.24em;
   text-transform: uppercase; padding: 5px 10px; border-radius: 999px;

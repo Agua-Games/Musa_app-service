@@ -52,6 +52,18 @@ quando o backend chegar (é o que `api.js` já promete com os modos `mock`/`live
 **Verificação:** o site do DemoMuseum funciona com `MUSA_MODE=live` servindo só JSONs
 estáticos; um item `draft` não existe em `api/items/` (nem como arquivo).
 
+> **Estado (2026-09-25): CONCLUÍDO.** Shapes documentados em `docs/api-estatica.md`;
+> o builder emite `api/schema.json`, `api/collections.json`,
+> `api/collections/<id>/items.json`, `api/items/<id>.json` e `api/search.json`
+> (índice de termos pré-computado) — tudo já com o gating aplicado — mais
+> `data/runtime.js` ligando o modo live estático. `api.js` fala os três modos
+> (mock / live estático / live dinâmico); galerias do frontend deixaram de
+> referenciar ids de coleção do demo e passaram a agregar por tier
+> (`featured_on` ausente = galeria padrão do tier; lista vazia explícita =
+> oculta). Prova local: DemoMuseum buildado serve os 4 itens publicados via
+> `api/*.json` com zero erros de console; `estudo-em-rascunho` não existe em
+> `api/items/`. 35 testes do builder verdes (8 novos em `tests/test_api.py`).
+
 ## Fase M1.2 — Entitlements reais (assinatura offline)
 
 1. Ferramenta da plataforma `tools/sign_entitlements.py` (chave privada Ed25519 fora do

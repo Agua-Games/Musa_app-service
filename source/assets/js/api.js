@@ -3,11 +3,15 @@
  *
  * Contract-first access to the collection backend. Every method documents the
  * REST resource it targets (see docs/Musa_design document_technical-specs_v1.1.md §6.1
- * and §6.4). While the backend milestone is pending, `mode: "mock"` serves the
- * in-browser catalog (window.MUSA_MOCK) with identical shapes, so the UI never
- * changes when the real service is plugged in — just set:
+ * and §6.4). Three ways to serve the same shapes:
  *
- *   MusaAPI.configure({ mode: "live", baseUrl: "https://api.musa.example/v1", token: "<JWT>" });
+ *   - "mock": the in-browser catalog (window.MUSA_MOCK) — the platform demo;
+ *   - "live" + static: the builder-emitted JSON files under api/ (ADR 0008,
+ *     M1.1) — what client sites run today, read-only;
+ *   - "live" (dynamic): the MUSA backend — same envelope, writes enabled.
+ *
+ * The builder emits data/runtime.js with the client's config; main.js applies
+ * it at boot via MusaAPI.configure(window.MUSA_RUNTIME).
  *
  * Live responses must match the ficha contract (schemas/ficha.schema.json).
  */
@@ -15,6 +19,7 @@ const MusaAPI = (() => {
   const state = {
     mode: "mock",                 // "mock" | "live"
     baseUrl: "/api/v1",           // collection API root (REST)
+    static: false,                // live mode against builder-emitted JSON files
     token: null,                  // JWT once auth exists (§7.1)
     session: null                 // current identity, set by login()
   };
@@ -22,8 +27,13 @@ const MusaAPI = (() => {
   const clone = (o) => JSON.parse(JSON.stringify(o));
   const mock = () => window.MUSA_MOCK;
 
+  // "/collections/x/items" -> "/collections/x/items.json" (the static API is
+  // a tree of JSON files; query strings only exist on /search, handled there).
+  const staticPath = (path) => path.replace(/\?.*$/, "") + ".json";
+
   async function request(path, options = {}) {
-    const res = await fetch(state.baseUrl + path, {
+    const url = state.baseUrl + (state.static ? staticPath(path) : path);
+    const res = await fetch(url, {
       ...options,
       headers: {
         "Content-Type": "application/json",
@@ -31,8 +41,24 @@ const MusaAPI = (() => {
         ...(options.headers || {})
       }
     });
-    if (!res.ok) throw new Error(`MusaAPI ${res.status} on ${path}`);
-    return res.json();
+    if (!res.ok) {
+      const err = new Error(`MusaAPI ${res.status} on ${path}`);
+      err.status = res.status;
+      throw err;
+    }
+    const body = await res.json();
+    // The API envelope is { data, meta } everywhere (docs/api-estatica.md).
+    return body && typeof body === "object" && "data" in body && "meta" in body ? body.data : body;
+  }
+
+  // The static API is the gated build output: a missing file IS "not found".
+  async function requestOrNull(path) {
+    try {
+      return await request(path);
+    } catch (err) {
+      if (err.status === 404) return undefined;
+      throw err;
+    }
   }
 
   async function via(path, liveCall, mockCall) {
@@ -40,6 +66,37 @@ const MusaAPI = (() => {
     // Simulate network latency so the UI's loading states are exercised.
     await new Promise((r) => setTimeout(r, 120));
     return clone(mockCall());
+  }
+
+  // Writes, auth and the assistant need the dynamic backend (M1.4+). On a
+  // static client site they fall back to the in-browser catalog so the admin
+  // demo keeps working — with a clear note that nothing persists.
+  const staticReadOnly = () => state.mode === "live" && state.static;
+
+  /* Tokenizing mirrors builder/musa_build/api.py: lowercase, split on
+     non-word characters, drop tokens shorter than 2. */
+  const tokenize = (text) => text.toLowerCase().split(/[^\w]+/u).filter((t) => t.length >= 2);
+
+  let searchIndexPromise = null;
+  async function staticSearch(query) {
+    searchIndexPromise = searchIndexPromise || request("/search");
+    const index = await searchIndexPromise;
+    const tokens = tokenize(query);
+    if (!tokens.length) return [];
+    let ids = null;
+    for (const token of tokens) {
+      const bucket = index.terms[token] || [];
+      ids = ids === null ? bucket.slice() : ids.filter((id) => bucket.includes(id));
+    }
+    let hits = (ids || []).map((id) => index.items[id]).filter(Boolean);
+    if (!hits.length) {
+      // Fallback: substring over the slim records (the mock's semantics),
+      // so informal queries still answer something. Semantics arrive in M2.
+      const q = query.toLowerCase();
+      hits = Object.values(index.items).filter((i) =>
+        [i.titulo, i.autor, ...(i.tags || [])].join(" ").toLowerCase().includes(q));
+    }
+    return hits;
   }
 
   return {
@@ -57,7 +114,9 @@ const MusaAPI = (() => {
     listItems(collectionId, { includeDrafts = false } = {}) {
       return via(
         `/collections/${collectionId}/items`,
-        () => request(`/collections/${collectionId}/items`),
+        // A collection with no file is a collection this build didn't publish —
+        // an empty list, not an exception (drafts/above-tier must not leak).
+        async () => (await requestOrNull(`/collections/${collectionId}/items`)) || [],
         () => mock().items.filter((i) => i.colecao === collectionId &&
           (includeDrafts || i.website_status === "published"))
       );
@@ -65,14 +124,14 @@ const MusaAPI = (() => {
 
     /** GET /items/{id} — full record card for one piece. */
     getItem(assetId) {
-      return via(`/items/${assetId}`, () => request(`/items/${assetId}`),
+      return via(`/items/${assetId}`, () => requestOrNull(`/items/${assetId}`),
         () => mock().items.find((i) => i.asset_id === assetId));
     },
 
-    /** GET /search?q= — semantic search over the collection (RAG). */
+    /** GET /search?q= — term index in static mode; semantic (RAG) at scale. */
     search(query) {
       return via(`/search?q=${encodeURIComponent(query)}`,
-        () => request(`/search?q=${encodeURIComponent(query)}`),
+        () => (state.static ? staticSearch(query) : request(`/search?q=${encodeURIComponent(query)}`)),
         () => {
           const q = query.toLowerCase();
           return mock().items.filter((i) =>
@@ -82,6 +141,10 @@ const MusaAPI = (() => {
 
     /** POST /items — create or update an item (write path; backend-of-scale). */
     saveItem(patch) {
+      if (staticReadOnly()) {
+        return Promise.reject(new Error(
+          "The static API is read-only — this change needs the MUSA backend (M1.4). Nothing was persisted."));
+      }
       return via("/items", () => request("/items", { method: "POST", body: JSON.stringify(patch) }),
         () => {
           const item = mock().items.find((i) => i.asset_id === patch.asset_id);
@@ -98,9 +161,10 @@ const MusaAPI = (() => {
      * Live response: { answer, suggestedArtifacts }
      */
     async assistantAsk(question, context = {}) {
-      if (state.mode === "live") {
+      if (state.mode === "live" && !state.static) {
         return request("/assistant/ask", { method: "POST", body: JSON.stringify({ question, context }) });
       }
+      // Static sites run the local stand-in: the LLM pipeline is a backend module.
       await new Promise((r) => setTimeout(r, 450)); // assistant "thinking"
       return mockAssistantAnswer(question);
     },
@@ -108,7 +172,7 @@ const MusaAPI = (() => {
     /* ---- Auth (backend: Payload native auth + JWT, §7.1) ---------------- */
     /** POST /auth/login — demo login against local identities for now. */
     async login(email, password) {
-      if (state.mode === "live") {
+      if (state.mode === "live" && !state.static) {
         const res = await request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
         state.token = res.token;
         state.session = res.user;
@@ -124,9 +188,11 @@ const MusaAPI = (() => {
     logout() { state.session = null; if (state.mode === "live") state.token = null; },
 
     /* ---- Service layer (scaffolds; modules & billing backend later) ----- */
-    listFilms()    { return via("/cinema/programme", () => request("/cinema/programme"), () => mock().films); },
-    listProducts() { return via("/store/products",   () => request("/store/products"),   () => mock().products); },
-    plans()        { return via("/plans",            () => request("/plans"),            () => mock().plans); }
+    /* Static sites serve these sections from the generated catalog — the
+       cinema/store/plans endpoints only exist on the dynamic backend. */
+    listFilms()    { return via("/cinema/programme", () => state.static ? mock().films : request("/cinema/programme"), () => mock().films); },
+    listProducts() { return via("/store/products",   () => state.static ? mock().products : request("/store/products"),   () => mock().products); },
+    plans()        { return via("/plans",            () => state.static ? mock().plans : request("/plans"),            () => mock().plans); }
   };
 
   /** Local stand-in for the RAG assistant until the LLM pipeline exists. */

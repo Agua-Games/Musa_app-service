@@ -8,7 +8,7 @@ nothing above the entitled tier — reaches the published payload.
 See docs/HANDOFF.md (M0) and docs/adr/0003-onboarding-de-clientes.md.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 # Version of the collection contract this builder implements. Must equal the
 # "x-contract-version" of the bundled schemas/ficha.schema.json (see
