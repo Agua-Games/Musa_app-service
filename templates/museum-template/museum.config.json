@@ -6,7 +6,7 @@
     "locale": "pt-BR",
     "domain": "{{museum.example.com}}"
   },
-  "musa": "0.1.1",
+  "musa": "0.2.0",
   "entitlements": {
     "tier": "bronze",
     "modules": [],
