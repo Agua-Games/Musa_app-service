@@ -1,6 +1,6 @@
 # ADR 0010 — Entitlements: arquivo assinado offline (Ed25519), endpoint online depois
 
-- **Status:** proposta — aguardando aprovação do dono
+- **Status:** aceita
 - **Data:** 2026-09-24
 - **Relacionada:** ADR 0003 (onboarding, item 4), ADR 0008 (backend M1)
 

@@ -1,6 +1,6 @@
 # ADR 0009 — Object storage da mídia: Cloudflare R2
 
-- **Status:** proposta — aguardando aprovação do dono
+- **Status:** aceita
 - **Data:** 2026-09-24
 - **Relacionada:** ADR 0004 (frontend auto-hospedado), ADR 0006 (artefato), ADR 0008 (backend M1)
 

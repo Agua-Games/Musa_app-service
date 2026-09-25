@@ -1,6 +1,6 @@
 # ADR 0008 — Backend do acervo no M1: API própria mínima (FastAPI), Payload adiado
 
-- **Status:** proposta — aguardando aprovação do dono
+- **Status:** aceita
 - **Data:** 2026-09-24
 - **Relacionada:** ADR 0001 (camada de acervo), ADR 0003 (onboarding), ADR 0006 (artefato)
 
