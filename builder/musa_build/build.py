@@ -22,6 +22,7 @@ from pathlib import Path
 from . import CONTRACT_VERSION, __version__
 from .api import emit_api
 from .contract import make_validator, validate_ficha
+from .entitlements import load_public_key, verify_entitlements
 from .gate import check_tier, gate_record, gate_tier
 from .report import BuildReport, Entry
 
@@ -68,7 +69,7 @@ def _orphan_report(error: str) -> BuildReport:
     return report
 
 
-def check_config(config: dict, report: BuildReport) -> dict:
+def check_config(config: dict, report: BuildReport, *, entitlements_key: Path | None = None) -> dict:
     """Validate museum.config.json; returns the normalized entitlement view."""
     errors = []
     museum = config.get("museum") or {}
@@ -95,11 +96,20 @@ def check_config(config: dict, report: BuildReport) -> dict:
         report.errors.extend(errors)
         raise BuildFailure(report)
 
-    if not entitlements.get("signature"):
-        report.warnings.append(
-            "entitlements were read from museum.config.json without a signature; "
-            "server-verified entitlements land in M1 (docs/HANDOFF.md §5.5)"
-        )
+    # Signed entitlements (ADR 0010): release builds must verify the platform's
+    # Ed25519 signature; the dev pin keeps local iteration unsigned.
+    if pin == "0.0.0-unreleased":
+        if not entitlements.get("signature"):
+            report.warnings.append(
+                "unsigned entitlements accepted because this is a development build "
+                "(musa: 0.0.0-unreleased); release images require the platform's signature"
+            )
+    else:
+        signature_errors = verify_entitlements(config, load_public_key(entitlements_key))
+        if signature_errors:
+            report.errors.extend(f"museum.config.json: {e}" for e in signature_errors)
+            raise BuildFailure(report)
+
     return {
         "tier": tier,
         "modules": list(entitlements.get("modules") or []),
@@ -221,7 +231,7 @@ def read_content(repo: Path, report: BuildReport) -> tuple[list[dict], list[dict
     return collections, items, site
 
 
-def build_site(repo: Path, frontend: Path, out: Path) -> BuildReport:
+def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path | None = None) -> BuildReport:
     repo = Path(repo)
     out = Path(out)
     config = load_config(repo)
@@ -232,7 +242,7 @@ def build_site(repo: Path, frontend: Path, out: Path) -> BuildReport:
         contract_version=CONTRACT_VERSION,
         entitled_tier=(config.get("entitlements") or {}).get("tier", "<unknown>"),
     )
-    entitlement = check_config(config, report)
+    entitlement = check_config(config, report, entitlements_key=entitlements_key)
     report.entitled_tier = entitlement["tier"]
     report.modules = entitlement["modules"]
 

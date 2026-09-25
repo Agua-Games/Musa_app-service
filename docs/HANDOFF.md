@@ -107,8 +107,9 @@ reasonix.toml                                 # preferências do agente neste wo
 - ⚠️ **Gating correto só nos builds do builder**: o demo da plataforma (Pages) ainda
   carrega o item `draft` no payload de propósito — ele é o material da demo do admin.
   Nos sites de cliente, o gating é no build e auditável (M0.6).
-- ❌ **Nenhum entitlements**: tier é um campo do mock (no builder, vem do
-  `museum.config.json` com *warning* de assinatura ausente até o M1).
+- ✅ **Entitlements reais (M1.2)**: o tier vem do bloco `entitlements` do
+  `museum.config.json`, **assinado pela plataforma** (Ed25519, docs/entitlements.md) —
+  builds de release falham sem assinatura válida; o pin de dev mantém o warning.
 
 ### O defeito conhecido que precisa ser corrigido (e como confirmar)
 

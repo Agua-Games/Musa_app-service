@@ -76,6 +76,17 @@ estáticos; um item `draft` não existe em `api/items/` (nem como arquivo).
 **Verificação:** adulterar o tier no `museum.config.json` do DemoMuseum **falha o build**
 (falsificável, como o gating do M0).
 
+> **Estado (2026-09-25): CONCLUÍDO.** `builder/musa_build/entitlements.py` (payload
+> canônico + verificação Ed25519 com a chave pública embarcada na imagem),
+> `tools/sign_entitlements.py` (gera o par de chaves e assina configs; a privada
+> vive fora de qualquer repo). Builds de release **exigem** assinatura válida, não
+> expirada, com `museum_id` casando; o pin `0.0.0-unreleased` mantém o modo dev com
+> warning. DemoMuseum assinado (gold, expira 2027-09-25). Prova local: config
+> assinado builda; módulo adulterado falha com "signature does not verify".
+> 46 testes verdes (11 novos). Operação e rotação de chave em `docs/entitlements.md`.
+> O token de deploy por cliente ficou documentado como preparação de M3/M4 (não há
+> deploy fora do Pages para ele autenticar ainda).
+
 ## Fase M1.3 — Object storage
 
 1. Bucket/container por cliente (`musa-assets-<museum-id>`), ciclo de vida e CORS.

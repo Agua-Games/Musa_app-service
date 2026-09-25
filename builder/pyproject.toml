@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "musa-app"
-version = "0.1.2"
+version = "0.1.3"
 description = "MUSA app-service builder: turns a client content repository into the museum's static site."
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["jsonschema>=4.20"]
+dependencies = ["jsonschema>=4.20", "cryptography>=42"]
 
 [project.scripts]
 musa-build = "musa_build.cli:main"
