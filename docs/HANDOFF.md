@@ -118,7 +118,11 @@ reasonix.toml                                 # preferências do agente neste wo
   `MUSA_ADMIN_TOKEN`, persistidas em overlay SQLite (`<repo>/.musa/state.db`) — o repo
   do cliente segue intacto como seed. O admin do frontend já fala com a API de verdade
   (login, criar coleção/item, publicar, hero). **Pendente:** medir o critério do
-  curador < 15 min com usuário real, upload de assets (M1.3) e release da imagem.
+  curador < 15 min com usuário real e o release da imagem com `serve`+`upload`.
+- ✅ **Object storage (M1.3)**: assets fora do repo do cliente — bucket R2 por museu,
+  `musa-build upload` sobe e reescreve o card com a URL pública, e o build falha se
+  uma URL do bucket não responder HEAD 200. DemoMuseum migrado: imagens e GLB no
+  `r2.dev`, git só com cards (ver AGENTS.md: a conta Cloudflare é temporária).
 - ✅ **Logger estruturado (M1.5)**: todo build emite `build-log.jsonl` com correlação tenant → build → asset; o report diz onde cada registro pousou. A API dinâmica (M1.4) reutiliza o mesmo logger.
 - ⚠️ **Gating correto só nos builds do builder**: o demo da plataforma (Pages) ainda
   carrega o item `draft` no payload de propósito — ele é o material da demo do admin.

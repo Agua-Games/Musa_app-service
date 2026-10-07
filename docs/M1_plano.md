@@ -101,19 +101,15 @@ estáticos; um item `draft` não existe em `api/items/` (nem como arquivo).
 **Verificação:** subir um GLB novo no DemoMuseum sem nenhum binário no commit; o site
 publicado carrega o modelo do bucket.
 
-> **Estado (2026-10-07): tooling CONCLUÍDO; migração do DemoMuseum pendente das
-> credenciais R2.** `builder/musa_build/upload.py` + comando `musa-build upload
-> --repo .`: sobe os assets locais referenciados nos cards (`image`,
-> `model_primary`, covers) para o bucket via API S3-compatível (boto3; R2 hoje,
-> Azure/B2 depois sem trocar código) e **reescreve o card com a URL pública** —
-> segunda execução é no-op. Config no `storage` do `museum.config.json`
-> (`bucket`, `endpoint`, `assetsBaseUrl`); credenciais só por env
-> (`MUSA_R2_ACCESS_KEY_ID`/`MUSA_R2_SECRET_ACCESS_KEY`), nunca no repo. O build
-> ganhou o portão de mídia (`check_remote_assets`): URL sob o `assetsBaseUrl`
-> do tenant que não responde HEAD 200 **falha o build** — drafts não são
-> checados (podem apontar para assets ainda não subidos), URLs externas
-> (Wikimedia etc.) também não. 12 testes novos (104 no total). Passo manual do
-> dono em andamento: bucket `musa-assets-demo-museum` + token R2 no Cloudflare.
+> **Estado (2026-10-07): CONCLUÍDO.** Bucket `musa-assets-demo-museum` no R2 (conta
+> pessoal do dono — temporário, ver AGENTS.md), público via `r2.dev`, token S3 com
+> escopo só no bucket (credenciais em `H:\Musa_app-service\secrets\r2-demo-museum.env`,
+> fora de qualquer repo). `musa-build upload` migrou as 2 imagens locais do
+> DemoMuseum e subiu o GLB da **Vênus de Milo** (4,1 MB) — commit `a6733ad` do
+> DemoMuseum **sem nenhum binário** (só cards reescritos com as URLs públicas e a
+> remoção dos .jpg do git). O build passou no CI já com o portão de mídia
+> (HEAD 200 nas URLs do bucket) e o site publicado serve imagem e modelo do
+> `r2.dev`. Custo: free tier (10 GB) — uso atual < 10 MB.
 
 ## Fase M1.4 — Admin mínimo (aqui entra o backend)
 
