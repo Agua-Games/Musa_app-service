@@ -3,6 +3,7 @@ answer the same shapes as the static API, with the same gating — a draft or an
 above-tier record is a 404, and its assets are not downloadable."""
 
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -17,7 +18,15 @@ CLIENT_OK = FIXTURES / "client-ok"
 class ServeTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.client = TestClient(create_app(CLIENT_OK))
+        # data_dir off the fixtures: the serve default (<repo>/.musa) would
+        # otherwise leave a state.db behind on every test run.
+        cls._tmp = tempfile.TemporaryDirectory()
+        cls.client = TestClient(create_app(CLIENT_OK, data_dir=Path(cls._tmp.name)))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.app.state.serve.store.close()
+        cls._tmp.cleanup()
 
     def test_health(self):
         body = self.client.get("/health").json()

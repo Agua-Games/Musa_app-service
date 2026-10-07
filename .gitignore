@@ -70,3 +70,6 @@ desktop.ini
 Thumbs.db
 .DS_Store
 *.egg-info/
+
+# Local write overlay of musa-build serve (test runs and local servers)
+.musa/
