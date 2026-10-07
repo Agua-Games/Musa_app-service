@@ -6,6 +6,17 @@
 >
 > Última atualização: **2026-09-23**.
 
+> ⚠️ **CONTAS E CARTÕES (leia antes de mexer em infra paga).** A conta **Cloudflare**
+> usada neste momento (R2 do M1.3) é **pessoal do dono, no cartão de crédito pessoal
+> dele — situação TEMPORÁRIA**. O desenho definitivo: a **empresa do MUSA** terá a
+> própria conta/cartão, e o custo de Cloudflare **de cada cliente** será debitado no
+> cartão **do próprio cliente** (a princípio, para minimizar impostos repassados pelo
+> MUSA; depois se decidirá se vira custo incluído no serviço com Cloudflare contratado
+> pela empresa). **Antes de implementar qualquer coisa que mova dados na Cloudflare
+> — sobretudo transferência de arquivos de vários megabytes (upload, migração,
+> sincronização entre buckets/contas) — verifique em qual conta e de quem é o
+> bucket/cartão envolvido.** O mesmo critério vale para qualquer serviço pago novo.
+
 ---
 
 ## 0. Como este projeto pensa

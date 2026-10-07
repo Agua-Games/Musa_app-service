@@ -64,3 +64,14 @@ convoluted manual process. Two rules follow:
 2. **If a step needs custom ACLs, elevation or a privileged helper, stop and ask
    first.** Do not create it on a "we can clean it up later" premise — check
    that the cleanup path actually works before you need it.
+
+## Paid accounts and credit cards (read before touching paid infra)
+
+The **Cloudflare** account currently in use (R2, M1.3) is the owner's **personal
+account on their personal credit card — TEMPORARY**. The target design: the MUSA
+company gets its own account/card, and **each client is billed on the client's
+own card** for their Cloudflare usage (initially, to minimize taxes passed
+through MUSA; later the company may bundle it). **Before implementing anything
+that moves data on Cloudflare — especially multi-megabyte transfers (uploads,
+migrations, bucket/account sync) — verify whose account, bucket and card is
+involved.** Apply the same check to any new paid service.
