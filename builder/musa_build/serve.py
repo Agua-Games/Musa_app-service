@@ -389,7 +389,10 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
             "id": collection_id,
             "title": str(body.get("title") or collection_id),
             "description": str(body.get("description") or ""),
-            "tier": body.get("tier"),
+            # New collections default to bronze: the photo catalog is the
+            # curator's starting point, and a null tier renders nowhere on
+            # the storefront (galleries group by collection tier).
+            "tier": body.get("tier") or "bronze",
             "subcollections": [],
             "website_status": body.get("website_status") or "published",
             "_dir": None,

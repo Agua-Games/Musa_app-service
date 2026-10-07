@@ -99,6 +99,8 @@ class CollectionWriteTest(WriteBase):
             headers=self.auth,
         )
         self.assertEqual(res.status_code, 201)
+        # Default tier is bronze — a null tier would render nowhere on the storefront.
+        self.assertEqual(res.json()["data"]["tier"], "bronze")
         ids = {c["id"] for c in self.client.get("/collections").json()["data"]}
         self.assertIn("fotografia", ids)
 

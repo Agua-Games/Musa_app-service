@@ -15,6 +15,7 @@ TOKEN="curador-demo"
 API_PORT=8000
 SITE_PORT=8001
 
+rm -rf "$WORK" 2>/dev/null || true
 mkdir -p "$WORK" "$DATA"
 
 echo "== building the DemoMuseum site (fresh) =="

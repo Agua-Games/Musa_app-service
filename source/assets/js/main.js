@@ -179,13 +179,18 @@
     const grid = $("#collectionsGrid");
     const tierLabel = { bronze: "Tier I · Photo", silver: "Tier II · 3D", gold: "Tier III · Twin" };
     const href = { bronze: "#bronze-gallery", silver: "#gallery-3d", gold: "#digital-twin" };
-    grid.innerHTML = cols.map((c) => {
-      const n = window.MUSA_MOCK.items.filter((i) => i.colecao === c.id && i.website_status === "published").length;
+    // Counts come from the API (live in every mode) — never from the
+    // build-time catalog, which knows nothing about admin-created items.
+    const counts = await Promise.all(cols.map((c) =>
+      MusaAPI.listItems(c.id).then((items) => items.length).catch(() => 0)));
+    grid.innerHTML = cols.map((c, idx) => {
+      const n = counts[idx];
+      const tier = c.tier || "bronze";
       return `
-      <a class="collection-card fx" href="${href[c.tier]}">
+      <a class="collection-card fx" href="${href[tier] || "#collections"}">
         ${c.cover ? `<img src="${c.cover}" alt="${c.title}" loading="lazy" />` : ""}
         <div class="cc-body">
-          <span class="cc-tier">${tierLabel[c.tier]}</span>
+          <span class="cc-tier">${tierLabel[tier] || "Collection"}</span>
           <h3 class="serif">${c.title}</h3>
           <p>${c.description}</p>
           <span class="cc-go">Enter · ${n} pieces</span>
@@ -288,7 +293,9 @@
     item.featured_on == null ? true : item.featured_on.includes(section);
 
   async function itemsOfTier(tier) {
-    const cols = (await MusaAPI.listCollections()).filter((c) => c.tier === tier);
+    // Collections without an explicit tier are bronze (photo catalog) —
+    // the same default the API applies when a curator creates one.
+    const cols = (await MusaAPI.listCollections()).filter((c) => (c.tier || "bronze") === tier);
     const items = [];
     for (const c of cols) items.push(...(await MusaAPI.listItems(c.id)));
     return items;
@@ -314,8 +321,11 @@
     lbImg.style.transform = `translate(${lbX}px, ${lbY}px) scale(${lbScale})`;
     lbImg.style.cursor = lbScale > 1 ? "grab" : "zoom-in";
   }
-  function openLightbox(id) {
-    const item = window.MUSA_MOCK.items.find((i) => i.asset_id === id);
+  async function openLightbox(id) {
+    // Items created through the API are not in the build-time catalog —
+    // ask the backend when the local lookup misses.
+    let item = window.MUSA_MOCK.items.find((i) => i.asset_id === id);
+    if (!item && MusaAPI.isLive()) item = await MusaAPI.getItem(id);
     if (!item) return;
     if (!item.image) { toast("This piece has no photograph yet — its record lives in the collection API"); return; }
     lbImg.src = item.image;
