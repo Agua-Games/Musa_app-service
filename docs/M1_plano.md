@@ -101,6 +101,20 @@ estáticos; um item `draft` não existe em `api/items/` (nem como arquivo).
 **Verificação:** subir um GLB novo no DemoMuseum sem nenhum binário no commit; o site
 publicado carrega o modelo do bucket.
 
+> **Estado (2026-10-07): tooling CONCLUÍDO; migração do DemoMuseum pendente das
+> credenciais R2.** `builder/musa_build/upload.py` + comando `musa-build upload
+> --repo .`: sobe os assets locais referenciados nos cards (`image`,
+> `model_primary`, covers) para o bucket via API S3-compatível (boto3; R2 hoje,
+> Azure/B2 depois sem trocar código) e **reescreve o card com a URL pública** —
+> segunda execução é no-op. Config no `storage` do `museum.config.json`
+> (`bucket`, `endpoint`, `assetsBaseUrl`); credenciais só por env
+> (`MUSA_R2_ACCESS_KEY_ID`/`MUSA_R2_SECRET_ACCESS_KEY`), nunca no repo. O build
+> ganhou o portão de mídia (`check_remote_assets`): URL sob o `assetsBaseUrl`
+> do tenant que não responde HEAD 200 **falha o build** — drafts não são
+> checados (podem apontar para assets ainda não subidos), URLs externas
+> (Wikimedia etc.) também não. 12 testes novos (104 no total). Passo manual do
+> dono em andamento: bucket `musa-assets-demo-museum` + token R2 no Cloudflare.
+
 ## Fase M1.4 — Admin mínimo (aqui entra o backend)
 
 O admin mockado atual vira real **contra a API** — criar coleção, subir item,

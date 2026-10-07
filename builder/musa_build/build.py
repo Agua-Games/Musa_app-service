@@ -18,6 +18,7 @@ Output (the published site):
 import json
 import shutil
 import time
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -213,6 +214,41 @@ def _rewrite_item_assets(repo: Path, item_dir: Path, item: dict, out: Path, repo
     return item
 
 
+def check_remote_assets(config: dict, items: list[dict], report: BuildReport) -> None:
+    """M1.3: asset URLs under the tenant's storage (storage.assetsBaseUrl)
+    must answer HEAD 200 before the build publishes them. External URLs
+    (Wikimedia etc.) are not the platform's responsibility and are skipped.
+    Only INCLUDED records are checked — drafts may legitimately point at
+    assets that were not uploaded yet."""
+    base = ((config.get("storage") or {}).get("assetsBaseUrl") or "").rstrip("/")
+    if not base:
+        return
+    log = get_logger(report)
+    checked: set[str] = set()
+    for item in items:
+        for key in ("image", "model_primary"):
+            url = item.get(key)
+            if not url or not url.startswith(base) or url in checked:
+                continue
+            checked.add(url)
+            try:
+                request = urllib.request.Request(url, method="HEAD")
+                with urllib.request.urlopen(request, timeout=10) as response:
+                    status = response.status
+            except Exception as exc:
+                report.fail(
+                    f"{item.get('asset_id', '?')}: asset not reachable at {url} ({exc}) — "
+                    "upload it first (musa-build upload)"
+                )
+                continue
+            if status != 200:
+                report.fail(
+                    f"{item.get('asset_id', '?')}: asset at {url} answers HEAD {status}, not 200"
+                )
+            else:
+                log.log("asset_head_ok", asset=item.get("asset_id"), url=url)
+
+
 def read_content(repo: Path, report: BuildReport) -> tuple[list[dict], list[dict], dict]:
     """Walk content/ into (collections, items, site sections). NO gating here."""
     content = repo / "content"
@@ -316,6 +352,12 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
 
     # Gate collections first; items of an excluded collection are excluded too.
     included_collections, included_items = gate_content(report, collections, items, entitlement["tier"])
+
+    # M1.3: nothing publishes that does not answer — bucket URLs are checked
+    # before a single byte is emitted.
+    check_remote_assets(config, included_items, report)
+    if report.errors:
+        raise BuildFailure(report)
 
     if out.exists():
         shutil.rmtree(out)

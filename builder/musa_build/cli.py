@@ -42,6 +42,21 @@ def _cmd_validate(args) -> int:
         return code
 
 
+def _cmd_upload(args) -> int:
+    """Upload local card assets to object storage and rewrite the cards (M1.3)."""
+    from .build import BuildFailure
+    from .upload import upload_assets
+
+    try:
+        upload_assets(Path(args.repo))
+    except BuildFailure as failure:
+        print(f"UPLOAD FAILED — {len(failure.report.errors)} error(s):")
+        for error in failure.report.errors:
+            print(f"  ERROR {error}")
+        return 1
+    return 0
+
+
 def _cmd_serve(args) -> int:
     """Run the dynamic collection API (ADR 0008, M1.4) for one client repository."""
     import uvicorn
@@ -83,6 +98,10 @@ def main(argv: list[str] | None = None) -> int:
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8000)
     serve.set_defaults(func=_cmd_serve)
+
+    upload = commands.add_parser("upload", help="upload local card assets to object storage and rewrite the cards (M1.3)")
+    upload.add_argument("--repo", required=True, help="client repository root (museum.config.json + content/)")
+    upload.set_defaults(func=_cmd_upload)
 
     args = parser.parse_args(argv)
     return args.func(args)
