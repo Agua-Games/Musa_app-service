@@ -87,6 +87,9 @@ class ServeState:
     included_items: set[tuple[str, str]] = field(default_factory=set)
     covers: dict[str, Path] = field(default_factory=dict)
     skin: dict[str, Path] = field(default_factory=dict)
+    films: list[dict] = field(default_factory=list)
+    products: list[dict] = field(default_factory=list)
+    plans: list[dict] = field(default_factory=list)
     logger: BuildLogger | None = None
 
 
@@ -168,7 +171,7 @@ def load_state(repo: Path, *, data_dir: Path | None = None,
     report.entitled_tier = entitlement["tier"]
     report.modules = entitlement["modules"]
 
-    collections, items, _site = read_content(repo, report)
+    collections, items, site = read_content(repo, report)
     if report.errors:
         raise BuildFailure(report)
 
@@ -206,6 +209,9 @@ def load_state(repo: Path, *, data_dir: Path | None = None,
         all_collections=all_collections,
         all_items=all_items,
         skin=skin,
+        films=site.get("films", []),
+        products=site.get("products", []),
+        plans=json.loads((Path(__file__).parent / "data" / "plans.json").read_text(encoding="utf-8")),
         logger=logger,
     )
     _regate(state)
@@ -334,6 +340,20 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
             ids = bucket if ids is None else ids & bucket
         hits = [state.index["items"][i] for i in sorted(ids or [])]
         return envelope(hits, count=len(hits))
+
+    # Service sections the storefront renders (spec §6.1 siblings): the static
+    # build embeds them in the catalog; the dynamic API serves them here.
+    @app.get("/cinema/programme")
+    def cinema_programme():
+        return envelope(state.films, count=len(state.films))
+
+    @app.get("/store/products")
+    def store_products():
+        return envelope(state.products, count=len(state.products))
+
+    @app.get("/plans")
+    def list_plans():
+        return envelope(state.plans, count=len(state.plans))
 
     # ---- writes (token required) ----------------------------------------------
     @app.post("/auth/login", status_code=200)

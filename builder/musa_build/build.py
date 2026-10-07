@@ -232,7 +232,12 @@ def check_remote_assets(config: dict, items: list[dict], report: BuildReport) ->
                 continue
             checked.add(url)
             try:
-                request = urllib.request.Request(url, method="HEAD")
+                # Cloudflare's managed r2.dev domain 403s python-urllib's default
+                # User-Agent, so identify the builder explicitly.
+                request = urllib.request.Request(
+                    url, method="HEAD",
+                    headers={"User-Agent": f"musa-build/{__version__} (asset gate)"},
+                )
                 with urllib.request.urlopen(request, timeout=10) as response:
                     status = response.status
             except Exception as exc:

@@ -64,7 +64,7 @@ def _cmd_serve(args) -> int:
     from .serve import create_app
 
     try:
-        app = create_app(Path(args.repo))
+        app = create_app(Path(args.repo), data_dir=Path(args.data_dir) if args.data_dir else None)
     except BuildFailure as failure:
         print(f"SERVE FAILED — {len(failure.report.errors)} error(s):")
         for error in failure.report.errors:
@@ -97,6 +97,8 @@ def main(argv: list[str] | None = None) -> int:
     serve.add_argument("--repo", required=True, help="client repository root (museum.config.json + content/)")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8000)
+    serve.add_argument("--data-dir", default=None,
+                       help="write overlay location (default: <repo>/.musa; use a throwaway dir for tests)")
     serve.set_defaults(func=_cmd_serve)
 
     upload = commands.add_parser("upload", help="upload local card assets to object storage and rewrite the cards (M1.3)")
