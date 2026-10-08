@@ -207,6 +207,19 @@ desenvolvimento, base do assistente de IA, canal de operação.
 
 ## Fase M1.7 — DemoMuseum com conteúdo real
 
+> **CONCLUÍDO (2026-10-08).** Acervo real migrado de `source/data/catalog.json` para
+> `content/` no DemoMuseum (commit `1b21142`, CI verde em 51s): 7 peças novas
+> (pinturas: Moça com Brinco de Pérola — hero, Nenúfares, Autorretrato de Van Gogh;
+> esculturas: Ânfora de Figuras Negras, Taweret, Busto de Nefertiti — hero, Lanterna
+> Edo com GLB próprio), cards existentes enriquecidos (autor/data/dimensões; Vênus,
+> Espartilho e Elmo ganharam imagens) e capas de coleção definidas. Todos os binários
+> vivem no bucket R2 via `musa-build upload` (11 registros reescritos para URLs
+> públicas) — o git carrega só cards. Build de verificação: **13 publicados / 1
+> excluído (rascunho intencional), zero avisos**. O item GR-001 (digital twin,
+> referência interna `twin:room-a` da plataforma) ficou de fora por ser específico
+> do venue demo MUSA, não de um museu cliente. `colecao_exemplo/` permanece até o
+> dono decidir removê-la.
+
 Migrar o acervo demo da plataforma (`source/data/catalog.json`, 14 itens) para
 `content/` no formato do contrato — o DemoMuseum deixa de ser exemplo e vira **réplica
 operacional** de um museu, com assets no bucket (M1.3), não no git.

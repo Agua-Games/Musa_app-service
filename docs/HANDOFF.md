@@ -359,8 +359,14 @@ consumir. Hoje a arquitetura está desenhada e não é executável.
 > assinados Ed25519 — release builds exigem assinatura válida; prova falsificável no CI
 > (adulterar o config quebra o build). **M1.5 concluída** (2026-09-25, builder): log
 > estruturado `build-log.jsonl` com correlação tenant → build → asset em todo build, e
-> report com a coluna "emitted to". Próximo: M1.3 (object storage — aguarda a conta
-> Cloudflare do dono) e M1.4 (admin mínimo + backend).
+> report com a coluna "emitted to". **M1.3 concluída** (2026-10-07): bucket R2 por museu,
+> `musa-build upload` sobe assets locais e reescreve os cards para URLs públicas; portão
+> de mídia (HEAD 200) roda até no CI. **M1.4 concluída** (2026-10-07): `musa-build serve`
+> com escritas + admin ao vivo; teste do curador medido pelo dono em 2–4 min (critério
+> < 15 min); release 0.3.0 publicada e puxada pelo DemoMuseum mudando 1 linha. **M1.7
+> concluída** (2026-10-08): acervo real migrado para o DemoMuseum — 13 peças publicadas /
+> 1 rascunho intencional, todos os binários no bucket, git só com cards. **M1 CONCLUÍDO.**
+> Próximo: M2 (pipeline de catalogação).
 
 **Entregáveis**
 1. **API de acervo** com o contrato de `/collections`, `/items/{id}`, `/search`, `/schema` (§6.1 da
@@ -389,10 +395,10 @@ afirme algo sobre o acervo **deve citar as fontes** (a regra que já está em
 `docs/Musa_design implementacao-usd.md` §7).
 
 **Critérios de saída**
-- [ ] Um curador não-técnico cria uma coleção e publica um item **sem ajuda**, em **< 15 min**.
-- [ ] O build report explica a inclusão/exclusão de 100% dos itens.
-- [ ] `search` responde com fontes rastreáveis a `asset_id`.
-- [ ] Um upgrade de versão do MUSA no cliente é: 1 linha + push, verde no CI.
+- [x] Um curador não-técnico cria uma coleção e publica um item **sem ajuda**, em **< 15 min**. (medido: 2–4 min, M1.4)
+- [x] O build report explica a inclusão/exclusão de 100% dos itens. (M1.5; verificado na M1.7: 13/14 com motivo em 1 linha)
+- [x] `search` responde com fontes rastreáveis a `asset_id`. (M1.6, MCP)
+- [x] Um upgrade de versão do MUSA no cliente é: 1 linha + push, verde no CI. (0.2.0 → 0.3.0, M1.4)
 
 ---
 
