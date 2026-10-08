@@ -181,14 +181,17 @@
     const href = { bronze: "#bronze-gallery", silver: "#gallery-3d", gold: "#digital-twin" };
     // Counts come from the API (live in every mode) — never from the
     // build-time catalog, which knows nothing about admin-created items.
-    const counts = await Promise.all(cols.map((c) =>
-      MusaAPI.listItems(c.id).then((items) => items.length).catch(() => 0)));
+    const itemsByCol = await Promise.all(cols.map((c) =>
+      MusaAPI.listItems(c.id).then((items) => items).catch(() => [])));
     grid.innerHTML = cols.map((c, idx) => {
-      const n = counts[idx];
+      const items = itemsByCol[idx];
+      const n = items.length;
       const tier = c.tier || "bronze";
+      // A collection without a cover borrows the first piece's photograph.
+      const cover = c.cover || (items[0] && items[0].image);
       return `
       <a class="collection-card fx" href="${href[tier] || "#collections"}">
-        ${c.cover ? `<img src="${c.cover}" alt="${c.title}" loading="lazy" />` : ""}
+        ${cover ? `<img src="${cover}" alt="${c.title}" loading="lazy" />` : ""}
         <div class="cc-body">
           <span class="cc-tier">${tierLabel[tier] || "Collection"}</span>
           <h3 class="serif">${c.title}</h3>
@@ -868,7 +871,7 @@
     $("#fbFormTitle").textContent = kind === "col" ? "New collection" : `New item in ${fb.path.join(" / ")}`;
     $$(".fb-only-item").forEach((el) => { el.style.display = kind === "item" ? "" : "none"; });
     $$(".fb-only-col").forEach((el) => { el.style.display = kind === "col" ? "" : "none"; });
-    ["#ffId", "#ffTitle", "#ffDesc", "#ffAuthor", "#ffYear", "#ffImage"].forEach((s) => { $(s).value = ""; });
+    ["#ffId", "#ffTitle", "#ffDesc", "#ffCover", "#ffAuthor", "#ffYear", "#ffImage"].forEach((s) => { $(s).value = ""; });
     $("#ffErr").textContent = "";
     $("#fbForm").style.display = "";
     $("#ffId").focus();
@@ -884,6 +887,7 @@
           id: $("#ffId").value.trim(),
           title: $("#ffTitle").value.trim(),
           description: $("#ffDesc").value.trim(),
+          cover: $("#ffCover").value.trim() || undefined,
         });
         toast("Collection created");
       } else {

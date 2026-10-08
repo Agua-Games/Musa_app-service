@@ -393,6 +393,7 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
             # curator's starting point, and a null tier renders nowhere on
             # the storefront (galleries group by collection tier).
             "tier": body.get("tier") or "bronze",
+            "cover": body.get("cover") or None,
             "subcollections": [],
             "website_status": body.get("website_status") or "published",
             "_dir": None,

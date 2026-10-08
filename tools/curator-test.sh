@@ -30,7 +30,18 @@ echo "== starting the collection API (writes enabled, throwaway state) =="
 (cd "$ROOT/builder" && MUSA_ADMIN_TOKEN="$TOKEN" python -m musa_build serve \
   --repo "$ROOT/../DemoMuseum" --data-dir "$DATA" --port $API_PORT) &
 API_PID=$!
-(cd "$SITE" && python -m http.server $SITE_PORT > /dev/null 2>&1) &
+# Static server with no-store, so a rerun never serves yesterday's JS.
+SITE_DIR="$SITE" python - << 'PY' > /dev/null 2>&1 &
+import functools, http.server, os
+class Handler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+http.server.ThreadingHTTPServer(
+    ("127.0.0.1", 8001),
+    functools.partial(Handler, directory=os.environ["SITE_DIR"]),
+).serve_forever()
+PY
 SITE_PID=$!
 trap 'kill $API_PID $SITE_PID 2>/dev/null || true' EXIT
 
