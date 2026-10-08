@@ -2,3 +2,4 @@
 # never in the tenant bucket. Regenerate with render_corpus.py (fixed seed).
 corpus/
 __pycache__/
+.venv/

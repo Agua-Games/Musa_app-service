@@ -410,9 +410,11 @@ afirme algo sobre o acervo **deve citar as fontes** (a regra que já está em
 > concluída**: ADRs 0011 (OCR: docling), 0012 (LLM: API pay-per-token) e 0013
 > (vetorial: sqlite-vec) **aceitas pelo dono**. **M2.1 parcial**: corpus sintético
 > de 450 fichas com gabarito 100% válido gerado em `pipeline/` (local, zero
-> Cloudflare); falta o corpus real (50 fotos de fichas — coleta do dono, guia em
-> `pipeline/README.md`). Ajuste de custo aprovado: a importação final leva só
-> metadados, com 10–15 scans de vitrine no máximo.
+> Cloudflare); o corpus real ficou **adiado** (coleta com cliente real ou geração
+> por IA — decisão do dono, 2026-10-08; guia em `pipeline/README.md`). **M2.2
+> concluída**: OCR docling+RapidOCR em lote — 450/450 fichas, 0 falhas, 4.32 s por
+> ficha, char recall médio 0.937 contra o gabarito. Ajuste de custo aprovado: a
+> importação final leva só metadados, com 10–15 scans de vitrine no máximo.
 
 **Entregáveis**
 1. **OCR em lote headless** sobre fotos de cards (§2.3.2 da spec).

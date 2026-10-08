@@ -26,6 +26,18 @@ python pipeline/render_corpus.py --limit 450 --seed 42
 python pipeline/validate_ground_truth.py
 ```
 
+## OCR (M2.2)
+
+```bash
+cd pipeline
+python -m venv .venv && .venv/Scripts/python.exe -m pip install -r requirements-ocr.txt
+.venv/Scripts/python.exe run_ocr.py            # resumível; falhas em corpus/ocr/failed/
+.venv/Scripts/python.exe ocr_report.py         # tempo, falhas, char recall vs. gabarito
+```
+
+Baseline das 450 fichas sintéticas (2026-10-08): 0 falhas, 4.32 s/ficha, char
+recall médio 0.937 (mediana 0.958). Detalhe: `docs/M2_plano.md` fase M2.2.
+
 ## Corpus real (50 fichas) — guia de coleta
 
 O corpus sintético mede a pipeline; o corpus real mede o **produto** (HANDOFF

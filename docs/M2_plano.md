@@ -85,6 +85,19 @@ fixa; `du` do bucket inalterado ao fim da fase.
 
 ## Fase M2.2 — OCR em lote headless
 
+> **Estado (2026-10-08): CONCLUÍDO.** venv dedicado em `pipeline/.venv`
+> (gitignored; dependências fixadas em `pipeline/requirements-ocr.txt`: docling
+> 2.135 + rapidocr 3.9.1 — o 3.10 mudou a API e quebra o docling — + torch CPU +
+> onnxruntime). `ocr_engine.py` implementa a interface da ADR 0011 com o backend
+> RapidOCR (o backend padrão EasyOCR não vem instalado no docling 2.x);
+> `run_ocr.py` é resumível, isola falhas em `ocr/failed/` e loga JSONL por ficha;
+> `ocr_report.py` mede o resultado contra o gabarito. **Números das 450 fichas:
+> 450 ok / 0 falhas / 0 saídas vazias; 4.32 s por ficha (~32 min de motor); char
+> recall vs. gabarito: média 0.937, mediana 0.958, p10 0.842, mín 0.633.**
+> Execução em 9 fatias resumidas (~55 fichas cada) por limite de timeout do
+> ambiente de automação — o runner é o mesmo, o resume é o comportamento
+> projetado; em máquina livre roda em lote único.
+
 1. `pipeline/` novo na plataforma (Python, offline, fora da imagem do app — é
    ferramenta da equipe, não runtime do cliente).
 2. Runner batch: varre o corpus, produz `ocr/*.json` (texto bruto + caixas de
