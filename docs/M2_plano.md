@@ -56,9 +56,16 @@ Sem gabarito não há como medir "X% dos campos sem revisão". Dois corpora:
    uma única vez. É o corpus que responde ao risco nº 1 (HANDOFF §10.2: qualidade
    do OCR em ficha manuscrita — **ninguém mediu ainda**).
 
-**Verificação:** `corpus/` fora do git (vai ao bucket via `musa-build upload`);
-`corpus/ground-truth/*.json` valida contra o contrato v1; script de geração
-sintética reproduzível com seed fixa.
+**Custo de infra: zero no Cloudflare.** O corpus é insumo de desenvolvimento da
+pipeline — vive **local** em `pipeline/corpus/` (gitignored), nunca no bucket.
+Só a importação final do M2.6 toca o R2, e mesmo assim **metadados apenas**: os
+cards importados não precisam de imagem (o contrato só exige `asset_id`,
+`titulo`, `colecao`). Vitrine visual do acervo importado = 10–15 fichas com
+scan no bucket, se o dono quiser — decisão adiada para o M2.6.
+
+**Verificação:** `pipeline/corpus/` local e gitignored; `ground-truth/*.json`
+valida contra o contrato v1; script de geração sintética reproduzível com seed
+fixa; `du` do bucket inalterado ao fim da fase.
 
 ---
 
@@ -131,7 +138,9 @@ verdes).
 ## Fase M2.6 — Importação em lote no DemoMuseum + publicação dos números
 
 1. Lote de 500 cards revisados entra em `content/` do DemoMuseum (coleção própria
-   `acervo-importado`), scans ao bucket, `git` só com cards — a invariante do M1.
+   `acervo-importado`) — **metadados apenas, sem scans no bucket** (restrição 4 e
+   decisão do dono, 2026-10-08: DemoMuseum não precisa de acervo extenso por ora);
+   10–15 scans de vitrine no máximo, se aprovados. O `git` segue só com cards.
 2. Build + CI verdes com o lote; medir tempo de build com N itens (insumo do M3).
 3. Publicar em `docs/M2_resultados.md`: X% sem revisão, R$/card decomposto
    (OCR + LLM + embeddings + storage), tempo de pipeline por ficha, taxa de erro
