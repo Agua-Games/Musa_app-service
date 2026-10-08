@@ -73,3 +73,6 @@ Thumbs.db
 
 # Local write overlay of musa-build serve (test runs and local servers)
 .musa/
+
+# Owner-local tooling, not part of the platform
+tools/ReasonixCrashCacheRemover/
