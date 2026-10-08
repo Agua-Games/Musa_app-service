@@ -1,6 +1,6 @@
 # ADR 0012 — LLM de estruturação: API pay-per-token com modo JSON, custo logado por chamada
 
-- **Status:** proposta (aguardando aprovação do dono — M2.0)
+- **Status:** aceita
 - **Data:** 2026-10-08
 - **Relacionada:** ADR 0011 (OCR), spec §2.3.3, `docs/M2_plano.md` fases M2.3/M2.4
 

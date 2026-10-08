@@ -406,11 +406,12 @@ afirme algo sobre o acervo **deve citar as fontes** (a regra que já está em
 
 **Objetivo:** provar que a promessa central do produto é verdadeira, com números.
 
-> **Progresso:** plano de ataque em `docs/M2_plano.md` (2026-10-08). **M2.0 em
-> revisão pelo dono:** ADRs 0011 (motor de OCR: docling), 0012 (LLM de
-> estruturação: API pay-per-token) e 0013 (índice vetorial: sqlite-vec) redigidas
-> com as recomendações — aprovação fecha a fase. Ajuste de custo aprovado: corpus
-> de fichas é **local** (nunca no Cloudflare); a importação final leva só
+> **Progresso:** plano de ataque em `docs/M2_plano.md` (2026-10-08). **M2.0
+> concluída**: ADRs 0011 (OCR: docling), 0012 (LLM: API pay-per-token) e 0013
+> (vetorial: sqlite-vec) **aceitas pelo dono**. **M2.1 parcial**: corpus sintético
+> de 450 fichas com gabarito 100% válido gerado em `pipeline/` (local, zero
+> Cloudflare); falta o corpus real (50 fotos de fichas — coleta do dono, guia em
+> `pipeline/README.md`). Ajuste de custo aprovado: a importação final leva só
 > metadados, com 10–15 scans de vitrine no máximo.
 
 **Entregáveis**

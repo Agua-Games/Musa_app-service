@@ -1,0 +1,4 @@
+# Generated corpus artifacts stay local (M2 plan, phase M2.1): never in git,
+# never in the tenant bucket. Regenerate with render_corpus.py (fixed seed).
+corpus/
+__pycache__/

@@ -30,6 +30,8 @@
 
 ## Fase M2.0 — Decisões de arquitetura (3 ADRs, ~1 sessão)
 
+> **Estado (2026-10-08): CONCLUÍDO.** ADRs 0011, 0012 e 0013 aprovadas pelo dono.
+
 Três decisões bloqueiam tudo; tomá-las por escrito antes de codar.
 
 | Decisão | Opção recomendada | Alternativa | ADR |
@@ -62,6 +64,18 @@ Só a importação final do M2.6 toca o R2, e mesmo assim **metadados apenas**: 
 cards importados não precisam de imagem (o contrato só exige `asset_id`,
 `titulo`, `colecao`). Vitrine visual do acervo importado = 10–15 fichas com
 scan no bucket, se o dono quiser — decisão adiada para o M2.6.
+
+> **Estado (2026-10-08): corpus sintético CONCLUÍDO; corpus real aguarda as fotos
+> do dono.** `pipeline/` criado: `fetch_seed_metadata.py` (475 metadados reais do
+> Met Open Access, cache resumível — a API devolve 403 intermitente sob rate
+> limit, contornado com backoff + skip), `render_corpus.py` (450 fichas, 3
+> layouts — datilografada, moderna, itálica — com rotação, blur, jitter de
+> brilho e ruído; seed fixa = reproduzível) e `validate_ground_truth.py` — **450
+> gabaritos, 100% válidos contra o contrato v1 pelo próprio validador do
+> builder**. Amostras inspecionadas visualmente. Guia de coleta do corpus real
+> (50 fichas: 15 manuscritas, 10 datilografadas, 10 impressas, 10 em condições
+> ruins, 5 multilíngues/incompletas) em `pipeline/README.md`. Bucket R2 intacto:
+> 0 bytes do corpus nele.
 
 **Verificação:** `pipeline/corpus/` local e gitignored; `ground-truth/*.json`
 valida contra o contrato v1; script de geração sintética reproduzível com seed

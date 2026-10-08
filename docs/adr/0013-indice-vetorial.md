@@ -1,6 +1,6 @@
 # ADR 0013 — Índice vetorial: sqlite-vec por museu, embeddings locais, índice derivado
 
-- **Status:** proposta (aguardando aprovação do dono — M2.0)
+- **Status:** aceita
 - **Data:** 2026-10-08
 - **Relacionada:** ADR 0003 (onboarding), ADR 0012 (LLM), spec §2.4,
   `docs/M2_plano.md` fase M2.5

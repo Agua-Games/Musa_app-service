@@ -1,6 +1,6 @@
 # ADR 0011 — Motor de OCR: docling (pip, headless, CPU) atrás de interface substituível
 
-- **Status:** proposta (aguardando aprovação do dono — M2.0)
+- **Status:** aceita
 - **Data:** 2026-10-08
 - **Relacionada:** ADR 0002 (tooling), spec §2.3.2, `docs/M2_plano.md` fase M2.2
 
