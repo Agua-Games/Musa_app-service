@@ -406,6 +406,10 @@ afirme algo sobre o acervo **deve citar as fontes** (a regra que já está em
 
 **Objetivo:** provar que a promessa central do produto é verdadeira, com números.
 
+> **Progresso:** plano de ataque em `docs/M2_plano.md` (2026-10-08), com 3 decisões
+> de arquitetura recomendadas para aprovação na M2.0 (ADRs 0011–0013: motor de OCR,
+> LLM de estruturação, índice vetorial).
+
 **Entregáveis**
 1. **OCR em lote headless** sobre fotos de cards (§2.3.2 da spec).
 2. **Agente de correção/estruturação** → `card.json`.
