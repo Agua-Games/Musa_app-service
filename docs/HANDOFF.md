@@ -112,13 +112,13 @@ reasonix.toml                                 # preferências do agente neste wo
 
 **O que NÃO existe ainda** (o M1 começa aqui):
 
-- ⚠️ **Backend M1.4 no ar (fases 1+2 de código)**: `musa-build serve` (FastAPI, mesma
-  imagem) — leitura com os mesmos shapes/gating da API estática **e escritas**
-  (`POST /items`, `POST /collections`, `POST /auth/login`) atrás do bearer
-  `MUSA_ADMIN_TOKEN`, persistidas em overlay SQLite (`<repo>/.musa/state.db`) — o repo
-  do cliente segue intacto como seed. O admin do frontend já fala com a API de verdade
-  (login, criar coleção/item, publicar, hero). **Pendente:** medir o critério do
-  curador < 15 min com usuário real e o release da imagem com `serve`+`upload`.
+- ✅ **Backend M1.4 CONCLUÍDO**: `musa-build serve` (FastAPI, mesma imagem) — leitura
+  com os mesmos shapes/gating da API estática **e escritas** (`POST /items`,
+  `POST /collections`, `POST /auth/login`) atrás do bearer `MUSA_ADMIN_TOKEN`,
+  persistidas em overlay SQLite (`<repo>/.musa/state.db`) — o repo do cliente segue
+  intacto como seed. O admin do frontend fala com a API de verdade (login, criar
+  coleção/item, publicar, hero). **Critério do curador medido: 2–4 min < 15 min.**
+  Release 0.3.0 no ar; DemoMuseum pinnado nele.
 - ✅ **Object storage (M1.3)**: assets fora do repo do cliente — bucket R2 por museu,
   `musa-build upload` sobe e reescreve o card com a URL pública, e o build falha se
   uma URL do bucket não responder HEAD 200. DemoMuseum migrado: imagens e GLB no

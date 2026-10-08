@@ -149,6 +149,20 @@ cronometrado — o critério é **< 15 min**.
 > **Falta para fechar a fase:** medir o critério real (curador não-técnico, < 15 min)
 > com o dono operando o admin, e o upload de assets (bloqueado na M1.3 — conta
 > Cloudflare pendente). Release da imagem com `serve` fica para esse ponto.
+>
+> **Estado (2026-10-08): CONCLUÍDO.** Critério medido com o dono operando o admin
+> (`tools/curator-test.sh` — site buildado + API dinâmica local, um comando):
+> **40s–1min no percurso dele, 2–4 min estimados para o usuário comum** (limite: 15).
+> O teste real encontrou e corrigiu 5 defeitos do modo dinâmico: coleção via API sem
+> tier (link `/undefined` → 404 e peça invisível nas galerias) — agora nasce bronze;
+> contagem de peças da home lendo o catálogo de build — agora via API; card sem capa
+> — formulário ganhou campo de capa e o card herda a foto da primeira peça; lightbox
+> só com catálogo de build — fallback à API; cache entre reruns — servidor do teste
+> com `no-store`. **Release 0.3.0 publicado** (`ghcr.io/agua-games/musa-app:0.3.0`):
+> `serve` + `upload` + portão de mídia + admin real. DemoMuseum e template pinnados
+> em 0.3.0, CI verde com o portão HEAD rodando contra o R2. Upload de assets pelo
+> admin (UI) segue como melhoria futura — hoje o fluxo é URL externa ou
+> `musa-build upload`.
 
 ## Fase M1.5 — Logger estruturado + depurador de conteúdo
 
