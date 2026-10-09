@@ -416,7 +416,10 @@ afirme algo sobre o acervo **deve citar as fontes** (a regra que já está em
 > ficha, char recall médio 0.937 contra o gabarito. **M2.5 concluída**: embeddings
 > locais (e5-small ONNX) + índice sqlite-vec em `.musa/vec.db`; MCP ganhou
 > `search_semantic` — critério medido no DemoMuseum ("retrato de moça holandesa"
-> → pérola no top-3). GPU para OCR: caminho documentado na ADR 0011, mas a decisão
+> → pérola no top-3). **M2.3 concluída**: agente de estruturação DeepSeek
+> (`deepseek-v4-flash`, JSON mode) — 450/450 cards válidas, 0 retries, custo
+> total US$ 0,06 (~R$ 0,32); auditoria de 20 fichas sem divergência de
+> proveniência. GPU para OCR: caminho documentado na ADR 0011, mas a decisão
 > é processamento remoto on-demand em produção. Ajuste de custo aprovado: a
 > importação final leva só metadados, com 10–15 scans de vitrine no máximo.
 

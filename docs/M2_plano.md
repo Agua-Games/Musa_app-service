@@ -112,6 +112,22 @@ relatório lista tempo total, falhas e taxa de caracteres reconhecidos por ficha
 
 ## Fase M2.3 — Agente de estruturação → card.json
 
+> **Estado (2026-10-08): CONCLUÍDO.** `pipeline/llm.py` (interface da ADR 0012 +
+> DeepSeekProvider + MockProvider offline para testes) e
+> `pipeline/structure_agent.py` (lote resumível, validação em código contra o
+> contrato v1, retry ≤2 com os erros no prompt, identidade nunca vem do LLM,
+> todo card nasce `draft`, custo logado por chamada). **Números das 450 fichas
+> com DeepSeek (`deepseek-v4-flash`, JSON mode): 450 ok / 0 falhas / 0 retries;
+> custo total US$ 0.0588 ≈ R$ 0,32 (câmbio aprox.) — ~R$ 0,0007 por ficha na
+> etapa LLM.** Auditoria da amostra de 20 fichas: **0 divergências de
+> proveniência** (nenhum campo marcado `ocr_read` sem estar no texto OCR).
+> Armadilhas documentadas: o modo thinking do Flash consome o `max_tokens` e
+> devolve `content` vazio — desligado via `"thinking": {"type": "disabled"}`; o
+> id `deepseek-v4-flash` é roteado para `deepseek-flash` na resposta; tarifas
+> em `llm.py` com data de referência 2026-05. Chave fora do repo
+> (`DEEPSEEK_API_KEY` no cofre local do dono). 3 testes unitários com o mock
+> (validação, retry, campos ausentes não são inventados).
+
 1. Prompt template da spec §2.3.3, endurecido: saída JSON validada contra o
    contrato v1 **em código** (não confiar no formato do modelo; retry com o erro
    de validação no prompt, máx. 2 tentativas).
