@@ -148,6 +148,16 @@ reprova a fase.
 
 ## Fase M2.4 — Relatório de confiança + fila de revisão
 
+> **Estado (2026-10-08): CONCLUÍDO (corpus sintético).**
+> `pipeline/confidence_report.py` cruza OCR + card + gabarito por campo, com
+> comparadores documentados por tipo de campo. Números publicados em
+> `docs/M2_resultados.md`: **X = 93,5% sem revisão (regra por confiança) com 6,9%
+> de erro residual; regra estrita de proveniência (só `ocr_read` auto-aprova):
+> 76,6% com 1,4% de erro**. Achado de produto: a confiança auto-reportada é
+> descalibrada (curva plana de 0.0–0.8) — o sinal que separa erro de acerto é a
+> proveniência. Fila de revisão: 145 campos em `corpus/review-queue.json`.
+> O número do corpus real fica pendente da coleta (adiada).
+
 1. Cruzamento com o gabarito do M2.1: por campo, por corpus, taxa de acerto de
    OCR puro vs. pós-LLM. **O número X sai daqui.**
 2. Fila de revisão: um único `review-queue.json` (ficha, campo, valor proposto,
