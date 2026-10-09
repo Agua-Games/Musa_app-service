@@ -36,6 +36,18 @@ TOOL_SCHEMAS = [
         },
     },
     {
+        "name": "search_semantic",
+        "description": "Semantic (vector) search over the collection — finds by meaning, not keywords. Requires the derived index built by pipeline/build_vector_index.py.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "limit": {"type": "integer", "default": 5},
+            },
+            "required": ["query"],
+        },
+    },
+    {
         "name": "validate_card",
         "description": "Validate a card against the frozen collection contract (v1).",
         "inputSchema": {

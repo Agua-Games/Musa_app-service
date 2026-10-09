@@ -35,6 +35,7 @@ Zero dependências além do builder: o loop JSON-RPC stdio é implementado em
 | `list_collections` | Coleções com tier, contagem de itens e status no portão | — |
 | `get_item` | Card completa de uma peça + decisão do portão | — |
 | `search` | Busca por termos; **todo resultado cita `asset_id` e o caminho do card** | — |
+| `search_semantic` | Busca por significado (sqlite-vec + e5-small ONNX, M2.5/ADR 0013); exige o índice derivado `.musa/vec.db` (`pipeline/build_vector_index.py`) e o venv da pipeline | — |
 | `validate_card` | Valida um card contra o contrato v1 congelado | — |
 | `propose_card_correction` | Corrige o que é mecânico (identidade da pasta, status default) e **sinaliza** o que é conteúdo (nunca inventa) | — |
 | `set_status` | Publica/despublica uma peça (`website_status` no card) | ✅ card.json |

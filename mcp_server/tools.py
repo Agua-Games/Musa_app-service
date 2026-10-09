@@ -125,6 +125,63 @@ def search(repo: MusaRepo, query: str) -> dict:
     return {"query": query, "count": len(hits), "results": hits}
 
 
+def search_semantic(repo: MusaRepo, query: str, limit: int = 5) -> dict:
+    """Semantic search over the per-museum sqlite-vec index (M2.5, ADR 0013).
+
+    The index is derived data at <repo>/.musa/vec.db, built by
+    pipeline/build_vector_index.py. Degrades gracefully: missing deps or a
+    missing index return instructions, not an exception.
+    """
+    pipeline_dir = Path(__file__).resolve().parent.parent / "pipeline"
+    if str(pipeline_dir) not in sys.path:
+        sys.path.insert(0, str(pipeline_dir))
+    try:
+        import sqlite3
+
+        import sqlite_vec
+
+        from embeddings import embed
+    except ImportError as exc:
+        return {
+            "error": f"semantic search unavailable: {exc}",
+            "hint": "install the pipeline venv extras (pipeline/requirements-ocr.txt "
+                    "+ sqlite-vec) and query with that interpreter",
+            "sources": ["docs/adr/0013-indice-vetorial.md"],
+        }
+    db_path = repo.repo / ".musa" / "vec.db"
+    if not db_path.is_file():
+        return {
+            "error": "vector index not found",
+            "hint": "run pipeline/build_vector_index.py --repo <client repo> first "
+                    "(the index is derived data, rebuilt from the cards)",
+            "sources": ["docs/adr/0013-indice-vetorial.md"],
+        }
+
+    vector = embed([query], kind="query")[0]
+    db = sqlite3.connect(db_path)
+    db.enable_load_extension(True)
+    sqlite_vec.load(db)
+    rows = db.execute(
+        """SELECT i.asset_id, i.colecao, i.titulo, v.distance
+           FROM vec_items v JOIN items i ON i.rowid = v.rowid
+           WHERE v.embedding MATCH ? AND k = ?
+           ORDER BY v.distance""",
+        (vector.tobytes(), int(limit)),
+    ).fetchall()
+    db.close()
+    hits = [
+        {
+            "asset_id": asset_id,
+            "colecao": colecao,
+            "titulo": titulo,
+            "score": round(1 - distance, 4),  # cosine similarity from cosine distance
+            "sources": [f"asset_id:{asset_id}", f"content/{colecao}/{asset_id}/card.json"],
+        }
+        for asset_id, colecao, titulo, distance in rows
+    ]
+    return {"query": query, "mode": "semantic", "count": len(hits), "results": hits}
+
+
 def validate_card_tool(repo: MusaRepo, card: dict) -> dict:
     validator = make_validator()
     problems = validate_card(card, validator)

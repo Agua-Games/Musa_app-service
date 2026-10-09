@@ -19,6 +19,7 @@ class Toolbox:
             "list_collections": lambda **kw: toolbox_module.list_collections(self.repo),
             "get_item": lambda **kw: toolbox_module.get_item(self.repo, **kw),
             "search": lambda **kw: toolbox_module.search(self.repo, **kw),
+            "search_semantic": lambda **kw: toolbox_module.search_semantic(self.repo, **kw),
             "validate_card": lambda **kw: toolbox_module.validate_card_tool(self.repo, **kw),
             "propose_card_correction": lambda **kw: toolbox_module.propose_card_correction(self.repo, **kw),
             "upload_asset": lambda **kw: toolbox_module.upload_asset(self.repo, **kw),

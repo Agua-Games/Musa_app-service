@@ -148,6 +148,19 @@ somente campos de baixa confiança ou inferidos.
 
 ## Fase M2.5 — Embeddings + busca semântica
 
+> **Estado (2026-10-08): CONCLUÍDO.** `pipeline/embeddings.py` (multilingual-
+> e5-small em ONNX puro — sem torch no runtime de consulta — convenções E5 de
+> prefixo query/passage + L2), `pipeline/build_vector_index.py` (índice
+> sqlite-vec derivado em `<repo>/.musa/vec.db`, gitignored, regenerável) e o MCP
+> ganhou **`search_semantic`** ao lado do `search` lexical, com fontes
+> rastreáveis e degradação graciosa (sem deps/índice → instrução, não exceção).
+> **Verificação medida no DemoMuseum** (`pipeline/test_semantic.py`, 3 testes
+> verdes): "retrato de moça holandesa" → Moça com Brinco de Pérola no top-3;
+> "escultura egípcia antiga" → Taweret em 1º; índice cobre 13 itens (14 menos o
+> rascunho). Busca lexical intacta: 13 testes do MCP + 104 do builder verdes no
+> runtime gerenciado. Nota: o ONNX quantizado genérico não existe no HF para
+> este modelo (só qint8 AVX512-VNNI) — usamos `onnx/model.onnx` completo.
+
 1. Embeddings **locais** (modelo multilíngue pequeno, ex. multilingual-e5-small
    via sentence-transformers — CPU, custo zero, PT-BR competente).
 2. Índice sqlite-vec por museu, regenerável a partir dos cards (derivado, nunca

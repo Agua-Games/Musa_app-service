@@ -63,3 +63,14 @@ O que pesa:
   do M2.1 existir **antes** do runner (medimos cedo) e pelo fallback planejado.
 - Nenhum dado sai da máquina do estúdio nesta fase — quando clientes reais
   entrarem (M3/M4), a questão de onde o OCR roda volta à mesa (LGPD).
+
+## Nota de operação (2026-10-08, observação do dono)
+
+O OCR local em CPU é pesado (~4.3 s/ficha no lote das 450 — baseline do M2.2).
+Caminhos de GPU existem e não exigem mudança de arquitetura: `torch` com CUDA
+(o layout do docling escolhe CUDA automaticamente quando disponível) e
+`onnxruntime-gpu` no lugar do `onnxruntime` (o RapidOCR passa a usar
+`CUDAExecutionProvider`). **Não vamos investir nisso**: o OCR local é uma ponte
+de desenvolvimento sem custo por chamada; em produção, com clientes e capital
+de giro, o processamento será remoto on-demand (pago por uso, escala sem
+hardware no estúdio). Registrado para não reabrir a discussão.

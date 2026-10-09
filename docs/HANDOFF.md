@@ -413,7 +413,11 @@ afirme algo sobre o acervo **deve citar as fontes** (a regra que já está em
 > Cloudflare); o corpus real ficou **adiado** (coleta com cliente real ou geração
 > por IA — decisão do dono, 2026-10-08; guia em `pipeline/README.md`). **M2.2
 > concluída**: OCR docling+RapidOCR em lote — 450/450 fichas, 0 falhas, 4.32 s por
-> ficha, char recall médio 0.937 contra o gabarito. Ajuste de custo aprovado: a
+> ficha, char recall médio 0.937 contra o gabarito. **M2.5 concluída**: embeddings
+> locais (e5-small ONNX) + índice sqlite-vec em `.musa/vec.db`; MCP ganhou
+> `search_semantic` — critério medido no DemoMuseum ("retrato de moça holandesa"
+> → pérola no top-3). GPU para OCR: caminho documentado na ADR 0011, mas a decisão
+> é processamento remoto on-demand em produção. Ajuste de custo aprovado: a
 > importação final leva só metadados, com 10–15 scans de vitrine no máximo.
 
 **Entregáveis**
