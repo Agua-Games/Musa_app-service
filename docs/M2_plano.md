@@ -214,6 +214,13 @@ verdes).
 
 ## Fase M2.6 — Importação em lote no DemoMuseum + publicação dos números
 
+> **Estado (2026-10-09): CONCLUÍDO — M2 encerrado (com a ressalva do corpus
+> real).** 450 cards importados no DemoMuseum (308 publicados / 142 draft pela
+> regra da fila; só metadados — 565 KB no git, zero no bucket). Build com 463
+> itens: 7,3 s local, CI verde em 36 s com deploy. Números finais em
+> `docs/M2_resultados.md`. `pipeline/import_to_museum.py` é o importador
+> (colisão de `asset_id` falha a ficha, nunca sobrescreve).
+
 1. Lote de 500 cards revisados entra em `content/` do DemoMuseum (coleção própria
    `acervo-importado`) — **metadados apenas, sem scans no bucket** (restrição 4 e
    decisão do dono, 2026-10-08: DemoMuseum não precisa de acervo extenso por ora);

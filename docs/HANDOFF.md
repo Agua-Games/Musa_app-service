@@ -422,7 +422,11 @@ afirme algo sobre o acervo **deve citar as fontes** (a regra que já está em
 > proveniência. **M2.4 concluída (sintético)**: X medido e publicado em
 > `docs/M2_resultados.md` — 93,5% dos campos sem revisão com 6,9% de erro
 > residual; regra estrita de proveniência: 76,6% com 1,4%. Achado: confiança
-> auto-reportada é descalibrada; proveniência é o sinal. GPU para OCR: caminho documentado na ADR 0011, mas a decisão
+> auto-reportada é descalibrada; proveniência é o sinal. **M2.6 concluída**
+> (2026-10-09): 450 cards importados no DemoMuseum (308 publicados/142 draft,
+> só metadados); build de 463 itens em 7,3 s e CI verde em 36 s. **M2 CONCLUÍDO**
+> — com a ressalva registrada: os números são do corpus sintético; o comercial
+> definitivo aguarda o corpus real (adiado). Próximo: M3 (beta/cliente virtual). GPU para OCR: caminho documentado na ADR 0011, mas a decisão
 > é processamento remoto on-demand em produção. Ajuste de custo aprovado: a
 > importação final leva só metadados, com 10–15 scans de vitrine no máximo.
 

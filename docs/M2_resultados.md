@@ -69,3 +69,21 @@ Revisão = editar o JSON e revalidar; UI de revisão não faz parte do M2.
    específico; cada cliente terá seu layout de ficha.
 3. Tarifas DeepSeek com referência 2026-05; o custo final R$/card sai do log por
    chamada na importação do M2.6.
+
+---
+
+## Importação no DemoMuseum (M2.6, 2026-10-09)
+
+- **450 cards importados** em `content/acervo-importado/` — só metadados (565 KB
+  no git, **0 bytes no bucket**): 308 publicados, 142 em `draft` aguardando a
+  revisão dirigida (regra: campo na fila que não seja `tags` mantém o rascunho).
+- **Build com 463 itens: 7,3 s** local; CI do DemoMuseum (build na imagem pinada
+  + deploy Pages): **36 s**, verde no primeiro push.
+- Site publicado exibe o acervo importado; rascunhos visíveis só no admin.
+- Modo batch do agente (medido, 20 fichas/1 request): ~150 tokens de entrada por
+  ficha (vs. ~476 solo), −29% de custo, 14 s de parede — default recomendado
+  para acervos reais.
+
+**M2 encerrado com ressalva explícita:** os critérios foram medidos no corpus
+sintético; o número comercial definitivo depende do corpus real (coleta adiada
+— ver `pipeline/README.md`).
