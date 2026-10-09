@@ -476,6 +476,13 @@ pode correr em paralelo.
 **Segurança e conformidade**
 - [ ] Gating **auditável**: um Bronze comprovadamente não recebe dados do Gold (teste, não promessa).
 - [ ] Tokens por tenant, rate limits, assinatura de entitlements.
+- [ ] **Anti-abuso do assistente** (preocupação do dono, 2026-10-08): chave de LLM
+      **nunca** no repo do cliente nem no browser — o site no Pages é estático; quem chama
+      o provedor é o nosso backend, server-side. Política em camadas contra saturação
+      mal-intencionada, uso off-topic gratuito e ataque de esgotamento de tokens:
+      rate limit por IP/sessão, cota de tokens por museu/dia com circuit breaker,
+      Turnstile (grátis) no endpoint de chat, grounding rígido (só responde com o
+      acervo recuperado; off-topic é recusado), telemetria de custo por tenant com alerta.
 - [ ] **LGPD**: dados de visitante, áudio de quiosque, retenção e exclusão.
 
 **Operação**
