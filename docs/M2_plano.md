@@ -128,6 +128,17 @@ relatório lista tempo total, falhas e taxa de caracteres reconhecidos por ficha
 > (`DEEPSEEK_API_KEY` no cofre local do dono). 3 testes unitários com o mock
 > (validação, retry, campos ausentes não são inventados).
 
+> **Adendo (2026-10-09, revisão do dono):** duas correções incorporadas:
+> (1) **contexto de domínio** — o LLM agora recebe `pipeline/domain_context.md`
+> antes das fichas (tipos de ficha, layouts, convenções de datas/materiais,
+> exemplo completo entrada→saída); antes ele adivinhava o material do zero;
+> (2) **modo batch** (`--batch-size N`) — N fichas por request, validação
+> individual por item, fallback para chamada solo nas que falharem. Teste
+> medido com 20 fichas em 1 request: 2.991 tokens de entrada (~150/ficha vs.
+> ~476 no modo individual — o system prompt + contexto amortizaram como
+> previsto), 5.167 de saída, **US$ 0,0019 (~29% mais barato por ficha) e 14 s
+> de parede (vs. ~35 s)**. A/B completo fica para a re-rodagem do corpus real.
+
 1. Prompt template da spec §2.3.3, endurecido: saída JSON validada contra o
    contrato v1 **em código** (não confiar no formato do modelo; retry com o erro
    de validação no prompt, máx. 2 tentativas).

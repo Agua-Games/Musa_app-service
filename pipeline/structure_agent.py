@@ -29,6 +29,7 @@ OCR_DIR = ROOT / "corpus" / "ocr"
 OUT_DIR = ROOT / "corpus" / "structured"
 LOG = ROOT / "corpus" / "structure-log.jsonl"
 MAX_RETRIES = 2
+DOMAIN_CONTEXT = (ROOT / "domain_context.md").read_text(encoding="utf-8")
 
 SYSTEM_PROMPT = """Você estrutura fichas de acervo de museu a partir de texto OCR, que pode conter erros de reconhecimento. Responda APENAS com JSON válido (sem markdown, sem comentários).
 
@@ -60,6 +61,56 @@ USER_TEMPLATE = """Texto OCR da ficha (pode conter erros):
 
 Estruture como JSON conforme as regras."""
 
+SYSTEM = SYSTEM_PROMPT + "\n\n" + DOMAIN_CONTEXT
+
+BATCH_USER_TEMPLATE = """Abaixo estão {n} fichas, cada uma iniciada por "Nº <asset_id>". Estruture TODAS como JSON conforme as regras, no formato:
+
+{{"items": [{{"asset_id": "<id exato da ficha>", "card": {{...}}, "provenance": {{...}}}}, ...]}}
+
+Fichas:
+
+{blocks}"""
+
+
+def _finalize_card(card: dict, asset_id: str) -> dict:
+    """Identity and batch-level fields never come from the LLM."""
+    card = dict(card)
+    card["asset_id"] = asset_id
+    card["colecao"] = "acervo-importado"  # assigned at batch level (M2.6 target)
+    card["website_status"] = "draft"  # nothing is born published
+    card["tier"] = "bronze"
+    return card
+
+
+def structure_batch(records: list[dict], provider, validator) -> dict[str, dict]:
+    """One request for N cards; each item validated individually (M2.3 batch mode).
+
+    Returns {asset_id: result}. Items missing or invalid are NOT in the result —
+    the caller falls back to individual calls for them.
+    """
+    blocks = "\n\n".join(f"Nº {r['asset_id']}\n{r['text'][:4000]}" for r in records)
+    payload, usage = provider.complete_json(
+        SYSTEM, BATCH_USER_TEMPLATE.format(n=len(records), blocks=blocks),
+        max_tokens=max(2500, 600 * len(records)),
+    )
+    results: dict[str, dict] = {}
+    for item in payload.get("items") or []:
+        asset_id = item.get("asset_id")
+        if asset_id not in {r["asset_id"] for r in records}:
+            continue
+        card = _finalize_card(dict(item.get("card") or {}), asset_id)
+        errors = validate_card(card, validator)
+        if not errors:
+            results[asset_id] = {
+                "asset_id": asset_id,
+                "card": card,
+                "provenance": item.get("provenance") or {},
+                "retries": 0,
+                "usage": {"batch": len(records), **usage},
+                "status": "ok",
+            }
+    return results
+
 
 def deterministic_id(titulo: str, salt: str) -> str:
     """asset_id from the title + a short hash of the source id; collisions fail."""
@@ -88,15 +139,11 @@ def structure_one(ocr: dict, provider, validator) -> dict:
         prompt = user
         if errors:
             prompt += "\n\nA resposta anterior falhou na validação do contrato:\n" + "\n".join(errors)
-        payload, usage = provider.complete_json(SYSTEM_PROMPT, prompt)
+        payload, usage = provider.complete_json(SYSTEM, prompt)
         for key in usage_total:
             usage_total[key] += usage.get(key, 0) or 0
 
-        card = dict(payload.get("card") or {})
-        card["asset_id"] = asset_id  # identity comes from the corpus, never the LLM
-        card["colecao"] = "acervo-importado"  # assigned at batch level (M2.6 target)
-        card["website_status"] = "draft"  # nothing is born published
-        card["tier"] = "bronze"
+        card = _finalize_card(dict(payload.get("card") or {}), asset_id)
         provenance = payload.get("provenance") or {}
 
         errors = validate_card(card, validator)
@@ -117,6 +164,9 @@ def main() -> int:
     parser.add_argument("--provider", default="mock")
     parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--batch-size", type=int, default=1,
+                        help="cards per request; >1 amortizes the system prompt, "
+                             "per-item validation keeps isolation, failures fall back to solo calls")
     args = parser.parse_args()
 
     provider = make_provider(args.provider)
@@ -127,28 +177,45 @@ def main() -> int:
 
     done = failed = skipped = 0
     started = time.perf_counter()
+    pending = []
     for path in batch:
         out = OUT_DIR / path.name
         if out.exists():
             skipped += 1
             continue
-        ocr = json.loads(path.read_text(encoding="utf-8"))
-        try:
-            result = structure_one(ocr, provider, validator)
-        except Exception as exc:
-            result = {"asset_id": ocr["asset_id"], "status": "failed",
-                      "errors": [f"{type(exc).__name__}: {exc}"]}
-        if result["status"] == "ok":
-            done += 1
-            out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        else:
-            failed += 1
-            (OUT_DIR / "failed").mkdir(exist_ok=True)
-            (OUT_DIR / "failed" / path.name).write_text(
-                json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        log({**{k: result.get(k) for k in ("asset_id", "status", "retries", "usage")},
-             "errors": result.get("errors"), "provider": args.provider})
-        print(f"  {result['status']} {result['asset_id']}", flush=True)
+        pending.append(json.loads(path.read_text(encoding="utf-8")))
+
+    for chunk_start in range(0, len(pending), args.batch_size):
+        chunk = pending[chunk_start : chunk_start + args.batch_size]
+        results: dict[str, dict] = {}
+        if len(chunk) > 1:
+            try:
+                results = structure_batch(chunk, provider, validator)
+                log({"batch": len(chunk), "ok": len(results),
+                     "fallback": len(chunk) - len(results), "provider": args.provider})
+            except Exception as exc:
+                print(f"  batch of {len(chunk)} failed ({exc}) — falling back to solo calls", flush=True)
+        for ocr in chunk:
+            result = results.get(ocr["asset_id"])
+            if result is None:  # solo path: batch disabled, or item fell back
+                try:
+                    result = structure_one(ocr, provider, validator)
+                except Exception as exc:
+                    result = {"asset_id": ocr["asset_id"], "status": "failed",
+                              "errors": [f"{type(exc).__name__}: {exc}"]}
+            if result["status"] == "ok":
+                done += 1
+                (OUT_DIR / f"{ocr['asset_id']}.json").write_text(
+                    json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            else:
+                failed += 1
+                (OUT_DIR / "failed").mkdir(exist_ok=True)
+                (OUT_DIR / "failed" / f"{ocr['asset_id']}.json").write_text(
+                    json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            if ocr["asset_id"] not in results:  # solo calls already log inside the loop below
+                log({**{k: result.get(k) for k in ("asset_id", "status", "retries", "usage")},
+                     "errors": result.get("errors"), "provider": args.provider})
+            print(f"  {result['status']} {result['asset_id']}", flush=True)
 
     total = round(time.perf_counter() - started, 1)
     print(f"STRUCTURE BATCH — {done} ok, {failed} failed, {skipped} skipped, {total}s wall")
