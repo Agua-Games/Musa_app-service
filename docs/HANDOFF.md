@@ -454,6 +454,10 @@ pode correr em paralelo.
 
 **Objetivo:** encontrar o que ninguém pensou, antes do cliente pagante.
 
+> **Progresso:** plano de ataque em `docs/M3_plano.md` (2026-10-09) — fases M3.0–M3.7,
+> restrições e mapeamento dos critérios de saída. Primeiro passo: M3.0 (ADRs 0014–0016:
+> driver das personas, execução nightly no Actions, telemetria + alarme).
+
 **O cliente virtual (no `DemoMuseum`) não é um teste de fumaça — é um ator.**
 
 1. **Personas sintéticas** — `owner@demo` e `team@demo` com rotinas:
