@@ -455,11 +455,12 @@ pode correr em paralelo.
 **Objetivo:** encontrar o que ninguém pensou, antes do cliente pagante.
 
 > **Progresso:** plano de ataque em `docs/M3_plano.md` (2026-10-09) — fases M3.0–M3.7,
-> restrições e mapeamento dos critérios de saída. **M3.0 redigida (2026-10-09):** ADRs
-> 0014 (driver das personas: scripts Python contra a API HTTP do `serve`), 0015 (nightly:
-> GitHub Actions `schedule` no repo do DemoMuseum, imagem do ghcr, clone descartável) e
-> 0016 (telemetria: JSONL por cenário + artifact + falha abre issue com dedup) — status
-> *proposta*, aguardando aprovação do dono.
+> restrições e mapeamento dos critérios de saída. **M3.0 concluída (2026-10-10):** ADRs
+> 0014 (driver das personas: scripts Python contra a API HTTP do `serve`) e 0016
+> (telemetria: JSONL + artifact + issue com dedup) **aceitas**; ADR 0015 aceita **com
+> emenda do dono** — validação sob demanda (`workflow_dispatch`), sem cron permanente
+> até haver cliente real; build de cliente é dirigido por evento ("dirty" → rebuild),
+> nunca por agenda.
 
 **O cliente virtual (no `DemoMuseum`) não é um teste de fumaça — é um ator.**
 

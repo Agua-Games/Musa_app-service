@@ -118,16 +118,23 @@ uma asserção que nunca falha no teste de sanidade não é asserção.
 
 ---
 
-## Fase M3.4 — Telemetria + nightly no CI
+## Fase M3.4 — Telemetria + validação no CI
 
-1. Workflow `beta-nightly.yml` no DemoMuseum (ADR 0015): sobe a imagem do ghcr,
-   roda personas + misuse + invariantes, grava JSONL por cenário e relatório
-   agregado como artifact.
+> **Emenda do dono (2026-10-10, ADR 0015):** sem cron permanente por ora — o
+> workflow nasce **só com `workflow_dispatch`** (rodada de prova + re-rodada
+> manual a cada mudança da plataforma). A linha `schedule:` (`17 3 * * *`)
+> só entra quando houver cliente real, e o relógio dos 14 dias começa nesse
+> momento. Direção fixada: build de cliente é **dirigido por evento**
+> (adição/edição de peça marca o acervo "dirty" → rebuild), nunca por agenda.
+
+1. Workflow `beta-validation.yml` no DemoMuseum (ADR 0015): sobe a imagem do
+   ghcr, roda personas + misuse + invariantes, grava JSONL por cenário e
+   relatório agregado como artifact.
 2. **Falha abre issue** via `gh` com fingerprint do cenário (dedup: falha já
    aberta recebe comentário, não issue nova); sucesso após falha fecha com
    referência ao run.
-3. **Critério dos 14 dias** começa a contar quando o nightly roda verde pela
-   primeira vez — 14 dias corridos sem regressão aberta.
+3. **Critério dos 14 dias** começa a contar com o primeiro cliente real (ou
+   beta fechado) — 14 dias corridos sem regressão aberta.
 
 **Verificação:** um nightly forçado (`workflow_dispatch`) termina verde de ponta
 a ponta; uma falha injetada de propósito abre issue e a recuperação a fecha.
@@ -193,7 +200,7 @@ bugs conhecidos publicada e priorizada.
 
 | Critério | Fase |
 |---|---|
-| 14 dias de nightly **sem regressão** | M3.4 |
+| 14 dias de validação **sem regressão** (relógio começa com o 1º cliente real — emenda ADR 0015) | M3.4 |
 | 100% dos cenários de uso indevido cobertos, **nenhum causa perda de dados** | M3.2 + M3.3 |
 | Lista de bugs conhecidos priorizada e publicada | M3.1–M3.4 (achados) + M3.7 (consolidação) |
 | Um museu real operou por 2 semanas sem intervenção da equipe | M3.7 (bloqueado pelo dono) |

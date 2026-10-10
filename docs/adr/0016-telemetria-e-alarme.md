@@ -1,6 +1,6 @@
 # ADR 0016 — Telemetria e alarme do cliente virtual: JSONL por cenário, artifact no run, falha abre issue
 
-- **Status:** proposta
+- **Status:** aceita (2026-10-10, dono)
 - **Data:** 2026-10-09
 - **Relacionada:** ADR 0014 (driver das personas), ADR 0015 (execução
   nightly), `docs/M3_plano.md` fases M3.3/M3.4, HANDOFF §M3 itens 3–4

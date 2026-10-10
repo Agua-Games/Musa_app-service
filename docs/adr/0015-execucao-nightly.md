@@ -1,6 +1,6 @@
-# ADR 0015 — Execução nightly do cliente virtual: GitHub Actions no repo do DemoMuseum
+# ADR 0015 — Execução do cliente virtual: validação sob demanda agora; schedule só com cliente real
 
-- **Status:** proposta
+- **Status:** aceita (com emenda do dono, 2026-10-10)
 - **Data:** 2026-10-09
 - **Relacionada:** ADR 0005 (publicação do frontend), ADR 0006 (formato do
   artefato), ADR 0014 (driver das personas), `docs/M3_plano.md` fase M3.4,
@@ -8,15 +8,16 @@
 
 ## Contexto
 
-O M3 exige **14 dias de nightly sem regressão** como critério de saída. Onde
-e como o nightly roda é decisão de arquitetura, não detalhe — define custo,
+O M3 exige **14 dias de validação sem regressão** como critério de saída
+(relogio que, pela emenda do dono ao final, só corre com cliente real). Onde
+e como a validação roda é decisão de arquitetura, não detalhe — define custo,
 fidelidade e quem é o "ator" do teste. O que pesa:
 
 1. **O cliente virtual deve rodar onde o cliente vive**: o repo do
    DemoMuseum. O workflow sobe a **imagem publicada no ghcr.io** (o artefato
    real de distribuição, ADR 0006), clona o próprio repo para um diretório
-   descartável e opera contra ele. Assim o nightly testa inclusive o caminho
-   real de distribuição — não o código da working tree da plataforma.
+   descartável e opera contra ele. Assim a validação testa inclusive o
+   caminho real de distribuição — não o código da working tree da plataforma.
 2. **Custo**: o DemoMuseum é repo **público** → minutos de GitHub Actions
    são gratuitos. O repo da plataforma é privado → consumiria a cota de
    minutos da org. Regra de custo do dono: nenhuma subscription nova, nenhum
@@ -31,22 +32,53 @@ fidelidade e quem é o "ator" do teste. O que pesa:
    Cloudflare em uso é pessoal e temporária (nota no topo do HANDOFF);
    nenhum teste automatizado pode gerar transferência ou armazenamento
    recorrente nela.
-5. **Horário**: `schedule` com cron em minuto fora de cheia —
+5. **Horário**: quando o schedule existir, cron em minuto fora de cheia —
    `17 3 * * *` (03:17 UTC = 00:17 em Brasília) — evitando a congestão dos
    minutos 0/30. `workflow_dispatch` permite rodada manual a qualquer
-   momento.
+   momento. **Emenda do dono (2026-10-10):** ver a seção ao final — sem cron
+   permanente por ora.
+
+## Emenda (2026-10-10, decisão do dono) — sem nightly permanente; build é por evento
+
+O dono aprovou a ADR com duas correções de rumo:
+
+1. **Nada de cron rodando sem parar.** O nightly recorrente só faz sentido
+   com um cliente real operando; até lá, a validação do cliente virtual é
+   **sob demanda** (`workflow_dispatch`) — rodada de prova agora, e re-rodada
+   manual a cada mudança relevante da plataforma. O workflow nasce **sem a
+   linha `schedule:`**; ela só é adicionada quando houver cliente real (e aí
+   entra o cron `17 3 * * *` acima). Consequência para o critério de saída:
+   o relógio dos **14 dias sem regressão começa com o primeiro cliente real**
+   (ou beta fechado); antes disso, o que se exige é uma rodada verde por
+   mudança da plataforma.
+2. **Build de cliente é dirigido por evento, não por agenda.** O modelo
+   mental: uma adição/edição de peça marca o acervo como **"dirty"** (payload
+   publicado obsoleto) e dispara um novo build; nenhum build acontece sem
+   evento de conteúdo. Isso **já é o comportamento de hoje** em ambos os
+   modos:
+   - **dinâmico** (`serve`): a escrita na API atualiza o overlay SQLite na
+     hora — não há rebuild algum, o payload reflete a edição no próximo
+     request;
+   - **estático** (Pages): o `deploy.yml` do repo do cliente dispara em
+     `push` na `main` — commit de conteúdo = o evento; sem push, sem build.
+   O que a emenda fixa como direção para o backend hospedado do M4: o
+   conceito "dirty → rebuild" vira cidadão de primeira classe (a escrita na
+   API marca o tenant dirty; um worker reage construindo e publicando), em
+   vez de qualquer build agendado. O gatilho de revisão do item 5 da Decisão
+   permanece.
 
 ## Decisão proposta
 
-1. **Workflow `beta-nightly.yml` no repo DemoMuseum**, gatilhos
-   `schedule: "17 3 * * *"` + `workflow_dispatch`.
+1. **Workflow `beta-validation.yml` no repo DemoMuseum**, gatilho
+   `workflow_dispatch` (a linha `schedule:` só entra com cliente real — ver
+   emenda acima).
 2. Passos: checkout do DemoMuseum em diretório descartável → pull da imagem
    `ghcr.io/agua-games/musa-app:<tag pinada>` → sobe `serve` com token de
    teste → roda personas (ADR 0014) + gerador de uso indevido + invariantes
    → publica JSONL e relatório como artifact (ADR 0016).
 3. **Sem escrita no repo, sem deploy, sem R2 real** — permissões do workflow
    restritas (`contents: read`, `issues: write` para o alarme do ADR 0016).
-4. **Tag da imagem pinada e visível** no workflow — o nightly testa uma
+4. **Tag da imagem pinada e visível** no workflow — a validação testa uma
    versão conhecida; bump da tag é commit explícito (o que também registra
    "qual versão do produto estava sob beta quando").
 5. **Gatilho de revisão registrado**: se o DemoMuseum virar privado, os
@@ -64,9 +96,10 @@ fidelidade e quem é o "ator" do teste. O que pesa:
 
 ## Consequências
 
-- O relógio dos 14 dias roda em infraestrutura gratuita, auditável (histórico
-  de runs público) e independente da máquina de ninguém.
-- Cada nightly prova que a **imagem publicada** opera o repo do cliente —
+- A validação roda em infraestrutura gratuita, auditável (histórico de runs
+  público) e independente da máquina de ninguém — hoje sob demanda, em
+  schedule quando houver cliente real (emenda acima).
+- Cada rodada prova que a **imagem publicada** opera o repo do cliente —
   regressão de distribuição (imagem quebrada, tag errada) é pega na hora.
 - O DemoMuseum acumula dois papéis: demo pública (M1/M2) e bancada do
   cliente virtual (M3) — com isolamento garantido por permissões do

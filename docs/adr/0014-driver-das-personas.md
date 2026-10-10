@@ -1,6 +1,6 @@
 # ADR 0014 — Driver das personas do M3: scripts Python contra a API HTTP do `serve`
 
-- **Status:** proposta
+- **Status:** aceita (2026-10-10, dono)
 - **Data:** 2026-10-09
 - **Relacionada:** ADR 0008 (backend do acervo), `docs/M3_plano.md` fase M3.0,
   HANDOFF §M3 item 1 (personas sintéticas)
