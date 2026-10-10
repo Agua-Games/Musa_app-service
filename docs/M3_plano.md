@@ -59,6 +59,21 @@ Três decisões bloqueiam tudo; tomá-las por escrito antes de codar.
 
 ## Fase M3.1 — Personas sintéticas (`beta/personas/`)
 
+> **Estado (2026-10-10): CONCLUÍDO.** Pacote `beta/` criado: `client.py`
+> (sessão HTTP do curador), `personas.py` (`owner@demo` + `team@demo`,
+> rotinas diária/semanal/pontual com seed determinística), `invariants.py`
+> (a biblioteca do M3.3, nascida aqui conforme o plano) e `run_beta.py`
+> (clone descartável → serve subprocess → rotinas → JSONL + relatório).
+> **Rodada local verde contra o DemoMuseum** (`20261010T225529Z-seed42`):
+> 17 eventos, 0 reprovações, os 4 achados-gap esperados classificados
+> (upload de asset, PATCH de coleção, desfazer, canal de módulo); repo do
+> DemoMuseum intacto (`git status` limpo — restrição 2 provada). 7 testes
+> verdes, incluindo determinismo de seed (mesma seed ⇒ mesma sequência) e
+> sanidade dos invariantes (cada um forçado a falhar uma vez). Armadilha
+> documentada: polling de health logo após o bind do uvicorn precisa de
+> timeout curto — no Windows a primeira conexão pode travar no kernel pelo
+> timeout inteiro (ver `beta/client.py`).
+
 1. **Duas personas** — `owner@demo` (pode tudo) e `team@demo` (papel restrito,
    quando papéis existirem; até lá opera com o mesmo token mas escopo menor de
    rotinas) — cada uma com rotinas:

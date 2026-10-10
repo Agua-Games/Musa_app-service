@@ -76,3 +76,6 @@ Thumbs.db
 
 # Owner-local tooling, not part of the platform
 tools/ReasonixCrashCacheRemover/
+
+# Beta validation run artifacts (JSONL logs + reports)
+beta/out/

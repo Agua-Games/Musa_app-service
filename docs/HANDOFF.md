@@ -460,7 +460,10 @@ pode correr em paralelo.
 > (telemetria: JSONL + artifact + issue com dedup) **aceitas**; ADR 0015 aceita **com
 > emenda do dono** — validação sob demanda (`workflow_dispatch`), sem cron permanente
 > até haver cliente real; build de cliente é dirigido por evento ("dirty" → rebuild),
-> nunca por agenda.
+> nunca por agenda. **M3.1 concluída (2026-10-10):** pacote `beta/` com personas
+> `owner@demo`/`team@demo`, invariantes e runner; rodada local verde contra o
+> DemoMuseum (17 eventos, 0 reprovações, 4 achados-gap conhecidos classificados,
+> repo do demo intacto); 7 testes verdes.
 
 **O cliente virtual (no `DemoMuseum`) não é um teste de fumaça — é um ator.**
 
