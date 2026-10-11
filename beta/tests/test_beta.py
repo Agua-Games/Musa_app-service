@@ -179,5 +179,57 @@ class InvariantSanityTest(unittest.TestCase):
         self.assertTrue(inv.check_contract_valid(client_ok).ok)
 
 
+class MisuseTest(unittest.TestCase):
+    """M3.2: the 10 hostile scenarios against the fixture museum (silver
+    tier). Divergences marked falha are the current known bugs — when a fix
+    lands, flip the expectation here (these are the acceptance tests of the
+    fixes)."""
+
+    def _run(self):
+        from beta.misuse import MisuseRunner
+        with running_server() as client:
+            assert client.login("misuse@demo", TOKEN).ok
+            runner = MisuseRunner(client, random.Random("t:misuse"), "tm", "silver")
+            return runner.run_all()
+
+    def test_all_scenarios_recorded_and_red_line_holds(self):
+        events = self._run()
+        red_line = [e for e in events if e.cenario == "linha-vermelha"]
+        self.assertEqual(len(red_line), 1)
+        self.assertEqual(red_line[0].resultado, "ok",
+                         f"RED LINE: {red_line[0].detalhe}")
+        scenarios = {e.cenario for e in events} - {"linha-vermelha"}
+        self.assertEqual(len(scenarios), 10, f"missing scenarios: {scenarios}")
+
+    def test_stable_rejections(self):
+        events = self._run()
+        by = {}
+        for e in events:
+            by.setdefault(e.cenario, []).append(e)
+        # missing required field -> 422 naming it
+        self.assertEqual(by["campo-obrigatorio-ausente"][0].resultado, "ok")
+        # forged token -> 401, public unchanged
+        self.assertEqual(by["token-invalido"][0].resultado, "ok")
+        # tier gate: above-tier vanishes, restored returns
+        gate = [e for e in by["downgrade-tier"] if e.acao == "gate-no-downgrade"]
+        self.assertEqual(gate[0].resultado, "ok")
+        # upload scenarios hit the known API gap for now
+        for cen in ("arquivo-grande", "mime-errado", "glb-corrompido", "upload-interrompido"):
+            self.assertEqual(by[cen][0].resultado, "achado-gap", cen)
+
+    def test_known_divergences_are_recorded_as_findings(self):
+        """Current product behavior diverges from the expected outcome in
+        these scenarios; the events must record falha (the known-bug list).
+        Flip to 'ok' as each fix lands."""
+        events = self._run()
+        by = {}
+        for e in events:
+            by.setdefault(e.cenario, []).append(e)
+        for cen in ("asset-id-duplicado", "data-invalida", "edicoes-concorrentes"):
+            self.assertEqual(by[cen][0].resultado, "falha",
+                             f"{cen}: expected a recorded divergence — fixed? "
+                             f"flip this expectation")
+
+
 if __name__ == "__main__":
     unittest.main()

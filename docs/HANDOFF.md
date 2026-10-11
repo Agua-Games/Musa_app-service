@@ -463,7 +463,14 @@ pode correr em paralelo.
 > nunca por agenda. **M3.1 concluída (2026-10-10):** pacote `beta/` com personas
 > `owner@demo`/`team@demo`, invariantes e runner; rodada local verde contra o
 > DemoMuseum (17 eventos, 0 reprovações, 4 achados-gap conhecidos classificados,
-> repo do demo intacto); 7 testes verdes.
+> repo do demo intacto); 7 testes verdes. Personas em **standby** (decisão do
+> dono, 2026-10-11): nada roda agendado; ativação = um comando local
+> (`python -m beta.run_beta --repo <repo>`) — custo Cloudflare zero por desenho.
+> **M3.2 concluída (2026-10-11):** gerador de uso indevido — 10/10 cenários com
+> veredito, zero perda de dados (321 itens públicos byte-idênticos após a
+> saraivada) e **3 bugs reais encontrados**: overwrite silencioso em
+> `asset_id` duplicado, data inválida aceita pelo contrato, crash 500 em edição
+> concorrente (race em `save_item`). Detalhes em `docs/M3_plano.md` §M3.2.
 
 **O cliente virtual (no `DemoMuseum`) não é um teste de fumaça — é um ator.**
 

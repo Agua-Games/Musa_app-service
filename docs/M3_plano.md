@@ -94,6 +94,28 @@ achados de lacuna de API já conhecidos aparecem classificados como tal.
 
 ## Fase M3.2 — Gerador de uso indevido (`beta/misuse/`)
 
+> **Estado (2026-10-11): CONCLUÍDO — 10/10 cenários com veredito, linha
+> vermelha preservada.** Rodada contra o DemoMuseum
+> (`20261011T235545Z-seed42`): 12 eventos, **321 itens públicos
+> pré-existentes byte-idênticos após a saraivada** (zero perda de dados),
+> repo do demo intacto. Proteções confirmadas estáveis: 422 nomeando o
+> campo ausente, 401 com token forjado (payload público inalterado), portão
+> de tier (item acima do tier some com 404 e volta intacto ao restaurar).
+> **3 bugs reais encontrados** (vão para a lista priorizada do critério 3):
+> 1. **`asset_id` duplicado sobrescreve em silêncio** — `save_item` faz
+>    patch quando o id existe; um create duplicado reescreve campos do card
+>    alheio sem aviso (esperado: 409);
+> 2. **data inválida aceita** — o schema não tem pattern para `data`;
+>    `"banana-com-ouro"` valida (esperado: 422);
+> 3. **edição concorrente derruba o escritor** — dois PATCHes simultâneos
+>    no mesmo card: HTTP [200, **500**]; race em `save_item`
+>    (`all_items.index(existing)` → ValueError). Esperado: conflito ou
+>    merge definido; hoje há crash *e* last-write-wins silencioso.
+> Gaps classificados (não são bugs — são ausência de endpoint): upload de
+> asset (cobre os cenários 1, 2, 6, 7) e mudança de entitlement via API.
+> 3 testes novos verdes; as divergências estão assertadas como `falha` —
+> são os testes de aceitação das correções (flipar para `ok` ao corrigir).
+
 Os 10 cenários do HANDOFF, cada um como script independente com **resultado
 esperado explícito** (aceitar graciosamente ou rejeitar com erro útil — nunca
 corromper estado nem perder dados):

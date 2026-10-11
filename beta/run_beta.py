@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 import shutil
 import socket
 import subprocess
@@ -26,6 +27,7 @@ from pathlib import Path
 
 from .client import ApiClient
 from . import invariants as inv
+from .misuse import MisuseRunner
 from .personas import SCOPES, ROUTINES, make_personas
 
 PLATFORM_ROOT = Path(__file__).resolve().parent.parent
@@ -54,7 +56,7 @@ def _wait_health(client: ApiClient, timeout_s: float = 30.0) -> bool:
 
 
 def run(repo: Path, seed: int, routines: list[str], out_dir: Path,
-        build_check: bool) -> int:
+        build_check: bool, suite: str = "personas") -> int:
     run_id = f"{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-seed{seed}"
     out_dir.mkdir(parents=True, exist_ok=True)
     log_path = out_dir / f"beta-log-{run_id}.jsonl"
@@ -90,22 +92,32 @@ def run(repo: Path, seed: int, routines: list[str], out_dir: Path,
                 print(f"FATAL: serve did not come up on {base_url}", file=sys.stderr)
                 return 2
 
-            for persona in make_personas(client, seed, run_id, museum_tier):
-                login = client.login(persona.email, token)
+            if suite in ("personas", "all"):
+                for persona in make_personas(client, seed, run_id, museum_tier):
+                    login = client.login(persona.email, token)
+                    if not login.ok:
+                        print(f"FATAL: login failed for {persona.email}", file=sys.stderr)
+                        return 2
+                    for cenario in routines:
+                        if cenario not in SCOPES[persona.email]:
+                            continue
+                        getattr(persona, ROUTINES[cenario])()
+                    if build_check:
+                        res = inv.check_build_green(work_repo, FRONTEND_DIR,
+                                                    root / "site-out", BUILDER_DIR)
+                        persona._record("sessao", "build-verde", str(work_repo),
+                                        "ok" if res.ok else "falha", 0.0, res.detail,
+                                        invariantes=[res])
+                    all_events.extend(persona.events)
+
+            if suite in ("misuse", "all"):
+                login = client.login("misuse@demo", token)
                 if not login.ok:
-                    print(f"FATAL: login failed for {persona.email}", file=sys.stderr)
+                    print("FATAL: login failed for misuse@demo", file=sys.stderr)
                     return 2
-                for cenario in routines:
-                    if cenario not in SCOPES[persona.email]:
-                        continue
-                    getattr(persona, ROUTINES[cenario])()
-                if build_check:
-                    res = inv.check_build_green(work_repo, FRONTEND_DIR,
-                                                root / "site-out", BUILDER_DIR)
-                    persona._record("sessao", "build-verde", str(work_repo),
-                                    "ok" if res.ok else "falha", 0.0, res.detail,
-                                    invariantes=[res])
-                all_events.extend(persona.events)
+                runner = MisuseRunner(client, random.Random(f"{seed}:misuse"),
+                                      run_id, museum_tier)
+                all_events.extend(runner.run_all())
         finally:
             server.terminate()
             try:
@@ -137,6 +149,7 @@ def run(repo: Path, seed: int, routines: list[str], out_dir: Path,
         "run_id": run_id,
         "seed": seed,
         "repo": str(repo),
+        "suite": suite,
         "routines": routines,
         "eventos": total,
         "reprovacoes": len(falhas),
@@ -167,11 +180,14 @@ def main(argv=None) -> int:
     p.add_argument("--out", default=str(PLATFORM_ROOT / "beta" / "out"))
     p.add_argument("--no-build-check", action="store_true",
                    help="skip the slower build-green invariant (per-session)")
+    p.add_argument("--suite", default="personas",
+                   choices=["personas", "misuse", "all"],
+                   help="personas (M3.1), misuse generator (M3.2) or both")
     args = p.parse_args(argv)
 
     routines = ["diaria", "semanal", "pontual"] if args.routines == "all" else [args.routines]
     return run(Path(args.repo), args.seed, routines, Path(args.out),
-               build_check=not args.no_build_check)
+               build_check=not args.no_build_check, suite=args.suite)
 
 
 if __name__ == "__main__":
