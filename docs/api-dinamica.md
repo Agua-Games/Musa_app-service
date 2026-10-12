@@ -39,7 +39,7 @@ docker run --rm -p 8000:8000 -v ${PWD}:/work -e MUSA_ADMIN_TOKEN=<token> \
 | GET | `/assets/content/...` | assets de registros incluídos, somente |
 | POST | `/auth/login` | `{email, password: <token>}` → `{token, user}` |
 | POST | `/collections` | `{id, title, description?, tier?}` — 409 se já existe |
-| POST | `/items` | patch (`{asset_id, ...campos}`) ou criação (card completo; nasce `draft`) |
+| POST | `/items` | patch (`{asset_id, ...campos}`) ou criação (card completo; nasce `draft`). **Guardas (M3.2):** corpo de criação (com `colecao`) para um `asset_id` existente → **409** (duplicado nunca sobrescreve em silêncio); todo registro carrega **`_rev`** — patch com `_rev` lido retorna **409** se estável (concorrência otimista); patch sem `_rev` é last-write-wins, por desenho |
 
 Todas as respostas de coleção usam o envelope `{ data, meta }` da API estática
 (docs/api-estatica.md) — o frontend troca de modo mudando só o `baseUrl`.

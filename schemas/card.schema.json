@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Agua-Games/Musa_app-service/schemas/card/v1/card.schema.json",
-  "x-contract-version": "1.0.0",
+  "x-contract-version": "1.1.0",
   "title": "MUSA collection item record",
   "description": "Single contract of the collection layer, frozen as v1 (see schemas/COMPATIBILITY.md). See docs/Musa_design document_technical-specs_v1.1.md section 3.2 and docs/adr/0001-camada-de-acervo.md. A record that does not validate against this schema must not enter the index.",
   "type": "object",
@@ -25,7 +25,12 @@
     },
     "data": {
       "type": "string",
-      "description": "YYYY, YYYY-MM or YYYY-MM-DD. BCE dates are negative numbers (e.g. -500)."
+      "description": "Date as free display text — real museum dating is fuzzy ('17th century', '1801-1900', 'late 16th-early 17th century'), so this field stays unconstrained. For sorting/filtering, use the optional structured companion data_iso."
+    },
+    "data_iso": {
+      "type": "string",
+      "pattern": "^-?\\d{1,4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$",
+      "description": "Normalized date for machines: YYYY, YYYY-MM or YYYY-MM-DD; BCE dates are negative numbers (e.g. -500). Optional; when present it must be exact. Added in 1.1.0 (compatible: optional field)."
     },
     "material": {
       "type": "string",

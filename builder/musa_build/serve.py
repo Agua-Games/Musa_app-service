@@ -22,7 +22,14 @@ read-only and writes answer 503):
     POST /auth/login                 {email, password: <tenant token>} -> {token, user}
     POST /items                      patch an existing card ({asset_id, ...fields})
                                      or create a new one (full card; status
-                                     defaults to draft — fail closed)
+                                     defaults to draft — fail closed).
+                                     Create-shaped bodies (with "colecao") get
+                                     409 when the asset_id already exists — a
+                                     duplicate create never silently overwrites.
+                                     Every record carries "_rev": PATCH with
+                                     "_rev" attached gets 409 on a stale read
+                                     (optimistic concurrency); without "_rev"
+                                     the patch is last-write-wins by design.
     POST /collections                {id, title, description?, tier?}
 
 Persistence: the repository stays the seed; edits land in a SQLite overlay
@@ -36,6 +43,7 @@ import hmac
 import json
 import os
 import re
+import threading
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -377,31 +385,37 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
             },
         }
 
+    # One writer at a time across the whole read-modify-write: the M3.2 misuse
+    # barrage proved that two concurrent patches could crash the handler with a
+    # 500 (ValueError in all_items.index) — and silently lose an edit.
+    write_lock = threading.Lock()
+
     @app.post("/collections", status_code=201)
     def create_collection(body: dict, request: Request):
         require_admin(request)
-        collection_id = str(body.get("id") or "")
-        if not ID_PATTERN.match(collection_id):
-            raise HTTPException(status_code=422, detail="id must be a lowercase slug (a-z, 0-9, -)")
-        if any(c["id"] == collection_id for c in state.all_collections):
-            raise HTTPException(status_code=409, detail=f"collection {collection_id!r} already exists")
-        meta = {
-            "id": collection_id,
-            "title": str(body.get("title") or collection_id),
-            "description": str(body.get("description") or ""),
-            # New collections default to bronze: the photo catalog is the
-            # curator's starting point, and a null tier renders nowhere on
-            # the storefront (galleries group by collection tier).
-            "tier": body.get("tier") or "bronze",
-            "cover": body.get("cover") or None,
-            "subcollections": [],
-            "website_status": body.get("website_status") or "published",
-            "_dir": None,
-        }
-        state.store.upsert_collection({k: v for k, v in meta.items() if k != "_dir"})
-        state.all_collections.append(meta)
-        _regate(state)
-        state.logger.log("api_write", action="create_collection", asset=collection_id)
+        with write_lock:
+            collection_id = str(body.get("id") or "")
+            if not ID_PATTERN.match(collection_id):
+                raise HTTPException(status_code=422, detail="id must be a lowercase slug (a-z, 0-9, -)")
+            if any(c["id"] == collection_id for c in state.all_collections):
+                raise HTTPException(status_code=409, detail=f"collection {collection_id!r} already exists")
+            meta = {
+                "id": collection_id,
+                "title": str(body.get("title") or collection_id),
+                "description": str(body.get("description") or ""),
+                # New collections default to bronze: the photo catalog is the
+                # curator's starting point, and a null tier renders nowhere on
+                # the storefront (galleries group by collection tier).
+                "tier": body.get("tier") or "bronze",
+                "cover": body.get("cover") or None,
+                "subcollections": [],
+                "website_status": body.get("website_status") or "published",
+                "_dir": None,
+            }
+            state.store.upsert_collection({k: v for k, v in meta.items() if k != "_dir"})
+            state.all_collections.append(meta)
+            _regate(state)
+            state.logger.log("api_write", action="create_collection", asset=collection_id)
         if collection_id not in state.included_collections:
             # Created but gated out (e.g. a draft) — say so explicitly.
             return envelope({"id": collection_id, "visible": False,
@@ -413,43 +427,67 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
     def save_item(body: dict, request: Request):
         """Patch an existing card ({asset_id, ...fields}) or create a new one
         (full card). New cards default to draft — publishing is a separate,
-        explicit patch."""
+        explicit patch.
+
+        Guards (M3.2 findings):
+        - a create-shaped body (carrying "colecao") for an asset_id that
+          already exists is a 409 — a duplicate create never silently
+          overwrites someone else's card;
+        - "_rev" implements optimistic concurrency: patch with the _rev you
+          read; a stale _rev is a 409. Patches without _rev are
+          last-write-wins by design.
+        """
         require_admin(request)
         asset_id = str(body.get("asset_id") or "")
         if not ID_PATTERN.match(asset_id):
             raise HTTPException(status_code=422, detail="asset_id must be a lowercase slug (a-z, 0-9, -)")
 
-        existing = next((i for i in state.all_items if i.get("asset_id") == asset_id), None)
-        if existing is not None:
-            card = {k: v for k, v in existing.items() if k != "_dir"}
-            card.update(body)
-            card["asset_id"] = asset_id
-            card["colecao"] = existing["colecao"]  # the folder rule: never moves via patch
-        else:
-            card = dict(body)
-            card.setdefault("website_status", "draft")  # fail closed
-            collection = card.get("colecao")
-            if not any(c["id"] == collection for c in state.all_collections):
-                raise HTTPException(status_code=422, detail=f"unknown collection {collection!r}")
+        with write_lock:
+            existing = next((i for i in state.all_items if i.get("asset_id") == asset_id), None)
+            if existing is not None:
+                if "colecao" in body:
+                    raise HTTPException(
+                        status_code=409,
+                        detail=f"item {asset_id!r} already exists — a create-shaped body "
+                               "(with 'colecao') is a conflict; patch with changed fields "
+                               "only, and attach '_rev' for optimistic concurrency")
+                current_rev = existing.get("_rev", 0)
+                if "_rev" in body and body["_rev"] != current_rev:
+                    raise HTTPException(
+                        status_code=409,
+                        detail=f"stale _rev: {asset_id!r} is at _rev {current_rev}; "
+                               "re-read and re-apply your edit")
+                card = {k: v for k, v in existing.items() if k not in ("_dir", "_rev")}
+                card.update({k: v for k, v in body.items() if k != "_rev"})
+                card["asset_id"] = asset_id
+                card["colecao"] = existing["colecao"]  # the folder rule: never moves via patch
+                card["_rev"] = current_rev + 1
+            else:
+                card = {k: v for k, v in body.items() if k != "_rev"}
+                card.setdefault("website_status", "draft")  # fail closed
+                card["_rev"] = 1
+                collection = card.get("colecao")
+                if not any(c["id"] == collection for c in state.all_collections):
+                    raise HTTPException(status_code=422, detail=f"unknown collection {collection!r}")
 
-        validator = make_validator()
-        problems = validate_card(card, validator)
-        if problems:
-            raise HTTPException(status_code=422, detail="; ".join(problems))
+            validator = make_validator()
+            problems = validate_card(card, validator)
+            if problems:
+                raise HTTPException(status_code=422, detail="; ".join(problems))
 
-        state.store.upsert_item(card)
-        card["_dir"] = existing.get("_dir") if existing else None
-        if existing is not None:
-            state.all_items[state.all_items.index(existing)] = card
-        else:
-            state.all_items.append(card)
-        _regate(state)
-        state.logger.log(
-            "api_write",
-            action="patch_item" if existing else "create_item",
-            asset=asset_id,
-            visible=any(i["asset_id"] == asset_id for i in state.items),
-        )
+            state.store.upsert_item(card)
+            card["_dir"] = existing.get("_dir") if existing else None
+            if existing is not None:
+                state.all_items[state.all_items.index(existing)] = card
+            else:
+                state.all_items.append(card)
+            _regate(state)
+            state.logger.log(
+                "api_write",
+                action="patch_item" if existing else "create_item",
+                asset=asset_id,
+                visible=any(i["asset_id"] == asset_id for i in state.items),
+            )
         shaped = _shape_item(card)
         return envelope(shaped)
 

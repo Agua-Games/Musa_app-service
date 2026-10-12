@@ -13,4 +13,4 @@ __version__ = "0.3.0"
 # Version of the collection contract this builder implements. Must equal the
 # "x-contract-version" of the bundled schemas/card.schema.json (see
 # schemas/COMPATIBILITY.md in the platform repository).
-CONTRACT_VERSION = "1.0.0"
+CONTRACT_VERSION = "1.1.0"

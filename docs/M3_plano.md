@@ -111,6 +111,21 @@ achados de lacuna de API já conhecidos aparecem classificados como tal.
 >    no mesmo card: HTTP [200, **500**]; race em `save_item`
 >    (`all_items.index(existing)` → ValueError). Esperado: conflito ou
 >    merge definido; hoje há crash *e* last-write-wins silencioso.
+>
+> **Correções (2026-10-11, aprovadas pelo dono):** os 3 bugs foram corrigidos
+> no mesmo dia —
+> 1. create-shaped body (com `colecao`) para `asset_id` existente → **409**,
+>    nunca overwrite silencioso;
+> 2. `data` documentado como **texto livre** (a prática museológica quebraria
+>    244 dos 439 cards reais: "17th century", "1801-1900") + campo opcional
+>    **`data_iso`** com pattern estrito — contrato sobe para **1.1.0**
+>    (minor compatível, ver `schemas/COMPATIBILITY.md`);
+> 3. **lock de escrita** no `serve` (fim do crash 500) + **concorrência
+>    otimista com `_rev`**: patch com `_rev` velho → 409; sem `_rev` →
+>    last-write-wins documentado.
+> Rodada completa pós-correção (`20261012T003451Z-seed42`, suite all): 30
+> eventos, **0 reprovações**. Testes de aceitação flipados para verde
+> (105 builder + 10 beta).
 > Gaps classificados (não são bugs — são ausência de endpoint): upload de
 > asset (cobre os cenários 1, 2, 6, 7) e mudança de entitlement via API.
 > 3 testes novos verdes; as divergências estão assertadas como `falha` —

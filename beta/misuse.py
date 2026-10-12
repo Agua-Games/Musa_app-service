@@ -167,22 +167,30 @@ class MisuseRunner:
                          invariantes=self._suite())
 
     def s05_data_invalida(self) -> None:
-        """Invalid date string -> contract rejection."""
+        """Date handling, two halves (contract 1.1.0):
+        - `data` is free display text by design (museum reality: "17th
+          century", "1801-1900") — arbitrary text is ACCEPTED;
+        - `data_iso` is the structured companion — garbage there is a 422.
+        """
         card = self._make_item(data="banana-com-ouro")
-        res = self.client.save_item(card)
-        if res.status == 422:
-            self._record("data-invalida", "create-data-invalida", card["asset_id"],
-                         "ok", res.latency_ms, "422 on invalid date",
-                         invariantes=self._suite())
-        elif res.ok:
-            self._record("data-invalida", "create-data-invalida", card["asset_id"],
-                         "falha", res.latency_ms,
-                         "contract accepted data='banana-com-ouro' — the schema has no "
-                         "date pattern, any string passes",
+        r1 = self.client.save_item(card)
+        bad_iso = self._make_item(data_iso="banana-com-ouro")
+        r2 = self.client.save_item(bad_iso)
+        good_iso = self._make_item(data_iso="1665")
+        r3 = self.client.save_item(good_iso)
+        total = r1.latency_ms + r2.latency_ms + r3.latency_ms
+        if r1.ok and r2.status == 422 and r3.ok:
+            self._record("data-invalida", "create-data-livre-e-iso", card["asset_id"],
+                         "ok", total,
+                         "free-text data accepted by design; data_iso='banana-com-ouro' "
+                         "rejected 422; data_iso='1665' accepted",
                          invariantes=self._suite())
         else:
-            self._record("data-invalida", "create-data-invalida", card["asset_id"],
-                         "falha", res.latency_ms, f"unexpected HTTP {res.status}",
+            self._record("data-invalida", "create-data-livre-e-iso", card["asset_id"],
+                         "falha", total,
+                         f"data free-text HTTP {r1.status} (want 200); "
+                         f"data_iso garbage HTTP {r2.status} (want 422); "
+                         f"data_iso valid HTTP {r3.status} (want 200)",
                          invariantes=self._suite())
 
     def s06_glb_corrompido(self) -> None:
@@ -216,45 +224,60 @@ class MisuseRunner:
 
     def s08_edicoes_concorrentes(self) -> None:
         """Two sessions patch the same card at once -> conflict or defined
-        merge; never silent loss."""
+        merge; never silent loss.
+
+        With _rev (contract of the fixed API): both writers read, both patch
+        with the _rev they read; exactly one wins, the other gets 409.
+        Patches WITHOUT _rev are documented last-write-wins — tested too:
+        they must at least not crash (the pre-fix race returned 500).
+        """
         card = self._make_item()
         self.client.save_item(card)
         asset_id = card["asset_id"]
-        results: dict[str, tuple[int, str]] = {}
+        read = self.client.item(asset_id, auth=True)
+        rev = read.body["data"].get("_rev", 0)
 
-        def patch(tag: str) -> None:
+        results: dict[str, int] = {}
+
+        def patch(tag: str, with_rev: bool) -> None:
             c = ApiClient(self.client.base_url)
             c.token = self.client.token
-            res = c.save_item({"asset_id": asset_id,
-                               "descricao": f"escrita-{tag}"})
-            results[tag] = (res.status, f"escrita-{tag}")
+            body = {"asset_id": asset_id, "descricao": f"escrita-{tag}"}
+            if with_rev:
+                body["_rev"] = rev
+            res = c.save_item(body)
+            results[tag] = res.status
 
-        t1 = threading.Thread(target=patch, args=("A",))
-        t2 = threading.Thread(target=patch, args=("B",))
+        t1 = threading.Thread(target=patch, args=("A", True))
+        t2 = threading.Thread(target=patch, args=("B", True))
         t1.start(); t2.start(); t1.join(); t2.join()
-        final = self.client.item(asset_id, auth=True)
-        final_desc = final.body["data"].get("descricao") if final.ok else None
-        codes = sorted(v[0] for v in results.values())
-        if 409 in codes or 412 in codes:
-            self._record("edicoes-concorrentes", "patch-concorrente", asset_id,
-                         "ok", 0.0, f"conflict surfaced: HTTP {codes}",
-                         invariantes=self._suite())
-        elif any(c >= 500 for c in codes):
-            self._record("edicoes-concorrentes", "patch-concorrente", asset_id,
-                         "falha", 0.0,
-                         f"concurrent patch CRASHED the writer: HTTP {codes} — "
-                         f"race in save_item (all_items.index(existing) ValueError)",
-                         invariantes=self._suite())
-        elif codes == [200, 200]:
-            loser = "A" if final_desc == "escrita-B" else "B"
-            self._record("edicoes-concorrentes", "patch-concorrente", asset_id,
-                         "falha", 0.0,
-                         f"both patches returned 200; last-write-wins silently "
-                         f"(writer {loser} lost its edit with no conflict signal)",
+        codes = sorted(results.values())
+        if codes == [200, 409]:
+            self._record("edicoes-concorrentes", "patch-com-rev", asset_id,
+                         "ok", 0.0,
+                         f"optimistic concurrency: one writer 200, the other 409 "
+                         f"(stale _rev) — no crash, no silent loss",
                          invariantes=self._suite())
         else:
-            self._record("edicoes-concorrentes", "patch-concorrente", asset_id,
-                         "falha", 0.0, f"unexpected status codes: {codes}",
+            self._record("edicoes-concorrentes", "patch-com-rev", asset_id,
+                         "falha", 0.0,
+                         f"expected [200, 409], got {codes}",
+                         invariantes=self._suite())
+
+        # Without _rev: last-write-wins by design, but must never crash.
+        t1 = threading.Thread(target=patch, args=("C", False))
+        t2 = threading.Thread(target=patch, args=("D", False))
+        t1.start(); t2.start(); t1.join(); t2.join()
+        codes = sorted(results[k] for k in ("C", "D"))
+        if codes == [200, 200]:
+            self._record("edicoes-concorrentes", "patch-sem-rev", asset_id,
+                         "ok", 0.0, "both 200, serialized — last-write-wins "
+                         "by design, documented", invariantes=self._suite())
+        else:
+            self._record("edicoes-concorrentes", "patch-sem-rev", asset_id,
+                         "falha", 0.0,
+                         f"rev-less concurrent patches must serialize to [200, 200], "
+                         f"got {codes} (the pre-fix race returned 500)",
                          invariantes=self._suite())
 
     def s09_token_invalido(self) -> None:

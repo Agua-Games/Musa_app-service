@@ -4,8 +4,9 @@
 > (`schemas/card.schema.json`, ADR 0001). Este documento define o que pode mudar
 > **sem** quebrar um cliente que já publica com a v1, e o que exige uma v2.
 
-Versão atual: **1.0.0** — congelada em 2026-09-23 (milestone M0, entregável 1).
-A versão viaja no próprio schema, em dois lugares que devem concordar:
+Versão atual: **1.1.0** — congelada como v1 em 2026-09-23 (milestone M0,
+entregável 1); minor 1.1.0 em 2026-10-11. A versão viaja no próprio schema, em
+dois lugares que devem concordar:
 
 - `$id`: `…/schemas/card/v1/card.schema.json` — o **major** (`v1`) está no caminho;
 - `x-contract-version`: `1.0.0` — a versão completa, lida pelo builder.
@@ -19,6 +20,15 @@ A versão viaja no próprio schema, em dois lugares que devem concordar:
 > muda para o cliente é a convenção de arquivo: o builder ≥ 0.2.0 lê
 > `content/<coleção>/<item>/card.json` (não mais `ficha.json`). Os documentos
 > `docs/Musa_design *.md` são snapshots versionados e preservam o termo antigo.
+
+> **Nota da minor 1.1.0 (2026-10-11, achado do M3.2):** adicionado o campo
+> **opcional** `data_iso` (data normalizada para máquina, com `pattern`
+> estrito), e a `description` de `data` passou a documentar o que a prática
+> museológica já impunha — `data` é **texto livre de exibição** ("séc. XVII",
+> "1801–1900", "final do séc. XVI"), sem pattern. A tentativa original de
+> restringir `data` quebraria 244 dos 439 cards reais importados no DemoMuseum,
+> então a validação estrita vive no campo novo. Todo card que validava continua
+> validando; nenhum consumer existente lê `data_iso`.
 
 ## O que é mudança compatível (sobe o *minor* ou o *patch*, continua `v1`)
 

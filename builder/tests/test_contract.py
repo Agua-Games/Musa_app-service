@@ -4,6 +4,7 @@ import json
 import unittest
 from pathlib import Path
 
+from musa_build import CONTRACT_VERSION
 from musa_build.contract import load_schema, make_validator, validate_card
 
 PLATFORM_SCHEMA = (
@@ -23,7 +24,18 @@ class ContractTest(unittest.TestCase):
         self.validator = make_validator()
 
     def test_load_schema_asserts_version(self):
-        self.assertEqual(load_schema()["x-contract-version"], "1.0.0")
+        self.assertEqual(load_schema()["x-contract-version"], CONTRACT_VERSION)
+
+    def test_data_iso_pattern(self):
+        """Contract 1.1.0: `data` is free text (museum reality); the optional
+        `data_iso` companion is strictly patterned."""
+        base = {"asset_id": "a-1", "titulo": "Piece", "colecao": "gallery"}
+        self.assertEqual(validate_card({**base, "data": "late 16th century"}, self.validator), [])
+        self.assertEqual(validate_card({**base, "data_iso": "1665"}, self.validator), [])
+        self.assertEqual(validate_card({**base, "data_iso": "-500"}, self.validator), [])
+        self.assertEqual(validate_card({**base, "data_iso": "1665-03"}, self.validator), [])
+        self.assertTrue(validate_card({**base, "data_iso": "banana-com-ouro"}, self.validator))
+        self.assertTrue(validate_card({**base, "data_iso": "1665-13"}, self.validator))
 
     def test_minimal_valid_card(self):
         card = {"asset_id": "a-1", "titulo": "Piece", "colecao": "gallery"}

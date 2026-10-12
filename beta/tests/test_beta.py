@@ -217,18 +217,17 @@ class MisuseTest(unittest.TestCase):
         for cen in ("arquivo-grande", "mime-errado", "glb-corrompido", "upload-interrompido"):
             self.assertEqual(by[cen][0].resultado, "achado-gap", cen)
 
-    def test_known_divergences_are_recorded_as_findings(self):
-        """Current product behavior diverges from the expected outcome in
-        these scenarios; the events must record falha (the known-bug list).
-        Flip to 'ok' as each fix lands."""
+    def test_fixed_divergences_now_pass(self):
+        """The three M3.2 findings were fixed (409 on duplicate create,
+        data_iso guard, write lock + _rev optimistic concurrency). These were
+        the acceptance tests of the fixes — they must stay green."""
         events = self._run()
         by = {}
         for e in events:
             by.setdefault(e.cenario, []).append(e)
         for cen in ("asset-id-duplicado", "data-invalida", "edicoes-concorrentes"):
-            self.assertEqual(by[cen][0].resultado, "falha",
-                             f"{cen}: expected a recorded divergence — fixed? "
-                             f"flip this expectation")
+            for e in by[cen]:
+                self.assertEqual(e.resultado, "ok", f"{cen}/{e.acao}: {e.detalhe}")
 
 
 if __name__ == "__main__":

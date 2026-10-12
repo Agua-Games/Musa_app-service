@@ -468,9 +468,13 @@ pode correr em paralelo.
 > (`python -m beta.run_beta --repo <repo>`) — custo Cloudflare zero por desenho.
 > **M3.2 concluída (2026-10-11):** gerador de uso indevido — 10/10 cenários com
 > veredito, zero perda de dados (321 itens públicos byte-idênticos após a
-> saraivada) e **3 bugs reais encontrados**: overwrite silencioso em
-> `asset_id` duplicado, data inválida aceita pelo contrato, crash 500 em edição
-> concorrente (race em `save_item`). Detalhes em `docs/M3_plano.md` §M3.2.
+> saraivada) e **3 bugs reais encontrados e corrigidos no mesmo dia** (aprovado
+> pelo dono): 409 em create duplicado (antes: overwrite silencioso), `data_iso`
+> estruturado no contrato **1.1.0** (`data` segue texto livre — a realidade
+> museológica quebraria 244/439 cards reais), lock de escrita + `_rev`
+> otimista no `serve` (antes: crash 500 em edição concorrente). Rodada pós-fix:
+> 30 eventos, 0 reprovações. Detalhes em `docs/M3_plano.md` §M3.2. Comandos do
+> dia a dia do dev em `docs/comandos-dev.md`.
 
 **O cliente virtual (no `DemoMuseum`) não é um teste de fumaça — é um ator.**
 
@@ -518,6 +522,25 @@ pode correr em paralelo.
       cronometrado** (DR drill, não plano no papel).
 - [ ] Runbook: onboarding, incidentes, rollback de versão.
 - [ ] Monitoramento e alertas dos SLOs do M3.
+- [ ] **Bateria final de testes do MVP, incluindo edge cases** (pedido do dono,
+      2026-10-11) — portão de saída do M4, rodada sobre a imagem publicada, estendendo
+      o harness do `beta/` (personas + misuse + invariantes já cobrem o dia a dia e os
+      10 cenários hostis; aqui entram os cantos):
+      - *contrato*: card com caracteres unicode/extremos (emoji, acentos, RTL), `asset_id`
+        no limite de tamanho, campos vazios vs. ausentes, `data_iso` BCE (`-500`) e
+        ano de 1 dígito, coleção com título gigante;
+      - *gating*: item `gold` em museu `bronze` durante downgrade/upgrade, draft órfão
+        de coleção despublicada, hero despublicado, coleção vazia publicada;
+      - *concorrência*: N escritores no mesmo card com e sem `_rev`, escrita durante
+        build, escrita durante regate;
+      - *infra*: serve sem `MUSA_ADMIN_TOKEN` (read-only), overlay `.musa/` corrompido
+        (apagar e reconstruir do repo), build com disco quase cheio, CI sem secrets
+        configurados (falha explícita, não silenciosa);
+      - *pipeline*: foto de card ilegível, card em branco, LLM retornando JSON quebrado,
+        provider fora do ar (circuit breaker), duplicata de `asset_id` na importação;
+      - *carga*: acervo de 10.000 itens (números do M3.5), imagem de capa de 20 MB;
+      - *navegador*: landing com JS parcialmente bloqueado, conexão lenta (3G),
+        primeiro acesso sem conta nenhuma.
 
 **Produto e apresentação**
 - [ ] Acessibilidade (WCAG no mínimo AA) e multi-idioma.
