@@ -495,6 +495,10 @@ pode correr em paralelo.
 > 3,9 MB de RAM marginal por instância de 500 itens, `/search` p95 235 ms em
 > 10k itens (ponto de atenção para o M3.6); custo R2 no MVP ≈ centavos/mês por
 > museu. Corpus sintético só de metadados: zero rede/R2, aprovado pelo dono.
+> **M3.6 concluída (2026-10-12):** SLOs com números reais — tabela final em
+> `docs/M3_slos.md`, §8.1 da spec reescrita com coluna "Medido"; nenhum alvo
+> reprovado, 2 linhas novas (search, publicação fim-a-fim), 3 pendências
+> honestas com dono/gatilho (GLB em 4G → M3.7, CDN → M4, disponibilidade → M3.7).
 
 **O cliente virtual (no `DemoMuseum`) não é um teste de fumaça — é um ator.**
 

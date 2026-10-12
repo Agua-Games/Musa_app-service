@@ -251,6 +251,15 @@ os pontos de quebra; nenhum número estimado sem marcação explícita.
 
 ## Fase M3.6 — SLOs com números reais
 
+> **Estado (2026-10-12): CONCLUÍDA.** Tabela final em `docs/M3_slos.md` e §8.1
+> da spec reescrita com coluna "Medido". Nenhum alvo medido reprovou (build
+> 2,2 s @1.000 vs. alvo de 10 min; `/items` p95 16 ms vs. 300 ms; 0 fichas
+> rejeitadas no CI). Duas linhas novas com alvo formal (`/search` p95 < 500 ms
+> @10k — medido 235 ms; publicação fim-a-fim < 2 min — mediana medida 36 s).
+> Três pendências honestas com dono e gatilho: GLB em 4G (M3.7), cache de CDN
+> (M4), disponibilidade (M3.7). Build de exatos 1.000 cards medido de propósito
+> (2,2 s) para cobrir o cenário exato do alvo da spec.
+
 A tabela §8.1 da spec tem alvos **propostos**. Substituir por medições:
 
 1. Para cada SLO proposto (disponibilidade, latência de leitura, tempo de build,

@@ -798,20 +798,27 @@ const data = await response.json();
 
 ### 8.1 Métricas-Chave
 
-> 📋 **Seção incompleta na origem.** No documento original ela foi interrompida no cabeçalho da
-> tabela. A tabela abaixo é um ponto de partida técnico proposto em 2026-09-16 e **precisa de
-> revisão** antes de virar SLO contratual.
+> ✅ **Revisada em 2026-10-12 (M3.6)** com medições reais — a tabela abaixo é o
+> resumo; a tabela completa, com cenário de cada medição, vereditos e as
+> pendências honestas (GLB em 4G, CDN, disponibilidade), está em
+> [docs/M3_slos.md](M3_slos.md). Números **MEDIDOS** saíram de
+> `docs/M3_carga.md`, dos runs de CI do DemoMuseum e do M2; **ESTIMATIVAS** e
+> itens não medidos estão marcados.
 
-| Métrica | Camada | O que indica | Alvo inicial |
-|---------|--------|--------------|--------------|
-| Tempo de build do acervo | Pipeline | custo de ingestão por lote | < 10 min para 1.000 peças |
-| Fichas rejeitadas na validação | Pipeline | qualidade dos metadados de entrada | 0 em produção |
-| Tempo de carga do GLB (p75) | Entrega | se o tier 3D é usável em 4G | < 3 s por peça |
-| Cache hit do CDN | Entrega | custo de egress | > 90% |
-| Latência p95 de `/items/{id}` | API | fluidez da navegação | < 300 ms |
-| Custo por consulta do assistente | IA | sustentabilidade do RAG | dentro do previsto por tier |
-| Custo de armazenamento | Infra | base do preço mensal | acompanhar GB/mês |
-| Qualidade da recuperação (RAG) | IA | utilidade do assistente | reavaliar a cada 6 meses |
+| Métrica | Camada | O que indica | Alvo | Medido (2026-10-12) |
+|---------|--------|--------------|------|---------------------|
+| Tempo de build do acervo | Pipeline | custo de ingestão por lote | < 10 min p/ 1.000 peças | **2,2 s** (1.000) · 17,0 s (10.000) — folga ~270× |
+| Fichas rejeitadas na validação | Pipeline | qualidade dos metadados de entrada | 0 em produção | **0** em todos os builds do DemoMuseum |
+| Tempo de carga do GLB (p75) | Entrega | se o tier 3D é usável em 4G | < 3 s por peça | NÃO MEDIDO — beta real (M3.7) |
+| Cache hit do CDN | Entrega | custo de egress | > 90% | N/A ainda — sem CDN (M4) |
+| Latência p95 de `/items/{id}` | API | fluidez da navegação | < 300 ms | **16 ms** em 10k itens — folga ~19× |
+| Latência p95 de `/search` | API | fluidez da busca | < 500 ms em 10k (novo, M3.6) | **235 ms** em 10k |
+| Publicação fim-a-fim (push → ar) | Pipeline | agilidade do curador | < 2 min (novo, M3.6) | **mediana 36 s** (463 itens) |
+| Custo por consulta do assistente | IA | sustentabilidade do RAG | dentro do previsto por tier | ≈ US$ 0,0004/consulta (ESTIMATIVA) |
+| Custo de armazenamento | Infra | base do preço mensal | acompanhar GB/mês | R2 ≈ centavos/mês por museu (fórmula medida) |
+| Qualidade da recuperação (RAG) | IA | utilidade do assistente | reavaliar a cada 6 meses | 76,6% auto-aprovado, 1,4% erro residual (M2) |
+| Disponibilidade | Infra | serviço no ar | 99,9% (repasse do provedor) | NÃO MEDIDO — cliente real (M3.7) |
+| RPO / RTO | Infra | perda máxima / tempo de recuperação | RPO 0 · RTO < 5 min | RPO 0 no repo versionado; RTO ≈ 1 min (redeploy medido) |
 
 ### 8.2 Alertas
 
