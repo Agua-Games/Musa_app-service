@@ -105,6 +105,18 @@ python pipeline/import_to_museum.py --repo <repo> --collection acervo-importado
 # Detalhes e corpus: pipeline/README.md
 ```
 
+## Carga (M3.5) — N museus × M itens
+
+```bash
+# Mede build/payload/startup/latências em 500/2.000/5.000/10.000 cards +
+# memória marginal por instância de serve (1/2/4/8 museus), e REESCREVE
+# docs/M3_carga.md. 100% local: corpus só de metadados, zero rede, zero R2.
+# Resumível: escalas já medidas ficam em beta/out/load-state.json (pule com --reset).
+python -m beta.load
+python -m beta.load --scales 500,2000      # parcial
+python -m beta.load --scales "" --skip-museums   # só re-renderiza o doc
+```
+
 ## GitHub / CI do cliente (gh CLI)
 
 ```bash

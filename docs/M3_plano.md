@@ -219,6 +219,18 @@ a ponta; uma falha injetada de propósito abre issue e a recuperação a fecha.
 
 ## Fase M3.5 — Carga: N museus × M itens
 
+> **Estado (2026-10-12): CONCLUÍDA.** Harness resumível em `beta/load.py`
+> (corpus sintético só de metadados — seed do Met + `ground_truth` do M2 —
+> zero rede, zero R2, zero custo; aprovado pelo dono nestas condições).
+> Resultados medidos e tabela publicada em `docs/M3_carga.md`. Manchetes
+> (MEDIDO, máquina do estúdio): build **linear** (~1,7 ms/item — 10.000 cards
+> em 17 s); startup do serve constante (~1,7 s, dominado pelo boot do
+> interpretador, não pelos dados); `/search` p95 235 ms em 10.000 itens
+> (ponto de atenção — candidato a índice pré-computado/paginação no M3.6);
+> memória marginal **3,9 MB por instância** de 500 itens (20 museus ≈ 113 MB
+> de RAM no host). Custo R2 na faixa do MVP: centavos/mês por museu —
+> o custo que manda é o compute (M4), não o storage.
+
 1. **Escala de itens por museu**: builds sintéticos com 500 / 2.000 / 5.000 /
    10.000 cards (gerador reaproveita o `render_corpus.py` do M2 — metadados
    apenas, sem assets). Mede tempo de build, tamanho do payload, tempo de

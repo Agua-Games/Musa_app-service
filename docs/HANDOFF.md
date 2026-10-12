@@ -489,7 +489,12 @@ pode correr em paralelo.
 > → Run workflow. **M3.3 concluída (2026-10-12):** suíte de sanidade separada
 > (`beta/tests/test_invariants_sanity.py`) — cada invariante é forçado a falhar
 > uma vez e observado passando; o `build-verde` agora tem prova real (repo
-> quebrado pego, fixture verde). 11 testes beta verdes.
+> quebrado pego, fixture verde). 11 testes beta verdes. **M3.5 concluída
+> (2026-10-12):** harness de carga resumível `beta/load.py` + tabela medida em
+> `docs/M3_carga.md` — build linear (~1,7 ms/item), startup do serve constante,
+> 3,9 MB de RAM marginal por instância de 500 itens, `/search` p95 235 ms em
+> 10k itens (ponto de atenção para o M3.6); custo R2 no MVP ≈ centavos/mês por
+> museu. Corpus sintético só de metadados: zero rede/R2, aprovado pelo dono.
 
 **O cliente virtual (no `DemoMuseum`) não é um teste de fumaça — é um ator.**
 
