@@ -529,6 +529,12 @@ pode correr em paralelo.
 
 **Objetivo:** vender, entregar e não quebrar.
 
+> **Plano de ataque em `docs/M4_plano.md` (2026-10-12)** — fases M4.0–M4.8,
+> decisão de hosting (ADR 0017 pendente) com os números medidos do M3.5.
+> **Decisão do dono (2026-10-12): Azure não é pago agora** — tudo até a M4.8 é
+> código/teste/doc a custo zero; a M4.8 (deploy de produção, o único portão
+> pago) fica bloqueada até o primeiro cliente fechar.
+
 **Segurança e conformidade**
 - [ ] Gating **auditável**: um Bronze comprovadamente não recebe dados do Gold (teste, não promessa).
 - [ ] Tokens por tenant, rate limits, assinatura de entitlements.
