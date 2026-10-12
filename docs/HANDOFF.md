@@ -474,7 +474,14 @@ pode correr em paralelo.
 > museológica quebraria 244/439 cards reais), lock de escrita + `_rev`
 > otimista no `serve` (antes: crash 500 em edição concorrente). Rodada pós-fix:
 > 30 eventos, 0 reprovações. Detalhes em `docs/M3_plano.md` §M3.2. Comandos do
-> dia a dia do dev em `docs/comandos-dev.md`.
+> dia a dia do dev em `docs/comandos-dev.md`. **M3.4 concluída (2026-10-12):**
+> workflow `beta-validation.yml` no DemoMuseum (só `workflow_dispatch`, pela
+> emenda) — rodada de prova **verde no CI** com a imagem 0.4.0 recém-publicada
+> (30 eventos, 0 falhas, artifact com JSONL + relatório, nenhuma issue aberta);
+> correções do caminho: `httpx` no cliente beta, `beta/` copiado para a imagem,
+> `gh -R` nos passos de issue e fingerprint como script arquivo (heredoc quebra
+> em `run: |`). Disparo manual: Actions → "beta validation (virtual client)"
+> → Run workflow.
 
 **O cliente virtual (no `DemoMuseum`) não é um teste de fumaça — é um ator.**
 

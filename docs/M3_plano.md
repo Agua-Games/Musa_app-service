@@ -172,6 +172,20 @@ uma asserção que nunca falha no teste de sanidade não é asserção.
 
 ## Fase M3.4 — Telemetria + validação no CI
 
+> **Estado (2026-10-12): CONCLUÍDA.** Workflow `beta-validation.yml` publicado
+> no DemoMuseum (só `workflow_dispatch`, conforme a emenda abaixo). Rodada de
+> prova **verde de ponta a ponta** no CI com a imagem `ghcr.io/agua-games/
+> musa-app:0.4.0` (release 0.4.0 = `beta/` embutido na imagem + `httpx` no
+> cliente): 30 eventos, 0 falhas, 10 achados-gap (5 distintos, todos
+> classificados como conhecidos), artifact `beta-validation-<run_id>`
+> publicado, nenhuma issue aberta. Armadilhas encontradas na primeira tentativa
+> e corrigidas: `gh` exige `-R` (o checkout fica no subdiretório `client/`, logo
+> a raiz do workspace não é um repo git) e heredoc indentado não sobrevive a
+> `run: |` do Actions — o fingerprint virou script arquivo
+> (`.github/scripts/beta_fail_fingerprint.py`). O caminho de falha (issue com
+> dedup) não foi exercitado no CI de propósito; o mecanismo é coberto pelo
+> teste de sanidade local dos invariantes.
+
 > **Emenda do dono (2026-10-10, ADR 0015):** sem cron permanente por ora — o
 > workflow nasce **só com `workflow_dispatch`** (rodada de prova + re-rodada
 > manual a cada mudança da plataforma). A linha `schedule:` (`17 3 * * *`)
