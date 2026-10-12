@@ -155,6 +155,16 @@ causa perda de dados — essa é a linha vermelha absoluta do critério de saíd
 
 ## Fase M3.3 — Asserções de invariante (`beta/invariants.py`)
 
+> **Estado (2026-10-12): CONCLUÍDA.** A biblioteca de invariantes nasceu com a
+> M3.1; a formalização desta fase foi a **suíte de sanidade separada**
+> (`beta/tests/test_invariants_sanity.py`): cada um dos 4 invariantes é
+> **forçado a falhar uma vez** e também observado passando — um checker que
+> sempre passa (ou sempre falha) seria inútil e agora seria pego. Os 3
+> invariantes rápidos (draft, tier, contrato) são exercitados contra um
+> `FakeClient` com respostas enlatadas; o 4º (`build-verde`) contra builds
+> reais: um repo quebrado (sem `museum.config.json`) precisa ser pego, e o
+> fixture `client-ok` precisa passar. 11 testes beta verdes.
+
 Biblioteca única, usada por personas e misuse após **cada** ação:
 
 1. **Nada `draft` no payload público** — `/collections`, `/items` e o build

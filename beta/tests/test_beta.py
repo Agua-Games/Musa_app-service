@@ -1,5 +1,6 @@
 """M3.1 tests: persona determinism, green run on the fixture museum, gap
-classification, and the sanity proof that each fast invariant can fail."""
+classification. Invariant sanity proofs live in test_invariants_sanity.py
+(M3.3)."""
 
 import os
 import random
@@ -14,7 +15,6 @@ from pathlib import Path
 import uvicorn
 
 from beta.client import ApiClient
-from beta import invariants as inv
 from beta.personas import KNOWN_GAPS, SCOPES, Persona
 
 FIXTURES = Path(__file__).resolve().parent.parent.parent / "builder" / "tests" / "fixtures"
@@ -118,65 +118,6 @@ class FullRunTest(unittest.TestCase):
                         for e in run_all(client, seed, run_id)]
         self.assertEqual(sequence(42, "a"), sequence(42, "b"))
         self.assertNotEqual(sequence(42, "a"), sequence(43, "c"))
-
-
-class FakeClient:
-    """Canned API answers to force invariant violations (sanity proofs)."""
-
-    def __init__(self, collections, items_by_collection, item_status):
-        self._cols = collections
-        self._items = items_by_collection
-        self._status = item_status
-
-    class _Res:
-        def __init__(self, status, body):
-            self.status, self.body, self.latency_ms = status, body, 0.0
-            self.ok = 200 <= status < 300
-
-    def collections(self, auth=False):
-        return self._Res(200, {"data": self._cols})
-
-    def collection_items(self, cid, include_drafts=False, auth=False):
-        return self._Res(200, {"data": self._items.get(cid, [])})
-
-    def item(self, asset_id, auth=False):
-        return self._Res(self._status.get(asset_id, 404), None)
-
-
-class InvariantSanityTest(unittest.TestCase):
-    """Each invariant is forced to fail once — an assertion that never fails
-    in its own sanity test is not an assertion (M3_plano.md, M3.3)."""
-
-    def test_draft_invariant_catches_a_leak(self):
-        cols = [{"id": "paintings", "tier": "bronze"}]
-        items = {"paintings": [{"asset_id": "secret", "website_status": "draft",
-                                "titulo": "x", "colecao": "paintings"}]}
-        client = FakeClient(cols, items, {"secret": 200})  # draft leaks publicly
-        self.assertFalse(inv.check_no_drafts_in_public(client).ok)
-        client_ok = FakeClient(cols, items, {"secret": 404})
-        self.assertTrue(inv.check_no_drafts_in_public(client_ok).ok)
-
-    def test_tier_invariant_catches_above_tier_item(self):
-        cols = [{"id": "paintings", "tier": "bronze"}]
-        items = {"paintings": [{"asset_id": "gold-piece", "website_status": "published",
-                                "tier": "gold"}]}
-        client = FakeClient(cols, items, {"gold-piece": 200})  # gold leaks on silver museum
-        self.assertFalse(inv.check_tier_gate(client, "silver").ok)
-        client_ok = FakeClient(cols, items, {"gold-piece": 404})
-        self.assertTrue(inv.check_tier_gate(client_ok, "silver").ok)
-
-    def test_contract_invariant_catches_invalid_card(self):
-        cols = [{"id": "paintings", "tier": "bronze"}]
-        good = {"asset_id": "ok-1", "titulo": "T", "colecao": "paintings",
-                "website_status": "published"}
-        bad = {"asset_id": "bad-1", "colecao": "paintings",
-               "website_status": "published"}  # no titulo
-        client = FakeClient(cols, {"paintings": [good, bad]}, {})
-        result = inv.check_contract_valid(client)
-        self.assertFalse(result.ok)
-        self.assertIn("bad-1", result.detail)
-        client_ok = FakeClient(cols, {"paintings": [good]}, {})
-        self.assertTrue(inv.check_contract_valid(client_ok).ok)
 
 
 class MisuseTest(unittest.TestCase):

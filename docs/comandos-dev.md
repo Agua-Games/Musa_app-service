@@ -61,6 +61,18 @@ set MUSA_R2_SECRET_ACCESS_KEY=...
 cd builder && python -m musa_build upload --repo "H:\Musa_app-service\DemoMuseum"
 ```
 
+## API reference (gerada — nunca editada à mão)
+
+```bash
+# Regenera docs/api-reference.md a partir das rotas do serve + contrato do
+# card. Endpoint novo sem anotação em ANNOTATIONS (musa_build/api_reference.py)
+# = erro; doc velho no disco = suíte do builder falha (test_api_reference.py).
+cd builder && python -m musa_build api-reference
+
+# Só confere se o doc está em sincronia (exit 1 = stale)
+cd builder && python -m musa_build api-reference --check
+```
+
 ## Cliente virtual (M3) — personas + gerador de uso indevido
 
 ```bash

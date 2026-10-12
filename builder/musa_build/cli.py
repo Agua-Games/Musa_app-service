@@ -75,6 +75,18 @@ def _cmd_serve(args) -> int:
     return 0
 
 
+def _cmd_api_reference(args) -> int:
+    """Generate (or freshness-check) the HTTP API reference doc."""
+    from . import api_reference
+
+    argv = []
+    if args.out:
+        argv += ["--out", args.out]
+    if args.check:
+        argv.append("--check")
+    return api_reference.main(argv)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="musa-build",
@@ -104,6 +116,14 @@ def main(argv: list[str] | None = None) -> int:
     upload = commands.add_parser("upload", help="upload local card assets to object storage and rewrite the cards (M1.3)")
     upload.add_argument("--repo", required=True, help="client repository root (museum.config.json + content/)")
     upload.set_defaults(func=_cmd_upload)
+
+    api_ref = commands.add_parser("api-reference",
+                                  help="generate the HTTP API reference doc (docs/api-reference.md) from the code")
+    api_ref.add_argument("--out", default=None,
+                         help="output path (default: <platform root>/docs/api-reference.md)")
+    api_ref.add_argument("--check", action="store_true",
+                         help="do not write; exit 1 if the doc on disk is stale")
+    api_ref.set_defaults(func=_cmd_api_reference)
 
     args = parser.parse_args(argv)
     return args.func(args)

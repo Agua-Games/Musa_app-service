@@ -474,14 +474,22 @@ pode correr em paralelo.
 > museológica quebraria 244/439 cards reais), lock de escrita + `_rev`
 > otimista no `serve` (antes: crash 500 em edição concorrente). Rodada pós-fix:
 > 30 eventos, 0 reprovações. Detalhes em `docs/M3_plano.md` §M3.2. Comandos do
-> dia a dia do dev em `docs/comandos-dev.md`. **M3.4 concluída (2026-10-12):**
+> dia a dia do dev em `docs/comandos-dev.md`. **API reference gerada do código
+> (2026-10-12, pedido do dono):** `python -m musa_build api-reference` renderiza
+> `docs/api-reference.md` (rotas do serve introspectadas + anotações curadas +
+> tabela de campos do contrato); endpoint sem anotação quebra o gerador e doc
+> velho falha a suíte do builder (`tests/test_api_reference.py`) — regeneração
+> manual, sincronia enforced nos testes pré-push. **M3.4 concluída (2026-10-12):**
 > workflow `beta-validation.yml` no DemoMuseum (só `workflow_dispatch`, pela
 > emenda) — rodada de prova **verde no CI** com a imagem 0.4.0 recém-publicada
 > (30 eventos, 0 falhas, artifact com JSONL + relatório, nenhuma issue aberta);
 > correções do caminho: `httpx` no cliente beta, `beta/` copiado para a imagem,
 > `gh -R` nos passos de issue e fingerprint como script arquivo (heredoc quebra
 > em `run: |`). Disparo manual: Actions → "beta validation (virtual client)"
-> → Run workflow.
+> → Run workflow. **M3.3 concluída (2026-10-12):** suíte de sanidade separada
+> (`beta/tests/test_invariants_sanity.py`) — cada invariante é forçado a falhar
+> uma vez e observado passando; o `build-verde` agora tem prova real (repo
+> quebrado pego, fixture verde). 11 testes beta verdes.
 
 **O cliente virtual (no `DemoMuseum`) não é um teste de fumaça — é um ator.**
 
