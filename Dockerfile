@@ -41,6 +41,13 @@ RUN python /app/tools/fetch_vendor.py \
 # against its own bundled copy, kept in sync by tests/test_schema_sync.py).
 COPY schemas/ /app/schemas/
 
+# The virtual-client harness (M3, ADR 0014/0015): personas + misuse generator +
+# invariants. Travelling with the artifact, any client repository can be
+# validated by the exact published image it runs:
+#   docker run --rm -v ${PWD}:/work --entrypoint python \
+#     ghcr.io/agua-games/musa-app:<versão> -m beta.run_beta --repo /work --suite all
+COPY beta/ /app/beta/
+
 LABEL org.opencontainers.image.source="https://github.com/Agua-Games/Musa_app-service" \
       org.opencontainers.image.description="MUSA app-service builder: client content repository -> static museum site" \
       org.opencontainers.image.licenses="Proprietary"

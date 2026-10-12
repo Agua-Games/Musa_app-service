@@ -9,8 +9,11 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+from urllib.parse import quote
 
-import requests
+# httpx (not requests): it is already a runtime dependency of the artifact
+# image, so the beta harness works inside the published container unchanged.
+import httpx
 
 
 @dataclass
@@ -30,7 +33,7 @@ class ApiClient:
     def __init__(self, base_url: str, timeout: float = 30.0):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
-        self._session = requests.Session()
+        self._session = httpx.Client()
         self.token: str | None = None
 
     # -- transport ------------------------------------------------------
@@ -93,4 +96,4 @@ class ApiClient:
         return self.request("POST", "/items", auth=True, json=card_or_patch)
 
     def search(self, q: str) -> ApiResponse:
-        return self.request("GET", f"/search?q={requests.utils.quote(q)}")
+        return self.request("GET", f"/search?q={quote(q)}")
