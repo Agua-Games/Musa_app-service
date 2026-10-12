@@ -530,10 +530,18 @@ pode correr em paralelo.
 **Objetivo:** vender, entregar e não quebrar.
 
 > **Plano de ataque em `docs/M4_plano.md` (2026-10-12)** — fases M4.0–M4.8,
-> decisão de hosting (ADR 0017 pendente) com os números medidos do M3.5.
+> decisão de hosting (ADR 0017 aceita) com os números medidos do M3.5.
 > **Decisão do dono (2026-10-12): Azure não é pago agora** — tudo até a M4.8 é
 > código/teste/doc a custo zero; a M4.8 (deploy de produção, o único portão
-> pago) fica bloqueada até o primeiro cliente fechar.
+> pago) fica bloqueada até o primeiro cliente fechar. **M4.0 concluída
+> (2026-10-12):** ADR 0017 **aceita** — Container Apps (consumption) para a API
+> dinâmica, site no Pages, assets no R2; gatilho registrado para o B1.
+> **M4.1 implementada (2026-10-12):** imagem endurecida (usuário `musa`
+> não-root, raiz read-only, healthcheck, graceful shutdown) + portão de fumaça
+> no release (suíte beta dentro da imagem com `--read-only` antes do push) +
+> guard test; workflows do DemoMuseum passam `--user root` explícito.
+> **Tabela de custos consolidada em `docs/M4_custos.md` (2026-10-12):** 2/5/10/
+> 20 museus ≈ R$ 23/48/88/169 por mês — para orçamentos e precificação.
 
 **Segurança e conformidade**
 - [ ] Gating **auditável**: um Bronze comprovadamente não recebe dados do Gold (teste, não promessa).

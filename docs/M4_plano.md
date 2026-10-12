@@ -40,11 +40,9 @@
 
 ### M4.0 — Decisão de hosting (ADR 0017)
 
-> **Estado (2026-10-12): ADR 0017 rascunhada, aguardando aprovação do dono.**
-> Proposta: Container Apps (consumption) para a API dinâmica (grant gratuito +
-> scale-to-zero casam com o padrão de rajadas do admin), site no Pages e assets
-> no R2 sem mudança; gatilho registrado para migrar ao App Service B1 quando
-> houver necessidade medida. Tabela de custo 1/10/50 museus na ADR.
+> **Estado (2026-10-12): CONCLUÍDA — ADR 0017 aceita pelo dono.** Container
+> Apps (consumption) para a API dinâmica; site no Pages e assets no R2 sem
+> mudança; gatilho registrado para o App Service B1.
 
 Decidir por escrito, com os números do M3.5: **App Service (B1)** vs.
 **Container Apps (consumption)** vs. híbrido (API no Container Apps + site
@@ -56,6 +54,16 @@ produção (Pages continua? ou tudo no Azure?).
 cenário (1 / 10 / 50 museus) usando os MEDIDOS do M3.5.
 
 ### M4.1 — Hardening da imagem de produção
+
+> **Estado (2026-10-12): IMPLEMENTADO — verificação no próximo release.**
+> Dockerfile: usuário `musa` não-root (uid 1000, padrão do runtime — CI de
+> cliente usa `--user root` explícito para escrever no workspace montado),
+> `PYTHONDONTWRITEBYTECODE=1` + `PYTHONUNBUFFERED=1` (raiz read-only), 
+> HEALTHCHECK no `/health`, graceful shutdown via uvicorn (PID 1). O release
+> pipeline ganhou **portão de fumaça**: a suíte beta inteira roda DENTRO da
+> imagem recém-construída com `--read-only --tmpfs /tmp` antes do push —
+> imagem que não prova o hardening não é publicada. Guard test em
+> `builder/tests/test_image_hardening.py` trava as invariantes declarativas.
 
 Hoje a imagem é de CI/demo. Para produção: usuário não-root, filesystem
 read-only onde possível, limites de recursos declarados, healthcheck formal

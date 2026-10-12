@@ -48,6 +48,29 @@ COPY schemas/ /app/schemas/
 #     ghcr.io/agua-games/musa-app:<versão> -m beta.run_beta --repo /work --suite all
 COPY beta/ /app/beta/
 
+# ---- production hardening (M4.1) -------------------------------------------
+# No bytecode writes and unbuffered logs: the image is meant to run with a
+# READ-ONLY root filesystem in production — the only writable paths are the
+# mounts the operator provides:
+#   - the client repository at /work (build/serve modes), and/or
+#   - a scratch tmpfs at /tmp (beta harness, serve overlay via --data-dir).
+# Example:  docker run --read-only --tmpfs /tmp -v ${PWD}:/work ...
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Non-root runtime user (production default). Client CI workflows that mount
+# the repository and must write build output into it run with `--user root`
+# explicitly — batch builds as root on a throwaway runner are acceptable; the
+# production runtime (Container Apps) keeps the unprivileged default.
+RUN groupadd --system musa && useradd --system --gid musa --uid 1000 musa \
+    && chown -R musa:musa /app
+USER musa
+
+# Meaningful in serve mode (long-running); batch runs ignore it. uvicorn is
+# the container's PID-1 process and shuts down gracefully on SIGTERM.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).status==200 else 1)" || exit 1
+
 LABEL org.opencontainers.image.source="https://github.com/Agua-Games/Musa_app-service" \
       org.opencontainers.image.description="MUSA app-service builder: client content repository -> static museum site" \
       org.opencontainers.image.licenses="Proprietary"

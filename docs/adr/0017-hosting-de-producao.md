@@ -1,6 +1,6 @@
 # ADR 0017 — Hosting de produção: Container Apps (consumption) para a API dinâmica; Pages + R2 seguem
 
-- **Status:** proposta (aguardando aprovação do dono)
+- **Status:** aceita (dono, 2026-10-12)
 - **Data:** 2026-10-12
 - **Relacionada:** ADR 0006 (formato do artefato — imagem de contêiner),
   ADR 0009 (object storage — R2), ADR 0015 (emenda: build dirigido por

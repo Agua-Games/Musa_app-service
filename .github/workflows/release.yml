@@ -80,7 +80,35 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push the artifact image
+      - name: Build the artifact image (local, not pushed yet)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: |
+            ghcr.io/agua-games/musa-app:${{ needs.gate.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # M4.1: the image must prove its hardening before it is published —
+      # the whole virtual-client suite runs INSIDE the fresh image with a
+      # read-only root filesystem, as the unprivileged default user.
+      - name: Smoke: image runs as the non-root musa user
+        run: |
+          docker run --rm --entrypoint id \
+            ghcr.io/agua-games/musa-app:${{ needs.gate.outputs.version }} \
+            | grep -q "uid=1000(musa)"
+
+      - name: Smoke: beta suite green with read-only root FS
+        run: |
+          docker run --rm --read-only --tmpfs /tmp \
+            -v "$PWD/builder/tests/fixtures/client-ok:/fixture:ro" \
+            --entrypoint python \
+            ghcr.io/agua-games/musa-app:${{ needs.gate.outputs.version }} \
+            -m beta.run_beta --repo /fixture --out /tmp/beta-out --suite all
+
+      - name: Push the verified image to the registry
         uses: docker/build-push-action@v6
         with:
           context: .
