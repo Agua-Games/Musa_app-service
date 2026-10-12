@@ -40,6 +40,12 @@
 
 ### M4.0 — Decisão de hosting (ADR 0017)
 
+> **Estado (2026-10-12): ADR 0017 rascunhada, aguardando aprovação do dono.**
+> Proposta: Container Apps (consumption) para a API dinâmica (grant gratuito +
+> scale-to-zero casam com o padrão de rajadas do admin), site no Pages e assets
+> no R2 sem mudança; gatilho registrado para migrar ao App Service B1 quando
+> houver necessidade medida. Tabela de custo 1/10/50 museus na ADR.
+
 Decidir por escrito, com os números do M3.5: **App Service (B1)** vs.
 **Container Apps (consumption)** vs. híbrido (API no Container Apps + site
 estático no Pages/R2). Inclui estratégia de domínio: `musa.app` + subdomínio
