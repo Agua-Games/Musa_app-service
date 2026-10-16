@@ -542,6 +542,14 @@ pode correr em paralelo.
 > guard test; workflows do DemoMuseum passam `--user root` explícito.
 > **Tabela de custos consolidada em `docs/M4_custos.md` (2026-10-12):** 2/5/10/
 > 20 museus ≈ R$ 23/48/88/169 por mês — para orçamentos e precificação.
+> **M4.2 concluída (2026-10-16):** `POST /assistant/ask` existe e é a porta
+> única do assistente — gate de módulo (404 stealth), Turnstile opcional,
+> rate limit por IP, respostas prontas (saudação/visão geral), filtro
+> off-topic sem chamar o provedor (stopwords não contam), cota diária de
+> tokens, circuit breaker de provedor e telemetria de custo com IP hasheado.
+> Provedor: DeepSeek (`DEEPSEEK_API_KEY`) ou fake determinístico
+> (`MUSA_LLM_FAKE=1` — beta/CI nunca gastam token real). Suítes: builder 133,
+> mcp_server 13, beta 15 (misuse agora com 12 cenários).
 
 **Segurança e conformidade**
 - [ ] Gating **auditável**: um Bronze comprovadamente não recebe dados do Gold (teste, não promessa).
@@ -553,6 +561,9 @@ pode correr em paralelo.
       rate limit por IP/sessão, cota de tokens por museu/dia com circuit breaker,
       Turnstile (grátis) no endpoint de chat, grounding rígido (só responde com o
       acervo recuperado; off-topic é recusado), telemetria de custo por tenant com alerta.
+      **→ Implementado na M4.2 (2026-10-16)** — ver `docs/M4_plano.md` §M4.2 e
+      `builder/musa_build/assistant.py`. Pendente apenas: alerta de anomalia
+      (hoje a telemetria registra; o alerta vem com o monitoramento da M4.4).
 - [ ] **LGPD**: dados de visitante, áudio de quiosque, retenção e exclusão.
 
 **Operação**

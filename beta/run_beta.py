@@ -77,6 +77,10 @@ def run(repo: Path, seed: int, routines: list[str], out_dir: Path,
         base_url = f"http://127.0.0.1:{port}"
         import os
         env = dict(os.environ, MUSA_ADMIN_TOKEN=token)
+        # The beta never touches a real LLM provider: the fake client keeps
+        # the assistant pipeline exercised with ~zero cost (M4.2), even if
+        # DEEPSEEK_API_KEY happens to be set in the dev environment.
+        env["MUSA_LLM_FAKE"] = "1"
         env["PYTHONPATH"] = str(BUILDER_DIR) + os.pathsep + env.get("PYTHONPATH", "")
         server = subprocess.Popen(
             [sys.executable, "-m", "musa_build", "serve",

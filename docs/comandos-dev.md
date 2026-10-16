@@ -51,6 +51,27 @@ cd builder && python -m musa_build serve --repo "H:\Musa_app-service\DemoMuseum"
 cd builder && python -m musa_build serve --repo <repo> --data-dir %TEMP%\musa-overlay --port 8000
 ```
 
+## Assistente (M4.2) — POST /assistant/ask
+
+```bash
+# Modo dev SEM gastar token: provedor fake determinístico (respostas simuladas,
+# pipeline completo exercitado). É o modo que o beta/CI usam, sempre.
+set MUSA_LLM_FAKE=1
+
+# Modo real: provedor DeepSeek (a chave NUNCA vai para o repo do cliente nem
+# para o browser — só no processo do serve).
+set DEEPSEEK_API_KEY=sk-...
+set MUSA_DEEPSEEK_MODEL=deepseek-chat        :: opcional; padrão deepseek-chat
+
+# Knobs anti-abuso (todos opcionais, com padrões sensatos):
+set MUSA_ASSISTANT_RPM=10                    :: rate limit por IP (req/min)
+set MUSA_ASSISTANT_DAILY_TOKENS=200000       :: cota de tokens por museu/dia UTC
+set MUSA_TURNSTILE_SECRET=...                :: só com isto o Turnstile é exigido
+
+# Telemetria: todo ask loga o evento assistant_ask (outcome, tokens,
+# cost_usd_estimate, hash do IP — nunca o IP cru).
+```
+
 ## Upload de assets para o R2 (Cloudflare)
 
 ```bash

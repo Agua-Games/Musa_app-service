@@ -39,6 +39,7 @@ are not served. A valid admin token additionally sees the tenant's DRAFTS
 (tier gating still applies — fail closed on entitlements, always).
 """
 
+import hashlib
 import hmac
 import json
 import os
@@ -55,6 +56,7 @@ from fastapi.responses import FileResponse
 
 from . import CONTRACT_VERSION, __version__
 from .api import _envelope, _tokenize, build_search_index
+from .assistant import QUESTION_MAX_CHARS, AssistantService
 from .build import (
     BuildFailure,
     _is_url,
@@ -84,6 +86,7 @@ class ServeState:
     museum_id: str
     generated: str
     tier: str
+    modules: list[str]
     store: Store | None
     all_collections: list[dict]  # seed + overlay, ungated
     all_items: list[dict]        # seed + overlay, ungated
@@ -213,6 +216,7 @@ def load_state(repo: Path, *, data_dir: Path | None = None,
         museum_id=report.museum_id,
         generated=datetime.now(timezone.utc).date().isoformat(),
         tier=entitlement["tier"],
+        modules=list(entitlement["modules"]),
         store=store,
         all_collections=all_collections,
         all_items=all_items,
@@ -239,8 +243,13 @@ def load_state(repo: Path, *, data_dir: Path | None = None,
 # ------------------------------------------------------------------ app ----
 
 def create_app(repo: Path, *, data_dir: Path | None = None,
-               entitlements_key: Path | None = None) -> FastAPI:
-    """Build the FastAPI app for one client repository (one tenant)."""
+               entitlements_key: Path | None = None, llm_client=None,
+               assistant_service: AssistantService | None = None) -> FastAPI:
+    """Build the FastAPI app for one client repository (one tenant).
+
+    ``assistant_service`` (tests) trumps ``llm_client`` (short-hand) trumps
+    the environment (DEEPSEEK_API_KEY / MUSA_LLM_FAKE — see assistant.py).
+    """
     state = load_state(repo, data_dir=data_dir, entitlements_key=entitlements_key)
     app = FastAPI(title=f"MUSA collection API — {state.museum_id}", version=__version__)
     app.state.serve = state
@@ -362,6 +371,50 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
     @app.get("/plans")
     def list_plans():
         return envelope(state.plans, count=len(state.plans))
+
+    # ---- assistant (M4.2) ---------------------------------------------------
+    # The anti-abuse stack (turnstile, per-IP rate limit, canned answers,
+    # off-topic filter, daily token quota, provider circuit breaker) lives in
+    # assistant.py — cheapest layer first, provider called last.
+    assistant = assistant_service or AssistantService.from_env(llm_client=llm_client)
+
+    @app.post("/assistant/ask")
+    def assistant_ask(body: dict, request: Request):
+        if "assistant" not in state.modules:
+            # Same stealth rule as the content gate: no module, no endpoint.
+            raise HTTPException(status_code=404, detail="not found")
+        question = str(body.get("question") or "").strip()
+        if not question:
+            raise HTTPException(status_code=422, detail="question is required")
+        if len(question) > QUESTION_MAX_CHARS:
+            raise HTTPException(
+                status_code=422,
+                detail=f"question too long (max {QUESTION_MAX_CHARS} chars)")
+        client_ip = request.client.host if request.client else "unknown"
+        context = body.get("context") or {}
+        result = assistant.ask(
+            state=state,
+            question=question,
+            client_ip=client_ip,
+            turnstile_token=body.get("turnstile_token") or context.get("turnstile_token"),
+        )
+        state.logger.log(
+            "assistant_ask",
+            ip_hash=hashlib.sha256(client_ip.encode()).hexdigest()[:12],
+            outcome=result.outcome,
+            tokens_in=result.tokens_in,
+            tokens_out=result.tokens_out,
+            cache_hit=result.cache_hit,
+            cost_usd_estimate=round(result.cost_usd, 8),
+        )
+        if result.status != 200:
+            headers = ({"Retry-After": str(result.retry_after)}
+                       if result.retry_after else None)
+            raise HTTPException(status_code=result.status, detail=result.detail,
+                                headers=headers)
+        # No envelope: the storefront's chat UI expects this shape verbatim
+        # (source/assets/js/main.js).
+        return {"answer": result.answer, "suggestedArtifacts": result.suggested}
 
     # ---- writes (token required) ----------------------------------------------
     @app.post("/auth/login", status_code=200)

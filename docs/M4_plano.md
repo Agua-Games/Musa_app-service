@@ -90,6 +90,39 @@ a chave do LLM nunca sai do nosso backend:
 (429 após N), cota diária estourada (circuit breaker abre e registra), pergunta
 off-topic recusada. Custos simulados, sem chamada real ao provedor no CI.
 
+> **M4.2 CONCLUÍDA (2026-10-16).** Implementação:
+>
+> - **Endpoint novo** `POST /assistant/ask` (`builder/musa_build/serve.py`) —
+>   o frontend já o esperava (`source/assets/js/api.js`); resposta
+>   `{answer, suggestedArtifacts}` sem envelope. Gate de módulo: museu sem
+>   `assistant` nos entitlements recebe **404** (stealth, como o gate de
+>   conteúdo). `ServeState` ganhou o campo `modules`.
+> - **Stack anti-abuso** em `builder/musa_build/assistant.py`, da camada mais
+>   barata à mais cara: Turnstile (só com `MUSA_TURNSTILE_SECRET`; fail-closed)
+>   → rate limit por IP (`MUSA_ASSISTANT_RPM`, padrão 10/min, janela deslizante)
+>   → respostas prontas (saudação, visão geral do acervo — custo zero) →
+>   **filtro off-topic** (pergunta sem nenhum token no índice público é
+>   recusada **sem chamar o provedor** — a proteção de custo mais forte;
+>   stopwords PT/EN nunca contam como evidência) → cota diária de tokens
+>   (`MUSA_ASSISTANT_DAILY_TOKENS`, padrão 200 mil/dia UTC) → circuit breaker
+>   de provedor (5 falhas seguidas abrem por 5 min, 503 sem chamar o provedor).
+> - **Grounding**: o provedor só vê as fichas públicas recuperadas do índice +
+>   system prompt que descreve os campos do card e proíbe inventar além delas
+>   (mesma regra "contexto antes de conteúdo" do pipeline OCR, M2.6).
+> - **Provedor**: `DeepSeekClient` (`DEEPSEEK_API_KEY`, modelo via
+>   `MUSA_DEEPSEEK_MODEL`, padrão `deepseek-chat`) ou `FakeLLMClient`
+>   determinístico (`MUSA_LLM_FAKE=1` — dev/testes/beta, custo ~zero).
+> - **Telemetria**: todo ask loga `assistant_ask` com outcome, tokens,
+>   cache-hit, `cost_usd_estimate` (tabela off-peak DeepSeek, ver
+>   `docs/M4_custos.md`) e **hash do IP** (nunca o IP cru — LGPD).
+> - **Divisão de verificação decidida**: rate limit e off-topic vão ao
+>   `beta/misuse.py` (cenários 11 e 12, este último por último para a janela
+>   de rate limit não contaminar os demais); cota, breaker e Turnstile ficam
+>   nos testes unitários (`builder/tests/test_assistant.py`, 21 testes) —
+>   o misuse não controla env por cenário.
+> - Suítes: builder 133 verdes, beta 15 verdes. API reference regenerada
+>   (seção "Assistente (M4.2)").
+
 ### M4.3 — Segurança auditável
 
 1. **Auditoria de gating como artefato**: script que prova, com saída legível

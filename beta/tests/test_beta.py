@@ -39,7 +39,11 @@ def running_server():
     root = Path(tmp.name)
     shutil.copytree(CLIENT_OK, root / "repo")
     old = os.environ.get("MUSA_ADMIN_TOKEN")
+    old_fake = os.environ.get("MUSA_LLM_FAKE")
     os.environ["MUSA_ADMIN_TOKEN"] = TOKEN
+    # The assistant pipeline runs against the deterministic fake provider —
+    # never a real API key (M4.2).
+    os.environ["MUSA_LLM_FAKE"] = "1"
     app = create_app(root / "repo", data_dir=root / "overlay")
     port = _free_port()
     server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=port,
@@ -67,6 +71,10 @@ def running_server():
             os.environ.pop("MUSA_ADMIN_TOKEN", None)
         else:
             os.environ["MUSA_ADMIN_TOKEN"] = old
+        if old_fake is None:
+            os.environ.pop("MUSA_LLM_FAKE", None)
+        else:
+            os.environ["MUSA_LLM_FAKE"] = old_fake
         tmp.cleanup()
 
 
@@ -121,10 +129,10 @@ class FullRunTest(unittest.TestCase):
 
 
 class MisuseTest(unittest.TestCase):
-    """M3.2: the 10 hostile scenarios against the fixture museum (silver
-    tier). Divergences marked falha are the current known bugs — when a fix
-    lands, flip the expectation here (these are the acceptance tests of the
-    fixes)."""
+    """M3.2: the hostile scenarios against the fixture museum (silver
+    tier) — 10 original + 2 assistant anti-abuse (M4.2). Divergences marked
+    falha are the current known bugs — when a fix lands, flip the expectation
+    here (these are the acceptance tests of the fixes)."""
 
     def _run(self):
         from beta.misuse import MisuseRunner
@@ -140,7 +148,7 @@ class MisuseTest(unittest.TestCase):
         self.assertEqual(red_line[0].resultado, "ok",
                          f"RED LINE: {red_line[0].detalhe}")
         scenarios = {e.cenario for e in events} - {"linha-vermelha"}
-        self.assertEqual(len(scenarios), 10, f"missing scenarios: {scenarios}")
+        self.assertEqual(len(scenarios), 12, f"missing scenarios: {scenarios}")
 
     def test_stable_rejections(self):
         events = self._run()
@@ -157,6 +165,9 @@ class MisuseTest(unittest.TestCase):
         # upload scenarios hit the known API gap for now
         for cen in ("arquivo-grande", "mime-errado", "glb-corrompido", "upload-interrompido"):
             self.assertEqual(by[cen][0].resultado, "achado-gap", cen)
+        # assistant anti-abuse (M4.2): off-topic refused, flood rate-limited
+        self.assertEqual(by["pergunta-off-topic"][0].resultado, "ok")
+        self.assertEqual(by["bot-martelando-chat"][0].resultado, "ok")
 
     def test_fixed_divergences_now_pass(self):
         """The three M3.2 findings were fixed (409 on duplicate create,

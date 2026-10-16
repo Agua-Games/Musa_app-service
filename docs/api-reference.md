@@ -6,7 +6,7 @@ Plataforma **v0.4.0** · contrato do card **v1.1.0** (`schemas/card/v1/card.sche
 
 ## Convenções
 
-- **Envelope**: toda rota de dados responde `{ data, meta }` — `meta` carrega `contract`, `generated`, `museum` e `count` (listas). Exceções: `/health`, `/schema`, `/auth/login` e os binários de `/assets/…`. Detalhes em `docs/api-estatica.md`.
+- **Envelope**: toda rota de dados responde `{ data, meta }` — `meta` carrega `contract`, `generated`, `museum` e `count` (listas). Exceções: `/health`, `/schema`, `/auth/login`, `/assistant/ask` e os binários de `/assets/…`. Detalhes em `docs/api-estatica.md`.
 - **Auth**: escritas e visão de rascunhos exigem `Authorization: Bearer <MUSA_ADMIN_TOKEN>`. Sem token configurado a instância é read-only e escritas respondem 503.
 - **Portão (gate)**: registros `draft` ou acima do tier do museu são 404 para o público — não vazam nem a existência.
 - **Erros**: corpo `{ "detail": "…" }` (FastAPI). Tabela completa por endpoint abaixo; resumo:
@@ -14,10 +14,12 @@ Plataforma **v0.4.0** · contrato do card **v1.1.0** (`schemas/card/v1/card.sche
   | Código | Significado |
   |---|---|
   | 401 | token ausente/inválido em rota protegida |
+  | 403 | verificação anti-robô (Turnstile) falhou |
   | 404 | recurso inexistente **ou** excluído pelo portão |
   | 409 | conflito: duplicado ou `_rev` estagnado |
   | 422 | validação (slug, coleção, contrato) — a mensagem aponta o campo |
-  | 503 | instância sem `MUSA_ADMIN_TOKEN` (writes disabled) |
+  | 429 | rate limit ou cota diária do assistente (header `Retry-After`) |
+  | 503 | instância sem `MUSA_ADMIN_TOKEN` (writes disabled) ou assistente indisponível |
 
 ## Ops
 
@@ -93,6 +95,21 @@ Planos de assinatura exibidos pelo site do museu.
 
 - **Auth**: público
 - **Resposta**: envelope com lista de planos
+
+## Assistente (M4.2)
+
+### `POST /assistant/ask`
+
+Pergunta em linguagem natural sobre o acervo (módulo `assistant`). A resposta é **grounded**: o provedor de LLM só recebe as fichas públicas recuperadas do índice de busca e um system prompt que descreve os campos do card e proíbe inventar além delas. Camadas anti-abuso, da mais barata à mais cara: Turnstile (só com `MUSA_TURNSTILE_SECRET` configurado), rate limit por IP (`MUSA_ASSISTANT_RPM`, padrão 10/min), respostas prontas para saudações e visão geral do acervo (custo zero), recusa de off-topic **sem chamar o provedor**, cota diária de tokens por museu (`MUSA_ASSISTANT_DAILY_TOKENS`, padrão 200 mil) e circuit breaker de provedor (5 falhas seguidas abrem por 5 min). Corpo: `{question, context?}`; o token do Turnstile vai em `turnstile_token` ou `context.turnstile_token`. Cada ask é logado (`assistant_ask`) com estimativa de custo e hash do IP (nunca o IP cru). Sem provedor configurado (`DEEPSEEK_API_KEY` ou `MUSA_LLM_FAKE=1`) → 503.
+
+- **Auth**: público (rate-limited)
+- **Resposta**: `{"answer": "…", "suggestedArtifacts": [{id, title}]}` — **sem envelope**
+- **Erros**:
+  - `403` — verificação Turnstile falhou (quando configurada)
+  - `404` — museu sem o módulo `assistant` — não vaza nem a existência
+  - `422` — `question` vazia ou acima de 2000 caracteres
+  - `429` — rate limit por IP **ou** cota diária de tokens esgotada (header `Retry-After`)
+  - `503` — assistente não configurado, ou provedor fora do ar (circuit breaker aberto)
 
 ## Escrita (admin)
 

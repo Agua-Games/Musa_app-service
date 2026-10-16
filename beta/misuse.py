@@ -1,4 +1,5 @@
-"""M3.2 — misuse generator: 10 hostile scenarios against the serve API.
+"""M3.2 — misuse generator: hostile scenarios against the serve API
+(10 original + 2 assistant anti-abuse scenarios from M4.2).
 
 Each scenario has an explicit expected outcome (accept gracefully or reject
 with a useful error — never corrupt state, never lose data). Three verdicts:
@@ -18,6 +19,7 @@ import json
 import random
 import string
 import threading
+import time
 from dataclasses import dataclass
 
 from .client import ApiClient
@@ -343,6 +345,57 @@ class MisuseRunner:
                          f"restored public HTTP {probe_on.status} (want 200)",
                          invariantes=self._suite())
 
+    def s11_pergunta_off_topic(self) -> None:
+        """Off-topic question -> grounded refusal, zero provider cost, no crash.
+
+        The unit tests (builder/tests/test_assistant.py) prove the refusal
+        never reaches the LLM; here we prove the endpoint holds up through
+        the real HTTP path with the fake provider wired (MUSA_LLM_FAKE=1).
+        """
+        res = self.client.request(
+            "POST", "/assistant/ask",
+            json={"question": "quem ganhou o campeonato de futebol xyzqw zzz?"})
+        answer = (res.body or {}).get("answer", "")
+        refused = "Só consigo responder" in answer
+        if res.status == 200 and refused:
+            self._record("pergunta-off-topic", "ask-off-topic", "/assistant/ask",
+                         "ok", res.latency_ms,
+                         "200 with the canned refusal — no provider call, no crash",
+                         invariantes=self._suite())
+        else:
+            self._record("pergunta-off-topic", "ask-off-topic", "/assistant/ask",
+                         "falha", res.latency_ms,
+                         f"expected 200 + canned refusal, got HTTP {res.status}: "
+                         f"{str(res.body)[:160]}",
+                         invariantes=self._suite())
+
+    def s12_bot_martelando_chat(self) -> None:
+        """Bot hammering the assistant -> 429s appear, service survives.
+
+        Runs LAST in the barrage on purpose: the per-IP window it fills must
+        not interfere with the other scenarios. 15 asks against a 10/min
+        limit must yield a mix of 200 and 429 — nothing else — and /health
+        must stay green afterwards.
+        """
+        cols = self.client.collections().body["data"]
+        items = self.client.collection_items(cols[0]["id"]).body["data"]
+        title = items[0].get("titulo") or items[0]["asset_id"]
+        codes: list[int] = []
+        t0 = time.perf_counter()
+        for _ in range(15):
+            res = self.client.request("POST", "/assistant/ask",
+                                      json={"question": f"me fale sobre {title}"})
+            codes.append(res.status)
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        health = self.client.health(timeout=1.5)
+        ok = (200 in codes and 429 in codes
+              and all(c in (200, 429) for c in codes) and health.ok)
+        self._record("bot-martelando-chat", "flood-assistant", "/assistant/ask",
+                     "ok" if ok else "falha", elapsed_ms,
+                     f"15 asks -> {sorted(set(codes))} "
+                     f"({codes.count(429)}x 429); health after: {health.status}",
+                     invariantes=self._suite())
+
     SCENARIOS = [
         ("01-arquivo-grande", s01_arquivo_grande),
         ("02-mime-errado", s02_mime_errado),
@@ -354,6 +407,8 @@ class MisuseRunner:
         ("08-edicoes-concorrentes", s08_edicoes_concorrentes),
         ("09-token-invalido", s09_token_invalido),
         ("10-downgrade-tier", s10_downgrade_tier),
+        ("11-pergunta-off-topic", s11_pergunta_off_topic),
+        ("12-bot-martelando-chat", s12_bot_martelando_chat),
     ]
 
     def run_all(self) -> list[Event]:
