@@ -550,10 +550,20 @@ pode correr em paralelo.
 > Provedor: DeepSeek (`DEEPSEEK_API_KEY`) ou fake determinístico
 > (`MUSA_LLM_FAKE=1` — beta/CI nunca gastam token real). Suítes: builder 133,
 > mcp_server 13, beta 15 (misuse agora com 12 cenários).
+> **M4.3 concluída (2026-10-16):** `musa-build audit` prova o gating sonda a
+> sonda e gera relatório PT anexável a contrato (DemoMuseum APROVADO, 1071
+> sondas — `docs/auditoria-gating-demo-museum.md`); rate limits por IP na
+> escrita (60/min) e no login (5/min, anti-brute-force); a imagem publicada
+> exige entitlements assinados (`MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1` no
+> Dockerfile — pin dev não-assinado vira erro só ali); `docs/runbook.md`
+> semeado com a rotação de todas as credenciais.
 
 **Segurança e conformidade**
-- [ ] Gating **auditável**: um Bronze comprovadamente não recebe dados do Gold (teste, não promessa).
-- [ ] Tokens por tenant, rate limits, assinatura de entitlements.
+- [x] Gating **auditável**: um Bronze comprovadamente não recebe dados do Gold (teste, não promessa)
+      — **M4.3 (2026-10-16)**: `musa-build audit`, relatório em `docs/auditoria-gating-demo-museum.md`.
+- [x] Tokens por tenant, rate limits, assinatura de entitlements
+      — token por tenant desde M1.4; **M4.3**: rate limits de escrita (60/min) e login (5/min)
+      por IP; imagem publicada exige entitlements assinados (`MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1`).
 - [ ] **Anti-abuso do assistente** (preocupação do dono, 2026-10-08): chave de LLM
       **nunca** no repo do cliente nem no browser — o site no Pages é estático; quem chama
       o provedor é o nosso backend, server-side. Política em camadas contra saturação

@@ -136,6 +136,36 @@ off-topic recusada. Custos simulados, sem chamada real ao provedor no CI.
 **Verificação:** relatório de auditoria gerado contra o DemoMuseum; teste que
 a imagem de release rejeita entitlements não assinados.
 
+> **M4.3 CONCLUÍDA (2026-10-16).** Implementação:
+>
+> - **`musa-build audit`** (`builder/musa_build/audit.py`): sobe o app real
+>   in-process (TestClient) e sonda a superfície pública HTTP — 6 verificações:
+>   contrato válido item a item, rascunhos invisíveis (JSON **e** arquivos),
+>   nada acima do tier (itens, arquivos e coleções), **controle positivo**
+>   (com token o rascunho aparece — prova que o 404 é decisão do portão, não
+>   dado faltando — e o tier não relaxa nem para admin), busca limpa e
+>   `card.json` não baixável. Relatório em PT claro (`render_markdown`),
+>   anexável a contrato, com nota honesta quando a prova de tier é vacuosa
+>   (museu gold). Exit 1 em qualquer vazamento.
+> - **Relatório real gerado**: `docs/auditoria-gating-demo-museum.md` —
+>   DemoMuseum APROVADO, 1071 sondas (321 públicos válidos, 143 rascunhos
+>   invisíveis).
+> - **Rate limits por IP** (`MUSA_WRITE_RPM` padrão 60/min em POST /items e
+>   /collections; `MUSA_LOGIN_RPM` padrão 5/min em /auth/login — o alvo de
+>   brute force do token do tenant; 0 desliga, para o harness de carga).
+>   O limiter é o mesmo `RateLimiter` da M4.2; 429 com `Retry-After`.
+> - **Release exige assinatura**: `MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1` no
+>   Dockerfile da imagem — pin dev não-assinado vira erro ali (fecha o buraco
+>   de auto-promoção via `musa: 0.0.0-unreleased`). O smoke gate do release
+>   desliga só para o fixture (dev-pin por desenho). Dev local no código-fonte
+>   mantém o warning.
+> - **Runbook semeado**: `docs/runbook.md` com rotação de todas as
+>   credenciais (admin token, DeepSeek, Turnstile, R2 — com a pendência do
+>   secret exposto —, Ed25519, GHCR PAT); M4.4 expande.
+> - Testes: +15 (audit 6, write limits 6, entitlements 3). Achado de teste:
+>   limiter in-memory vaza entre métodos de uma classe unittest — app por
+>   método, não por classe.
+
 ### M4.4 — Operação: backup, DR e runbook
 
 1. **Backup local** do overlay `.musa/` (pendência assumida na M3.6: RPO do

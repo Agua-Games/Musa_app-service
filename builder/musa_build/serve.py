@@ -244,11 +244,16 @@ def load_state(repo: Path, *, data_dir: Path | None = None,
 
 def create_app(repo: Path, *, data_dir: Path | None = None,
                entitlements_key: Path | None = None, llm_client=None,
-               assistant_service: AssistantService | None = None) -> FastAPI:
+               assistant_service: AssistantService | None = None,
+               write_rpm: int | None = None,
+               login_rpm: int | None = None) -> FastAPI:
     """Build the FastAPI app for one client repository (one tenant).
 
     ``assistant_service`` (tests) trumps ``llm_client`` (short-hand) trumps
     the environment (DEEPSEEK_API_KEY / MUSA_LLM_FAKE — see assistant.py).
+    ``write_rpm``/``login_rpm``: per-IP rate limits for the write API and
+    the login endpoint (M4.3); None reads MUSA_WRITE_RPM (default 60) and
+    MUSA_LOGIN_RPM (default 5); 0 disables.
     """
     state = load_state(repo, data_dir=data_dir, entitlements_key=entitlements_key)
     app = FastAPI(title=f"MUSA collection API — {state.museum_id}", version=__version__)
@@ -267,6 +272,30 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
     # ---- auth (per-tenant bearer token) -----------------------------------
     def configured_token() -> str | None:
         return os.environ.get("MUSA_ADMIN_TOKEN") or None
+
+    # M4.3: per-IP rate limits on the endpoints worth attacking — login
+    # (brute force on the tenant token) and writes (overlay churn). Reads
+    # stay unlimited; the assistant has its own stack (assistant.py).
+    def _rpm(env_name: str, default: int, override: int | None) -> int:
+        if override is not None:
+            return override
+        return int(os.environ.get(env_name, str(default)))
+
+    from .assistant import RateLimiter
+    login_limiter = RateLimiter(_rpm("MUSA_LOGIN_RPM", 5, login_rpm))
+    write_limiter = RateLimiter(_rpm("MUSA_WRITE_RPM", 60, write_rpm))
+
+    def client_ip(request: Request) -> str:
+        return request.client.host if request.client else "unknown"
+
+    def check_limit(limiter: RateLimiter, request: Request, what: str) -> None:
+        if limiter.rpm <= 0:
+            return  # 0 disables (load harness, benchmarks)
+        if not limiter.allow(client_ip(request)):
+            raise HTTPException(
+                status_code=429,
+                detail=f"too many {what} attempts; wait a moment and try again",
+                headers={"Retry-After": "60"})
 
     def is_admin(request: Request) -> bool:
         token = configured_token()
@@ -418,9 +447,11 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
 
     # ---- writes (token required) ----------------------------------------------
     @app.post("/auth/login", status_code=200)
-    def login(body: dict):
+    def login(body: dict, request: Request):
         # M1.4: one token per tenant; the password field carries it. Real
         # accounts (roles, SSO) arrive with the backend-of-scale (ADR 0008).
+        # M4.3: rate-limited per IP — this endpoint is the brute-force target.
+        check_limit(login_limiter, request, "login")
         if not configured_token():
             raise HTTPException(status_code=503, detail="this instance has no MUSA_ADMIN_TOKEN configured")
         if not hmac.compare_digest(str(body.get("password") or ""), configured_token()):
@@ -445,6 +476,7 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
 
     @app.post("/collections", status_code=201)
     def create_collection(body: dict, request: Request):
+        check_limit(write_limiter, request, "write")
         require_admin(request)
         with write_lock:
             collection_id = str(body.get("id") or "")
@@ -490,6 +522,7 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
           read; a stale _rev is a 409. Patches without _rev are
           last-write-wins by design.
         """
+        check_limit(write_limiter, request, "write")
         require_admin(request)
         asset_id = str(body.get("asset_id") or "")
         if not ID_PATTERN.match(asset_id):

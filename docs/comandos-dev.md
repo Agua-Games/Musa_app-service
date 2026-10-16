@@ -52,7 +52,6 @@ cd builder && python -m musa_build serve --repo <repo> --data-dir %TEMP%\musa-ov
 ```
 
 ## Assistente (M4.2) — POST /assistant/ask
-
 ```bash
 # Modo dev SEM gastar token: provedor fake determinístico (respostas simuladas,
 # pipeline completo exercitado). É o modo que o beta/CI usam, sempre.
@@ -70,6 +69,26 @@ set MUSA_TURNSTILE_SECRET=...                :: só com isto o Turnstile é exig
 
 # Telemetria: todo ask loga o evento assistant_ask (outcome, tokens,
 # cost_usd_estimate, hash do IP — nunca o IP cru).
+```
+
+## Segurança auditável (M4.3)
+
+```bash
+# Auditoria de gating: PROVA, sonda a sonda, que nenhum rascunho e nada
+# acima do tier vaza para o público (JSON, arquivos, busca) — com controle
+# positivo (admin vê rascunhos; tier nunca relaxa). Gera relatório em PT
+# claro, anexável a contrato. Exit 1 se houver qualquer vazamento.
+cd builder && python -m musa_build audit --repo "H:\Musa_app-service\DemoMuseum" --out ..\docs\auditoria-gating-demo-museum.md
+
+# Rate limits de escrita/login (por IP; 0 desliga — uso do harness de carga):
+set MUSA_WRITE_RPM=60     :: padrão 60/min — POST /items e /collections
+set MUSA_LOGIN_RPM=5      :: padrão 5/min — POST /auth/login (anti-brute-force)
+
+# Entitlements assinados obrigatórios (a imagem publicada JÁ exporta =1;
+# local só se você quiser simular o ambiente de release):
+set MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1
+
+# Rotação de credenciais (tokens, chaves R2, DeepSeek, Ed25519): docs/runbook.md
 ```
 
 ## Upload de assets para o R2 (Cloudflare)

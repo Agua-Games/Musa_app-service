@@ -16,6 +16,7 @@ Output (the published site):
 """
 
 import json
+import os
 import shutil
 import time
 import urllib.request
@@ -102,10 +103,23 @@ def check_config(config: dict, report: BuildReport, *, entitlements_key: Path | 
         raise BuildFailure(report)
 
     # Signed entitlements (ADR 0010): release builds must verify the platform's
-    # Ed25519 signature; the dev pin keeps local iteration unsigned.
+    # Ed25519 signature; the dev pin keeps local iteration unsigned. M4.3: the
+    # release IMAGE sets MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1, closing the
+    # privilege-escalation hole where a client repo pins 0.0.0-unreleased to
+    # skip signature verification entirely — there, dev-unsigned is an error.
     log = get_logger(report)
+    require_signed = os.environ.get("MUSA_REQUIRE_SIGNED_ENTITLEMENTS") == "1"
     if pin == "0.0.0-unreleased":
         if not entitlements.get("signature"):
+            if require_signed:
+                report.fail(
+                    "museum.config.json: unsigned entitlements with the development pin "
+                    "(musa: 0.0.0-unreleased) are refused in this environment "
+                    "(MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1) — release images only build "
+                    "client repositories whose entitlements the platform has signed "
+                    "(docs/entitlements.md)"
+                )
+                raise BuildFailure(report)
             report.warn(
                 "unsigned entitlements accepted because this is a development build "
                 "(musa: 0.0.0-unreleased); release images require the platform's signature"

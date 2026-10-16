@@ -5,6 +5,7 @@ the build — the same way a contract violation does.
 """
 
 import json
+import os
 import shutil
 import tempfile
 import unittest
@@ -147,6 +148,61 @@ class BuildGateTest(unittest.TestCase):
         config["musa"] = "0.0.0-unreleased"
         config["entitlements"].pop("signature", None)
         self.config_path.write_text(json.dumps(config), encoding="utf-8")
+        report = self.build()
+        self.assertTrue(report.ok, report.errors)
+        self.assertTrue(any("unsigned entitlements" in w for w in report.warnings))
+
+
+class RequireSignedEnvTest(unittest.TestCase):
+    """M4.3: the release image sets MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1 — the
+    dev pin can no longer skip signature verification (a client repo pinning
+    0.0.0-unreleased to self-promote is the hole this closes). Local dev
+    from source keeps the unsigned-with-warning path above."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmp.name)
+        self.repo = self.tmp / "client"
+        shutil.copytree(CLIENT_OK, self.repo)  # dev pin, unsigned, as committed
+        self._old = os.environ.get("MUSA_REQUIRE_SIGNED_ENTITLEMENTS")
+        os.environ["MUSA_REQUIRE_SIGNED_ENTITLEMENTS"] = "1"
+
+    def tearDown(self):
+        if self._old is None:
+            os.environ.pop("MUSA_REQUIRE_SIGNED_ENTITLEMENTS", None)
+        else:
+            os.environ["MUSA_REQUIRE_SIGNED_ENTITLEMENTS"] = self._old
+        self._tmp.cleanup()
+
+    def build(self):
+        return build_site(self.repo, FRONTEND, self.tmp / "site")
+
+    def test_unsigned_dev_pin_fails_when_required(self):
+        with self.assertRaises(BuildFailure) as ctx:
+            self.build()
+        self.assertTrue(any("MUSA_REQUIRE_SIGNED_ENTITLEMENTS" in e
+                            for e in ctx.exception.report.errors))
+
+    def test_signed_dev_pin_still_builds_when_required(self):
+        private_b64, public_b64 = generate_keypair()
+        key_file = self.tmp / "test-public.key"
+        key_file.write_text(public_b64 + "\n", encoding="utf-8")
+        config_path = self.repo / "museum.config.json"
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        config["entitlements"].update({
+            "museum_id": "fixture-museum",
+            "issued": "2026-09-25",
+            "expires": "2999-01-01",
+        })
+        config["entitlements"]["signature"] = sign_entitlements(
+            config["entitlements"], private_b64)
+        config_path.write_text(json.dumps(config), encoding="utf-8")
+        report = build_site(self.repo, FRONTEND, self.tmp / "site",
+                            entitlements_key=key_file)
+        self.assertTrue(report.ok, report.errors)
+
+    def test_unset_env_keeps_the_warning_path(self):
+        os.environ.pop("MUSA_REQUIRE_SIGNED_ENTITLEMENTS", None)
         report = self.build()
         self.assertTrue(report.ok, report.errors)
         self.assertTrue(any("unsigned entitlements" in w for w in report.warnings))

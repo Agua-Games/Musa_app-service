@@ -18,7 +18,12 @@
    `0.0.0-unreleased`) **falham o build** se a assinatura faltar, não conferir,
    estiver expirada, ou se o `museum_id` não for o do museu. O pin de
    desenvolvimento aceita config não assinado com *warning* — é o modo de
-   iterar localmente.
+   iterar localmente. **M4.3:** a imagem publicada exporta
+   `MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1` e aí até o pin de desenvolvimento sem
+   assinatura é **erro** — fecha o buraco em que um repo cliente fixava
+   `musa: 0.0.0-unreleased` para escapar da verificação. O smoke gate do
+   release desliga a exigência só para o fixture de teste (dev-pin por
+   desenho); local, no código-fonte, o warning continua.
 
 ## O que a assinatura cobre
 

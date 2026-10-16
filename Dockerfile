@@ -58,6 +58,13 @@ COPY beta/ /app/beta/
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# M4.3: the published image refuses dev-pinned, unsigned entitlements — a
+# client repository cannot escape signature verification by pinning
+# musa: 0.0.0-unreleased (ADR 0010). Local development from source keeps the
+# unsigned path with a warning; the release smoke gate disables this ONLY for
+# the dev-pinned test fixture (see .github/workflows/release.yml).
+ENV MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1
+
 # Non-root runtime user (production default). Client CI workflows that mount
 # the repository and must write build output into it run with `--user root`
 # explicitly — batch builds as root on a throwaway runner are acceptable; the

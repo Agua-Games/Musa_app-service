@@ -43,6 +43,12 @@ class ImageHardeningTest(unittest.TestCase):
         self.assertIn("uid=1000(musa)", self.release)
         self.assertIn("-m beta.run_beta", self.release)
 
+    def test_release_image_requires_signed_entitlements(self):
+        # M4.3: the published image closes the dev-pin escape hatch; the smoke
+        # gate may only disable it for the dev-pinned test fixture.
+        self.assertIn("MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1", self.dockerfile)
+        self.assertIn("MUSA_REQUIRE_SIGNED_ENTITLEMENTS=0", self.release)
+
 
 if __name__ == "__main__":
     unittest.main()

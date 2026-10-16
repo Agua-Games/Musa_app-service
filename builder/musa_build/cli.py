@@ -87,6 +87,16 @@ def _cmd_api_reference(args) -> int:
     return api_reference.main(argv)
 
 
+def _cmd_audit(args) -> int:
+    """Gating audit (M4.3): probe-by-probe proof the gate holds, as a report."""
+    from . import audit
+
+    argv = ["--repo", args.repo]
+    if args.out:
+        argv += ["--out", args.out]
+    return audit.main(argv)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="musa-build",
@@ -124,6 +134,14 @@ def main(argv: list[str] | None = None) -> int:
     api_ref.add_argument("--check", action="store_true",
                          help="do not write; exit 1 if the doc on disk is stale")
     api_ref.set_defaults(func=_cmd_api_reference)
+
+    audit_cmd = commands.add_parser("audit",
+                                    help="gating audit (M4.3): prove, probe by probe, that no draft and "
+                                         "no above-tier record reaches the public; renders a PT report")
+    audit_cmd.add_argument("--repo", required=True, help="client repository root")
+    audit_cmd.add_argument("--out", default=None,
+                           help="write the markdown report here (default: print a summary only)")
+    audit_cmd.set_defaults(func=_cmd_audit)
 
     args = parser.parse_args(argv)
     return args.func(args)

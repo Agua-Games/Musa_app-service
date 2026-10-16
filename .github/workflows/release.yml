@@ -102,7 +102,13 @@ jobs:
 
       - name: Smoke: beta suite green with read-only root FS
         run: |
+          # MUSA_REQUIRE_SIGNED_ENTITLEMENTS=0: the image (M4.3) refuses
+          # unsigned entitlements, but the beta runs against the dev-pinned
+          # test fixture — the override applies to the fixture only, never to
+          # client repositories (DemoMuseum builds signed, as release images
+          # require).
           docker run --rm --read-only --tmpfs /tmp \
+            -e MUSA_REQUIRE_SIGNED_ENTITLEMENTS=0 \
             -v "$PWD/builder/tests/fixtures/client-ok:/fixture:ro" \
             --entrypoint python \
             ghcr.io/agua-games/musa-app:${{ needs.gate.outputs.version }} \
