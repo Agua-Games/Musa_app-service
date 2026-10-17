@@ -659,6 +659,11 @@ pode correr em paralelo.
       por expiração de entitlement sem retenção do acervo. **Pendente: revisão
       de assessoria jurídica** — checklist de pontos abertos no fim do documento.
 - [ ] Termos de uso e política de privacidade publicados.
+      — **Modelos prontos (2026-10-17)**: `docs/privacidade-modelo.md` (M4.6) +
+      `docs/termos-de-uso-modelo.md` (par novo). **Falta o último passo para
+      "publicados"**: o builder não tem mecanismo de páginas estáticas —
+      pendência registrada: `content/paginas/*.md` → `/privacidade` + `/termos`
+      com links no rodapé.
 
 **Critérios de saída**
 - [ ] Onboarding de um cliente real **ponta a ponta sem a equipe no loop** (exceto escaneamento 3D).
