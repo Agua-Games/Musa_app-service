@@ -1,10 +1,11 @@
 # Política de Privacidade — **[NOME DO MUSEU]**
 
 > **Modelo MUSA (M4.6) — adapte antes de publicar.** Substitua todos os
-> `[COLCHETES]`, revise com o jurídico do museu e publique como página do
-> site (sugestão: `/privacidade`), com link no rodapé. Esta página descreve
-> o serviço como ele é hoje: um site de acervo **sem contas de visitante,
-> sem cookies e sem analytics**.
+> `[COLCHETES]`, revise com o jurídico do museu e publique salvando como
+> `content/paginas/privacidade.md` no repo do cliente — o build gera
+> `/privacidade.html` e o rodapé ganha o link automaticamente. Esta página
+> descreve o serviço como ele é hoje: um site de acervo **sem contas de
+> visitante, sem cookies e sem analytics**.
 
 **Controlador:** [NOME DO MUSEU], CNPJ [__], [endereço]
 **Encarregado de dados (DPO):** [nome] — [e-mail]

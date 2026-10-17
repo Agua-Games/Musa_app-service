@@ -658,12 +658,13 @@ pode correr em paralelo.
       terceiros), portabilidade via formato aberto + repo do cliente, suspensão
       por expiração de entitlement sem retenção do acervo. **Pendente: revisão
       de assessoria jurídica** — checklist de pontos abertos no fim do documento.
-- [ ] Termos de uso e política de privacidade publicados.
-      — **Modelos prontos (2026-10-17)**: `docs/privacidade-modelo.md` (M4.6) +
-      `docs/termos-de-uso-modelo.md` (par novo). **Falta o último passo para
-      "publicados"**: o builder não tem mecanismo de páginas estáticas —
-      pendência registrada: `content/paginas/*.md` → `/privacidade` + `/termos`
-      com links no rodapé.
+- [x] Termos de uso e política de privacidade publicados.
+      — **Pronto e NO AR (2026-10-17)**: mecanismo de páginas estáticas no builder
+      (`content/paginas/*.md` → `<slug>.html` + coluna "Institutional" no rodapé,
+      HTML cru escapado — markdown-it `html=False` pinado); modelos em
+      `docs/privacidade-modelo.md` + `docs/termos-de-uso-modelo.md`; DemoMuseum
+      publicou as duas instanciadas (musa-app 0.6.0): `/privacidade.html` e
+      `/termos.html` verificados no ar.
 
 **Critérios de saída**
 - [ ] Onboarding de um cliente real **ponta a ponta sem a equipe no loop** (exceto escaneamento 3D).

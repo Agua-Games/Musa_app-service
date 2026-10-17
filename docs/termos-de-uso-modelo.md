@@ -107,5 +107,6 @@ regra de competência do consumidor. Dúvidas: [e-mail de contato do Museu].
 
 - [ ] Substituir `[NOME DO MUSEU]`, `[data]`, contato, cidade/foro.
 - [ ] Revisão do jurídico do museu (especialmente §5.1, loja).
-- [ ] Publicar como `/termos` com link no rodapé, ao lado de `/privacidade`
-      (ver pendência de build: páginas estáticas no pipeline — HANDOFF).
+- [ ] Publicar: salve como `content/paginas/termos.md` no repo do cliente —
+      o build gera `/termos.html` e o rodapé linka automaticamente (coluna
+      "Institutional"). O par é `content/paginas/privacidade.md`.

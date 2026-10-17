@@ -38,6 +38,17 @@ cd builder && python -m musa_build validate --repo "H:\Musa_app-service\DemoMuse
   --frontend "H:\Musa_app-service\alpha\source"
 ```
 
+## Páginas estáticas do cliente (termos, privacidade…)
+
+```
+# O cliente escreve content/paginas/<slug>.md (front matter: titulo, ordem;
+# corpo em markdown). O build emite <slug>.html na identidade visual do site
+# e lista em catalog.pages — o rodapé da landing cria os links sozinho.
+# Sempre públicas: não passam pelo gate de tier/módulo nem pelo contrato de card.
+# HTML cru no markdown é ESCAPADO (markdown-it html=False) — página de cliente
+# não injeta script. Slug inválido, sem titulo ou corpo vazio = build falha.
+```
+
 ## Servir a API dinâmica localmente (modo admin)
 
 ```bash
