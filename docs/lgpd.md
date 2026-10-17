@@ -111,5 +111,8 @@ acesso/eliminação se resolvem assim:
 - [ ] Confirmar DPAs/termos dos suboperadores (DeepSeek, Cloudflare, GitHub).
 - [ ] Se o cliente ativar módulos novos (loja com checkout, áudio de
       quiosque, analytics), reabrir este inventário **antes** do go-live.
-- [ ] Registrar quem é o controlador (o museu) e quem é o operador (a
-      plataforma) no contrato de serviço — ver HANDOFF §Comercial.
+- [x] Registrar quem é o controlador (o museu) e quem é o operador (a
+      plataforma) no contrato de serviço — **registrado (2026-10-17) no §6 da
+      minuta `docs/contrato-servico.md`** (museu = controlador, plataforma =
+      operadora, suboperadores listados, condição de go-live para módulos
+      novos). Falta a revisão jurídica da minuta.

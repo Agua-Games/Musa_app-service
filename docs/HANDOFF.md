@@ -649,6 +649,11 @@ pode correr em paralelo.
 - [ ] **Documento de IP**: o que é da plataforma, o que é do cliente, o que é de quem contribuiu. O
       material deste repositório é sensível (preços, estratégia, conversas) — mantenha tudo privado.
 - [ ] Contrato de serviço (SLA, propriedade do acervo, portabilidade e saída).
+      — **Minuta pronta (2026-10-17)**: `docs/contrato-servico.md` — estrutura
+      completa com os números medidos de SLO, tabela de IP (plataforma × museu ×
+      terceiros), portabilidade via formato aberto + repo do cliente, suspensão
+      por expiração de entitlement sem retenção do acervo. **Pendente: revisão
+      de assessoria jurídica** — checklist de pontos abertos no fim do documento.
 - [ ] Termos de uso e política de privacidade publicados.
 
 **Critérios de saída**
