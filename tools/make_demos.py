@@ -43,6 +43,94 @@ apply the client template CI (see docs/runbook.md §Onboarding in the platform
 repo) and enable Pages. Modules: {modules}.
 """
 
+# Institutional pages (the builder's static-pages feature, musa-app >= 0.6.0):
+# every demo ships privacidade + termos so the footer is complete out of the box.
+_PRIVACIDADE = """---
+titulo: Política de Privacidade
+ordem: 1
+---
+
+# Política de Privacidade — {name}
+
+> O **{name}** é um museu fictício de demonstração da plataforma MUSA.
+
+**Controlador:** {name} (museu fictício), CNPJ 00.000.000/0001-00
+**Operador da plataforma:** Agua-Games (plataforma MUSA)
+**Última atualização:** 2026-10-17
+
+## 1. O que coletamos
+
+**Quase nada — por desenho.** Todo o acervo é visitável sem conta, sem
+cookies e sem analytics. GitHub Pages e Cloudflare mantêm logs técnicos
+próprios (como IP), sob as políticas deles.
+
+## 2. Assistente de acervo (quando disponível)
+
+A pergunta é processada pelo provedor de IA (DeepSeek) **sem nenhum dado
+que identifique você**, e não fica gravada em logs. O IP é usado só em
+memória, para limitar abusos, de forma pseudonimizada.
+
+## 3. Seus direitos (LGPD)
+
+Como não mantemos dados identificáveis de visitantes, provavelmente **não
+há dados seus para exportar ou eliminar** — mas solicitações (art. 18 da
+LGPD) são sempre respondidas: privacidade@{domain}.
+
+## 4. Acervo, créditos e licenças
+
+Cada peça informa sua **licença e fonte** na própria ficha — essa é a
+informação que vale para reutilização.
+"""
+
+_TERMOS = """---
+titulo: Termos de Uso
+ordem: 2
+---
+
+# Termos de Uso — {name}
+
+> O **{name}** é um museu fictício de demonstração da plataforma MUSA.
+
+**Última atualização:** 2026-10-17
+
+## 1. Uso do site
+
+Visitação **livre e sem cadastro**. Permitido: consulta e compartilhamento
+de links para fins pessoais, educacionais e não comerciais.
+
+## 2. Direitos autorais
+
+As fichas e imagens pertencem ao Museu ou a terceiros licenciantes. **Cada
+peça informa licença e fonte na ficha** — obras CC0/domínio público seguem
+a licença indicada, não este parágrafo. Não é permitido scraping em massa
+nem uso comercial sem licença.
+
+## 3. Conduta
+
+Sem requisições automatizadas abusivas (há limite por minuto), sem uso do
+assistente para fins alheios ao acervo, sem burlar a verificação anti-robô.
+
+## 4. Assistente virtual (IA)
+
+Pode errar: respostas são informativas e a **ficha da peça é a fonte
+autoritativa**.
+
+## 5. Disposições gerais
+
+Legislação brasileira. O site é oferecido "como está", sem exclusão de
+direitos irrenunciáveis do consumidor (CDC). Privacidade: ver
+[Política de Privacidade](privacidade.html). Contato: contato@{domain}.
+"""
+
+
+def _write_pages(repo: Path, name: str, domain: str) -> None:
+    paginas = repo / "content" / "paginas"
+    paginas.mkdir(parents=True, exist_ok=True)
+    (paginas / "privacidade.md").write_text(
+        _PRIVACIDADE.format(name=name, domain=domain), encoding="utf-8")
+    (paginas / "termos.md").write_text(
+        _TERMOS.format(name=name, domain=domain), encoding="utf-8")
+
 
 def _card(asset_id: str, colecao: str, titulo: str, autor: str, tier: str,
           image: str | None = None, **extra) -> dict:
@@ -78,7 +166,7 @@ def _config(museum_id: str, name: str, tagline: str, tier: str, modules: list[st
     return {
         "museum": {"id": museum_id, "name": name, "tagline": tagline,
                    "locale": "pt-BR", "domain": f"{museum_id}.musa.example"},
-        "musa": "0.4.0",
+        "musa": "0.6.0",
         "entitlements": {
             "tier": tier,
             "modules": modules,
@@ -219,6 +307,7 @@ def main(argv: list[str] | None = None) -> int:
         (repo / ".gitignore").write_text(GITIGNORE, encoding="utf-8")
         config = json.loads((repo / "museum.config.json").read_text(encoding="utf-8"))
         ent = config["entitlements"]
+        _write_pages(repo, config["museum"]["name"], config["museum"]["domain"])
         (repo / "README.md").write_text(
             README.format(title=config["museum"]["name"], tier=ent["tier"],
                           modules=", ".join(ent["modules"]) or "nenhum"),
