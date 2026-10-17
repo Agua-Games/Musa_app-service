@@ -91,6 +91,32 @@ set MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1
 # Rotação de credenciais (tokens, chaves R2, DeepSeek, Ed25519): docs/runbook.md
 ```
 
+## Operação (M4.4) — backup/restore, DR drill, alertas
+
+```bash
+# Backup do overlay (.musa/state.db) — consistente MESMO com o serve vivo
+# (backup API do SQLite). Cria musa-backup-<museum>-<timestamp>/ com
+# state.db + manifest.json (museum_id, contagens, sha256).
+cd builder && python -m musa_build backup --repo "H:\Musa_app-service\DemoMuseum" --out "H:\Musa_app-service\backups"
+
+# Restore — recusa museum errado ou sha256 mismatch ANTES de escrever;
+# preserva o overlay atual em state.before-restore-<ts> e boot-prova o app.
+# exit 0 ok · exit 2 precondição falhou (nada foi escrito)
+cd builder && python -m musa_build restore --repo "H:\Musa_app-service\DemoMuseum" --from "H:\Musa_app-service\backups\musa-backup-<museum>-<ts>"
+
+# DR drill completo e cronometrado: edita overlay → backup → cópia off-site →
+# T0 (mata serve, apaga repo+overlay) → re-clone + restore + boot + checagem.
+# Mede RTO (meta: < 5 min, SLO M3.6). ATA de referência: docs/dr-drill-ata.md
+python tools/dr_drill.py --repo "H:\Musa_app-service\DemoMuseum"
+
+# Alertas dos SLOs sobre o log JSONL do serve — 5 regras/dia UTC:
+# custo-assistente, cota-estourada, cards-rejeitados (422), egress-assets,
+# qualquer-5xx. exit 0 limpo · exit 1 alerta · exit 2 log ausente.
+# Agende (Task Scheduler/cron) para virar notificação; canais: docs/runbook.md
+python tools/check_alerts.py serve-log.jsonl --custo-dia 0.50 --rejeicoes-dia 10 --assets-dia 50000
+type serve-log.jsonl | python tools/check_alerts.py -   :: via stdin
+```
+
 ## Upload de assets para o R2 (Cloudflare)
 
 ```bash

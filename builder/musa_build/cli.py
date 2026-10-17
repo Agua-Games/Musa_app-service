@@ -97,6 +97,20 @@ def _cmd_audit(args) -> int:
     return audit.main(argv)
 
 
+def _cmd_backup(args) -> int:
+    """Overlay backup/restore (M4.4) — delegates to musa_build.backup."""
+    from . import backup
+
+    argv = [args.action, "--repo", args.repo]
+    if args.data_dir:
+        argv += ["--data-dir", args.data_dir]
+    if args.action == "backup":
+        argv += ["--out", args.out]
+    else:
+        argv += ["--from", args.source]
+    return backup.main(argv)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="musa-build",
@@ -142,6 +156,20 @@ def main(argv: list[str] | None = None) -> int:
     audit_cmd.add_argument("--out", default=None,
                            help="write the markdown report here (default: print a summary only)")
     audit_cmd.set_defaults(func=_cmd_audit)
+
+    for action, helptext in (("backup", "back up the write overlay (.musa/state.db) with a manifest (M4.4)"),
+                             ("restore", "verify, install and boot-prove an overlay backup (M4.4)")):
+        p = commands.add_parser(action, help=helptext)
+        p.add_argument("--repo", required=True, help="client repository root")
+        p.add_argument("--data-dir", default=None,
+                       help="overlay location (default: <repo>/.musa)")
+        if action == "backup":
+            p.add_argument("--out", required=True,
+                           help="directory the backup folder is created in")
+        else:
+            p.add_argument("--from", dest="source", required=True,
+                           help="the backup directory to restore from")
+        p.set_defaults(func=_cmd_backup, action=action)
 
     args = parser.parse_args(argv)
     return args.func(args)

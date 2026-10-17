@@ -179,6 +179,34 @@ a imagem de release rejeita entitlements não assinados.
 **Verificação:** ata do DR drill com tempos medidos (meta: RTO < 5 min, do
 SLO proposto); runbook revisado executando-o de ponta a ponta.
 
+> **M4.4 CONCLUÍDA (2026-10-16).** Implementação:
+>
+> - **Backup/restore do overlay** (`builder/musa_build/backup.py` +
+>   `musa-build backup|restore`): cópia consistente pela backup API do
+>   SQLite (segura com o serve vivo), manifest com museum_id, contagens e
+>   sha256; restore recusa museum errado ou cópia corrompida **antes** de
+>   escrever, preserva o overlay atual em `state.before-restore-<ts>` e
+>   boot-prova o app no final — restore que não boota é falha, não sucesso.
+>   Fecha a pendência de RPO assumida na M3.6.
+> - **DR drill cronometrado** (`tools/dr_drill.py`, executado contra o
+>   DemoMuseum real): edita 3 registros só no overlay, backup, cópia
+>   "off-site", T0 (mata serve, apaga repo + overlay), re-clone + restore +
+>   boot + verificação. **RTO medido 4,5 s vs meta 300 s**; payload público
+>   byte-idêntico (322 itens). Ata em `docs/dr-drill-ata.md`, com limites
+>   honestos (repo pequeno, rede local, mídia no R2 fora do drill).
+> - **Alertas dos SLOs** (`builder/musa_build/alerts.py` +
+>   `tools/check_alerts.py`): 5 regras por dia UTC sobre o JSONL do serve —
+>   custo-assistente, cota-estourada, cards-rejeitados (422), egress-assets
+>   (404 não conta), qualquer-5xx. Limiares como argumentos (pontos de
+>   partida por tenant, não SLO contratual). Exit 1 = alerta, pronto para
+>   scheduler; canais documentados no runbook (CI vermelho + e-mail do
+>   Actions para build; check agendado para runtime; Azure Monitor na M4.8).
+> - **Runbook completo** (`docs/runbook.md`): onboarding de cliente em 10
+>   passos (marcando os que são só do dono), 4 cenários de incidente,
+>   rollback como re-pin de tag imutável, tabela dos 5 alertas com ações,
+>   operação de backup/restore com retenção sugerida e ensaio mensal.
+> - Testes: +13 (backup 6 — round-trip byte-idêntico incluso; alertas 7).
+
 ### M4.5 — Bateria final de testes do MVP (portão de saída)
 
 O pedido do dono (2026-10-11), já enumerado no HANDOFF §M4: edge cases de

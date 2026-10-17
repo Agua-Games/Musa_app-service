@@ -548,7 +548,7 @@ pode correr em paralelo.
 > off-topic sem chamar o provedor (stopwords não contam), cota diária de
 > tokens, circuit breaker de provedor e telemetria de custo com IP hasheado.
 > Provedor: DeepSeek (`DEEPSEEK_API_KEY`) ou fake determinístico
-> (`MUSA_LLM_FAKE=1` — beta/CI nunca gastam token real). Suítes: builder 133,
+> (`MUSA_LLM_FAKE=1` — beta/CI nunca gastam token real). Suítes: builder 162,
 > mcp_server 13, beta 15 (misuse agora com 12 cenários).
 > **M4.3 concluída (2026-10-16):** `musa-build audit` prova o gating sonda a
 > sonda e gera relatório PT anexável a contrato (DemoMuseum APROVADO, 1071
@@ -557,6 +557,14 @@ pode correr em paralelo.
 > exige entitlements assinados (`MUSA_REQUIRE_SIGNED_ENTITLEMENTS=1` no
 > Dockerfile — pin dev não-assinado vira erro só ali); `docs/runbook.md`
 > semeado com a rotação de todas as credenciais.
+> **M4.4 concluída (2026-10-16):** backup/restore do overlay `.musa/`
+> (`musa-build backup|restore` — cópia consistente com o serve vivo, restore
+> recusa museum errado/corrupção antes de escrever e boot-prova no final);
+> DR drill cronometrado contra o DemoMuseum real — **RTO 4,5 s vs meta 5 min**,
+> ata em `docs/dr-drill-ata.md`; 5 regras de alerta dos SLOs sobre o log do
+> serve (`tools/check_alerts.py` — custo-assistente, cota-estourada,
+> cards-rejeitados, egress-assets, 5xx); runbook completo (onboarding em 10
+> passos, incidentes, rollback como re-pin, alertas, backup/restore).
 
 **Segurança e conformidade**
 - [x] Gating **auditável**: um Bronze comprovadamente não recebe dados do Gold (teste, não promessa)
@@ -572,15 +580,21 @@ pode correr em paralelo.
       Turnstile (grátis) no endpoint de chat, grounding rígido (só responde com o
       acervo recuperado; off-topic é recusado), telemetria de custo por tenant com alerta.
       **→ Implementado na M4.2 (2026-10-16)** — ver `docs/M4_plano.md` §M4.2 e
-      `builder/musa_build/assistant.py`. Pendente apenas: alerta de anomalia
-      (hoje a telemetria registra; o alerta vem com o monitoramento da M4.4).
+      `builder/musa_build/assistant.py`. Alerta de anomalia: **M4.4** — regra
+      custo-assistente + cota-estourada em `tools/check_alerts.py`.
 - [ ] **LGPD**: dados de visitante, áudio de quiosque, retenção e exclusão.
 
 **Operação**
-- [ ] **Backup local** (o artefato on-premise: nó na máquina do museu) + **restore ensaiado e
+- [x] **Backup local** (o artefato on-premise: nó na máquina do museu) + **restore ensaiado e
       cronometrado** (DR drill, não plano no papel).
-- [ ] Runbook: onboarding, incidentes, rollback de versão.
-- [ ] Monitoramento e alertas dos SLOs do M3.
+      — **M4.4 (2026-10-16)**: `musa-build backup|restore`; drill em `tools/dr_drill.py`,
+      RTO medido 4,5 s (meta 5 min), ata em `docs/dr-drill-ata.md`.
+- [x] Runbook: onboarding, incidentes, rollback de versão.
+      — **M4.4**: `docs/runbook.md` completo (onboarding 10 passos, 4 incidentes,
+      rollback como re-pin de tag imutável).
+- [x] Monitoramento e alertas dos SLOs do M3.
+      — **M4.4**: 5 regras por dia UTC em `builder/musa_build/alerts.py` +
+      `tools/check_alerts.py` (exit 1 = alerta, pronto para scheduler; canais no runbook).
 - [ ] **Bateria final de testes do MVP, incluindo edge cases** (pedido do dono,
       2026-10-11) — portão de saída do M4, rodada sobre a imagem publicada, estendendo
       o harness do `beta/` (personas + misuse + invariantes já cobrem o dia a dia e os
