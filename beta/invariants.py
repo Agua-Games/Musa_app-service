@@ -8,6 +8,7 @@ invariant that never fails in its own sanity test is not an invariant.
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -16,6 +17,21 @@ from pathlib import Path
 from .client import ApiClient
 
 TIER_ORDER = {"bronze": 1, "silver": 2, "gold": 3}
+
+
+def snapshot_public_items(client: ApiClient) -> dict[str, str]:
+    """asset_id -> canonical JSON of every publicly served item.
+
+    The red-line probe shared by the misuse generator and the edge battery:
+    pre-existing public items must be byte-identical after the barrage."""
+    snap: dict[str, str] = {}
+    cols = client.collections().body["data"]
+    for c in cols:
+        res = client.collection_items(c["id"])
+        if res.ok:
+            for item in res.body["data"]:
+                snap[item["asset_id"]] = json.dumps(item, sort_keys=True, ensure_ascii=False)
+    return snap
 
 
 @dataclass

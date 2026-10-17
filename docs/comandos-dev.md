@@ -147,9 +147,12 @@ cd builder && python -m musa_build api-reference --check
 # nada toca o R2, o repo real ou o Pages. Exit 0 = verde; 1 = reprovação.
 python -m beta.run_beta --repo "H:\Musa_app-service\DemoMuseum" --seed 42 --suite all
 
-# Só personas / só o gerador de uso indevido
+# Só personas / só o gerador de uso indevido / só a bateria de edge cases (M4.5:
+# 24 casos — contrato, gating, concorrência, infra com reboot, estáticos do site;
+# vereditos individuais no log; `all` já inclui edge)
 python -m beta.run_beta --repo <repo> --suite personas --no-build-check
 python -m beta.run_beta --repo <repo> --suite misuse
+python -m beta.run_beta --repo "H:\Musa_app-service\DemoMuseum" --suite edge
 
 # Flags: --seed N (mesma seed = mesma sequência) · --routines diaria|semanal|pontual|all
 #        --no-build-check (pula o build-verde, mais rápido) · --out <dir> dos logs

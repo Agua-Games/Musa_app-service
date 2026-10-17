@@ -595,7 +595,7 @@ pode correr em paralelo.
 - [x] Monitoramento e alertas dos SLOs do M3.
       — **M4.4**: 5 regras por dia UTC em `builder/musa_build/alerts.py` +
       `tools/check_alerts.py` (exit 1 = alerta, pronto para scheduler; canais no runbook).
-- [ ] **Bateria final de testes do MVP, incluindo edge cases** (pedido do dono,
+- [x] **Bateria final de testes do MVP, incluindo edge cases** (pedido do dono,
       2026-10-11) — portão de saída do M4, rodada sobre a imagem publicada, estendendo
       o harness do `beta/` (personas + misuse + invariantes já cobrem o dia a dia e os
       10 cenários hostis; aqui entram os cantos):
@@ -614,6 +614,10 @@ pode correr em paralelo.
       - *carga*: acervo de 10.000 itens (números do M3.5), imagem de capa de 20 MB;
       - *navegador*: landing com JS parcialmente bloqueado, conexão lenta (3G),
         primeiro acesso sem conta nenhuma.
+      **→ Concluída na M4.5 (2026-10-17)**: 24 casos com veredito em `beta/edge.py`,
+      rodada real contra o DemoMuseum — 23 passa + 1 gap conhecido
+      (gap-orphan-visibility), 0 falhas, linha vermelha intacta. Tabela completa
+      de vereditos e divergências corrigidas em `docs/M4_plano.md` §M4.5.
 
 **Produto e apresentação**
 - [ ] Acessibilidade (WCAG no mínimo AA) e multi-idioma.

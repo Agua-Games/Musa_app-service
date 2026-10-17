@@ -26,6 +26,11 @@ from .client import ApiClient
 from .personas import Event, KNOWN_GAPS
 from . import invariants as inv
 
+# Shared red-line probe (lives in invariants.py since M4.5 so the edge
+# battery can use it without importing this module — importing THIS module
+# registers the misuse gap in KNOWN_GAPS, which is the personas' contract).
+snapshot_public_items = inv.snapshot_public_items
+
 # Additional gap surfaced by the misuse scenarios (beyond the persona gaps).
 KNOWN_GAPS.setdefault(
     "gap-entitlement-change-via-api",
@@ -36,18 +41,6 @@ KNOWN_GAPS.setdefault(
 def _slug(rng: random.Random, prefix: str) -> str:
     suffix = "".join(rng.choices(string.ascii_lowercase + string.digits, k=6))
     return f"beta-misuse-{prefix}-{suffix}"
-
-
-def snapshot_public_items(client: ApiClient) -> dict[str, str]:
-    """asset_id -> canonical JSON of every publicly served item."""
-    snap: dict[str, str] = {}
-    cols = client.collections().body["data"]
-    for c in cols:
-        res = client.collection_items(c["id"])
-        if res.ok:
-            for item in res.body["data"]:
-                snap[item["asset_id"]] = json.dumps(item, sort_keys=True, ensure_ascii=False)
-    return snap
 
 
 class MisuseRunner:

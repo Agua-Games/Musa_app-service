@@ -1,5 +1,7 @@
 """M3.1 runner: boot `musa-build serve` on a DISPOSABLE copy of a client repo,
-run the synthetic personas, log JSONL per action (ADR 0016), write a summary.
+run the synthetic suites, log JSONL per action (ADR 0016), write a summary.
+
+Suites: personas (M3.1), misuse generator (M3.2), edge battery (M4.5) or all.
 
 Nothing is committed, deployed or uploaded: the copy lives in a temp dir, the
 overlay lives in another temp dir, and uploads never leave the machine
@@ -8,6 +10,7 @@ overlay lives in another temp dir, and uploads never leave the machine
 Usage (from the platform repo root):
 
     python -m beta.run_beta --repo H:\\Musa_app-service\\DemoMuseum --seed 42
+    python -m beta.run_beta --repo <repo> --suite edge
     python -m beta.run_beta --repo <repo> --routines diaria --no-build-check
 """
 
@@ -17,8 +20,6 @@ import argparse
 import json
 import random
 import shutil
-import socket
-import subprocess
 import sys
 import tempfile
 import time
@@ -27,32 +28,15 @@ from pathlib import Path
 
 from .client import ApiClient
 from . import invariants as inv
+from .edge import EdgeRunner
+from .harness import BUILDER_DIR, ServeHarness
 from .misuse import MisuseRunner
 from .personas import SCOPES, ROUTINES, make_personas
 
 PLATFORM_ROOT = Path(__file__).resolve().parent.parent
-BUILDER_DIR = PLATFORM_ROOT / "builder"
 FRONTEND_DIR = PLATFORM_ROOT / "source"  # the generic frontend (image: /app/frontend)
 
 IGNORE = shutil.ignore_patterns(".git", ".musa", "_site", "node_modules", "__pycache__")
-
-
-def _free_port() -> int:
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
-
-
-def _wait_health(client: ApiClient, timeout_s: float = 30.0) -> bool:
-    deadline = time.time() + timeout_s
-    while time.time() < deadline:
-        try:
-            if client.health(timeout=1.5).ok:
-                return True
-        except Exception:
-            pass
-        time.sleep(0.25)
-    return False
 
 
 def run(repo: Path, seed: int, routines: list[str], out_dir: Path,
@@ -63,6 +47,7 @@ def run(repo: Path, seed: int, routines: list[str], out_dir: Path,
 
     all_events = []
     tmpdir = tempfile.mkdtemp(prefix="musa-beta-")
+    harness: ServeHarness | None = None
     try:
         root = Path(tmpdir)
         work_repo = root / "repo"
@@ -73,29 +58,10 @@ def run(repo: Path, seed: int, routines: list[str], out_dir: Path,
         museum_tier = museum_cfg.get("entitlements", {}).get("tier", "bronze")
         token = f"beta-token-{seed}"
 
-        port = _free_port()
-        base_url = f"http://127.0.0.1:{port}"
-        import os
-        env = dict(os.environ, MUSA_ADMIN_TOKEN=token)
-        # The beta never touches a real LLM provider: the fake client keeps
-        # the assistant pipeline exercised with ~zero cost (M4.2), even if
-        # DEEPSEEK_API_KEY happens to be set in the dev environment.
-        env["MUSA_LLM_FAKE"] = "1"
-        env["PYTHONPATH"] = str(BUILDER_DIR) + os.pathsep + env.get("PYTHONPATH", "")
-        server = subprocess.Popen(
-            [sys.executable, "-m", "musa_build", "serve",
-             "--repo", str(work_repo), "--data-dir", str(data_dir),
-             "--host", "127.0.0.1", "--port", str(port)],
-            cwd=str(BUILDER_DIR), env=env,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        )
+        harness = ServeHarness(work_repo, data_dir, token=token, log_dir=root / "logs")
+        client = harness.boot()
 
         try:
-            client = ApiClient(base_url)
-            if not _wait_health(client):
-                print(f"FATAL: serve did not come up on {base_url}", file=sys.stderr)
-                return 2
-
             if suite in ("personas", "all"):
                 for persona in make_personas(client, seed, run_id, museum_tier):
                     login = client.login(persona.email, token)
@@ -122,13 +88,18 @@ def run(repo: Path, seed: int, routines: list[str], out_dir: Path,
                 runner = MisuseRunner(client, random.Random(f"{seed}:misuse"),
                                       run_id, museum_tier)
                 all_events.extend(runner.run_all())
+
+            if suite in ("edge", "all"):
+                login = client.login("edge@demo", token)
+                if not login.ok:
+                    print("FATAL: login failed for edge@demo", file=sys.stderr)
+                    return 2
+                edge = EdgeRunner(harness, client, random.Random(f"{seed}:edge"),
+                                  run_id, museum_tier, work_repo, BUILDER_DIR,
+                                  FRONTEND_DIR, root)
+                all_events.extend(edge.run_all())
         finally:
-            server.terminate()
-            try:
-                server.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                server.kill()
-                server.wait(timeout=10)
+            harness.stop()
     finally:
         # On Windows the SQLite overlay file can stay locked for a few
         # hundred ms after the serve subprocess dies — retry, then give up
@@ -185,8 +156,8 @@ def main(argv=None) -> int:
     p.add_argument("--no-build-check", action="store_true",
                    help="skip the slower build-green invariant (per-session)")
     p.add_argument("--suite", default="personas",
-                   choices=["personas", "misuse", "all"],
-                   help="personas (M3.1), misuse generator (M3.2) or both")
+                   choices=["personas", "misuse", "edge", "all"],
+                   help="personas (M3.1), misuse generator (M3.2), edge battery (M4.5) or all")
     args = p.parse_args(argv)
 
     routines = ["diaria", "semanal", "pontual"] if args.routines == "all" else [args.routines]

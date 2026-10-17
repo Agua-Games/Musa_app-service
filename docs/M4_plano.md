@@ -220,6 +220,59 @@ Rodada sobre a **imagem publicada**, estendendo o harness do `beta/`.
 **Verificação:** cada edge case com veredito; divergências viram issue ou
 correção; bateria integrada ao `beta-validation.yml` como suíte `edge`.
 
+> **M4.5 CONCLUÍDA (2026-10-17).** Implementação:
+>
+> - **`beta/edge.py` — 24 casos com veredito individual**, rodados contra o
+>   DemoMuseum real (run `20261017T023351Z-seed42`: **23 passa + 1 gap
+>   conhecido, 0 falhas**, linha vermelha intacta — acervo pré-existente
+>   byte-idêntico após a bateria):
+>   - *contrato* (5): unicode/emoji/RTL round-trip byte-idêntico + busca;
+>     `asset_id` de 120 chars aceito (sem limite de tamanho em contrato nem
+>     serve — risco de filesystem documentado) e maiúsculo 422 (serve mais
+>     estrito que o contrato, a direção segura); vazio-vs-ausente explícito;
+>     `data_iso` BCE/ano de 1 dígito aceitos com round-trip exato, mês-13 422;
+>     título de coleção com 10k chars aceito sem quebrar nada.
+>   - *gating* (5): draft órfão de coleção despublicada 404 público
+>     (**gap-orphan-visibility**: invisível também para o admin — gap
+>     registrado); hero despublicado nunca fura o portão; coleção vazia
+>     publicada listada com count 0; **downgrade/upgrade de tier com reboot**
+>     (item do tier some no bronze e volta no gold — prova real no DemoMuseum);
+>     **config assinado adulterado derruba o boot com erro explícito de
+>     assinatura** (auto-promoção impossível — prova real, ADR 0010).
+>   - *concorrência* (4): dois escritores com o mesmo `_rev` → exatamente um
+>     200 e um 409; sem `_rev` last-write-wins sem corrupção; 30 patches sob
+>     leituras públicas simultâneas sem nenhum 5xx; escrita durante build
+>     verde (repo e overlay independentes por arquitetura).
+>   - *infra* (4+reboot): serve sem `MUSA_ADMIN_TOKEN` → read-only explícito
+>     (503, health "disabled", reads ok); overlay corrompido → boot falha com
+>     mensagem apontando o operador (correção abaixo) e overlay apagado →
+>     museu reconstruído do seed; build com destino impossível → exit não-zero
+>     com mensagem; CI sem secrets → preflight explícito (correção abaixo).
+>   - *pipeline/carga/navegador*: duplicata de `asset_id` 409 (regressão do
+>     guard M3.2); build com asset local de 20 MB verde (5,7 s vs 5,8 s
+>     baseline); payload de primeiro acesso 2.702 KB local (vídeo hero no
+>     YouTube, mídia no R2); catálogo renderiza de dados locais com CDN
+>     bloqueado (só os viewers 3D degradam); primeiro acesso sem conta —
+>     login vive no modal admin, nunca bloqueia o conteúdo primário.
+>     Cobertos por suítes existentes (não duplicados): LLM fora/JSON quebrado
+>     (M4.2 `test_assistant*`), 10k itens (M3.5 `beta/load.py`).
+> - **`beta/harness.py`**: ciclo de vida do serve extraído do runner —
+>   reboot com env/config mutados, stderr em arquivo (boot quebrado é
+>   diagnosticável), health-wait sai cedo se o processo morreu. Rate limits
+>   desligados no harness (determinismo; M4.3 cobre os limites).
+> - **Divergências encontradas e corrigidas**: (1) CI do cliente sem
+>   `GHCR_PULL_TOKEN` falhava com erro críptico de docker login → step
+>   **Preflight** no `deploy.yml` do DemoMuseum (template dos clientes);
+>   (2) overlay corrompido derrubava o boot com traceback cru **e deixava a
+>   conexão SQLite aberta** (arquivo travado no Windows) → `StoreError` com
+>   o caminho do operador + conexão fechada antes de levantar (+2 testes).
+> - **Integração**: `--suite edge` no `run_beta` (`all` inclui); choice
+>   `edge` no `beta-validation.yml` do DemoMuseum — **manual-only, sem cron**
+>   (decisão do dono 2026-10-16: rotinas agendadas só com cliente pagante;
+>   no CI da imagem fica disponível a partir do artifact 0.5.0).
+> - Testes: +5 (edge battery 3 contra o fixture — aceitação de cada caso;
+>   store 2). A bateria inteira roda em ~65 s no fixture.
+
 ### M4.6 — LGPD + licenças
 
 1. Dados de visitante (analytics?), áudio de quiosque, retenção e exclusão —

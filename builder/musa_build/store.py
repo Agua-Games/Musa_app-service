@@ -33,6 +33,13 @@ CREATE TABLE IF NOT EXISTS items (
 """
 
 
+class StoreError(Exception):
+    """The overlay database exists but is unreadable (corrupted, truncated,
+    not a SQLite file). Raised before any state is served, with the operator
+    path in the message: restore a backup or delete the overlay to rebuild
+    from the repository seed."""
+
+
 class Store:
     """Thread-safe-ish SQLite overlay (one writer per instance)."""
 
@@ -41,9 +48,24 @@ class Store:
         data_dir.mkdir(parents=True, exist_ok=True)
         self.path = data_dir / "state.db"
         self._lock = threading.Lock()
-        self._db = sqlite3.connect(self.path, check_same_thread=False)
-        self._db.executescript(SCHEMA)
-        self._db.commit()
+        self._db: sqlite3.Connection | None = None
+        try:
+            self._db = sqlite3.connect(self.path, check_same_thread=False)
+            self._db.executescript(SCHEMA)
+            self._db.commit()
+        except sqlite3.DatabaseError as exc:
+            # M4.5 edge finding: a corrupted overlay must fail EXPLICITLY —
+            # never boot into a silently empty museum. The operator path is
+            # restore-from-backup (M4.4) or delete-and-rebuild-from-seed.
+            if self._db is not None:
+                self._db.close()  # release the file lock (Windows) before raising
+                self._db = None
+            raise StoreError(
+                f"overlay database is unreadable at {self.path}: {exc}. "
+                f"Restore a backup (`musa-build restore --from <dir>`) or delete "
+                f"the overlay to rebuild from the repository seed — overlay-only "
+                f"edits are lost either way unless a backup exists."
+            ) from exc
 
     def close(self) -> None:
         self._db.close()
