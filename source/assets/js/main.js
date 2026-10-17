@@ -334,6 +334,12 @@
     lbImg.src = item.image;
     lbImg.alt = item.titulo;
     $("#lbCap").innerHTML = `<strong>${item.titulo}</strong>${item.autor} · ${item.data} · ${item.material}`;
+    // M4.6: every public asset shows its rights statement and source when the
+    // card carries them (contract 1.2.0 — optional fields, so older cards
+    // simply render no credit line).
+    const rights = [item.licenca, item.fonte].filter(Boolean).join(" · ");
+    $("#lbRights").textContent = rights;
+    $("#lbRights").style.display = rights ? "" : "none";
     lbScale = 1; lbX = 0; lbY = 0; lbApply();
     lb.classList.add("open");
     document.body.style.overflow = "hidden";

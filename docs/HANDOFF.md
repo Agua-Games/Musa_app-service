@@ -582,7 +582,12 @@ pode correr em paralelo.
       **→ Implementado na M4.2 (2026-10-16)** — ver `docs/M4_plano.md` §M4.2 e
       `builder/musa_build/assistant.py`. Alerta de anomalia: **M4.4** — regra
       custo-assistente + cota-estourada em `tools/check_alerts.py`.
-- [ ] **LGPD**: dados de visitante, áudio de quiosque, retenção e exclusão.
+- [x] **LGPD**: dados de visitante, áudio de quiosque, retenção e exclusão.
+      — **M4.6 (2026-10-17)**: inventário completo em `docs/lgpd.md` (a arquitetura é a
+      medida principal: sem contas, sem cookies, sem analytics; pergunta do assistente nunca
+      gravada; IP só como hash pseudonimizado), página modelo em `docs/privacidade-modelo.md`,
+      checklist de conformidade por cliente no §5 do lgpd.md. Áudio de quiosque e checkout:
+      dados futuros com reavaliação obrigatória antes do go-live (§1.5).
 
 **Operação**
 - [x] **Backup local** (o artefato on-premise: nó na máquina do museu) + **restore ensaiado e
@@ -621,7 +626,11 @@ pode correr em paralelo.
 
 **Produto e apresentação**
 - [ ] Acessibilidade (WCAG no mínimo AA) e multi-idioma.
-- [ ] Créditos e licenças de todo asset público exibidos corretamente.
+- [x] Créditos e licenças de todo asset público exibidos corretamente.
+      — **M4.6 (2026-10-17)**: contrato 1.2.0 (campos opcionais `licenca` + `fonte`,
+      minor compatível — COMPATIBILITY.md); lightbox do site renderiza os dois; DemoMuseum
+      com 455 cards preenchidos (450 Met CC0 com URL da peça, 5 pinturas PD/Wikimedia);
+      esculturas demo sem proveniência verificável ficaram sem — checklist do cliente cobre.
 - [ ] **Ambiente de demonstração** com 3 museus fictícios, cada um em um tier, e uma narrativa de
       upgrade — é isso que se mostra a um investidor ou a um cliente.
 - [ ] Custo por cliente/mês conhecido, dentro da margem de cada tier.

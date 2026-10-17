@@ -2,7 +2,7 @@
 
 > **Gerado automaticamente — não editar à mão.** Regenere com `cd builder && python -m musa_build api-reference` (a suíte de testes falha se este doc ficar velho em relação ao código). Conceitos, justificativas e o porquê das decisões: `docs/api-dinamica.md` e `docs/api-estatica.md`.
 
-Plataforma **v0.4.0** · contrato do card **v1.1.0** (`schemas/card/v1/card.schema.json`).
+Plataforma **v0.4.0** · contrato do card **v1.2.0** (`schemas/card/v1/card.schema.json`).
 
 ## Convenções
 
@@ -160,7 +160,7 @@ Binário de um asset (imagem, `.glb`, …). Somente assets de registros **inclu�
 
 ## Contrato do card (campos)
 
-Fonte: `builder/musa_build/schemas/card.schema.json` (v1.1.0). Obrigatórios: `asset_id`, `titulo`, `colecao`.
+Fonte: `builder/musa_build/schemas/card.schema.json` (v1.2.0). Obrigatórios: `asset_id`, `titulo`, `colecao`.
 
 | Campo | Tipo | Descrição (verbatim do contrato) |
 |---|---|---|
@@ -172,6 +172,8 @@ Fonte: `builder/musa_build/schemas/card.schema.json` (v1.1.0). Obrigatórios: `a
 | `material` | string | Predominant material. |
 | `dimensoes` | string | Physical dimensions as free text (e.g. 30cm x 20cm). |
 | `descricao` | string | Long description. |
+| `licenca` | string | Rights statement of the media/record (e.g. 'CC0 1.0', 'Domínio público', 'CC BY-SA 4.0'). Optional; rendered in the item view so every public asset shows its license (LGPD/licensing milestone M4.6). Added in 1.2.0 (compatible: optional field). |
+| `fonte` | string | Source of the media/record — the institution or URL the asset came from (e.g. 'The Metropolitan Museum of Art', a Wikimedia Commons URL). Optional; rendered with licenca. Added in 1.2.0 (compatible: optional field). |
 | `colecao` **(obrigatório)** | string | Collection this item belongs to; must match a top-level folder under acervo/. |
 | `tags` | lista de string | Keywords. |
 | `model_primary` | string | Asset the frontend loads today (e.g. model.glb). Required when model_status is available. |

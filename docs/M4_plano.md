@@ -284,6 +284,37 @@ correção; bateria integrada ao `beta-validation.yml` como suíte `edge`.
 **Verificação:** doc `docs/lgpd.md` + checklist de conformidade por cliente;
 tela do demo mostrando créditos.
 
+> **M4.6 CONCLUÍDA (2026-10-17).** Implementação:
+>
+> - **Inventário LGPD** (`docs/lgpd.md`): a arquitetura é a principal medida
+>   de conformidade — sem contas de visitante, sem cookies, sem analytics.
+>   Tabela dado-a-dado: a pergunta do assistente vai à DeepSeek **sem
+>   identificadores e nunca é gravada**; o IP existe só como hash SHA-256
+>   truncado (pseudonimizado) e em memória para rate limit; logs operacionais
+>   com retenção-alvo de 90 dias via sweep. Bases legais, resposta a direitos
+>   dos titulares, suboperadores (DeepSeek/Cloudflare/GitHub) e dados futuros
+>   (áudio de quiosque, checkout, analytics → reavaliação obrigatória antes
+>   do go-live). Checklist de conformidade por cliente no §5.
+> - **Página de privacidade modelo** (`docs/privacidade-modelo.md`): texto em
+>   PT pronto para o cliente adaptar ([NOME DO MUSEU], CNPJ, DPO) e publicar.
+> - **Contrato 1.2.0** (minor compatível, COMPATIBILITY.md): campos opcionais
+>   `licenca` (declaração de direitos) e `fonte` (instituição/URL de origem).
+>   Schema empacotado sincronizado; API reference regenerada.
+> - **Render no site**: lightbox da peça mostra a linha `licenca · fonte`
+>   quando o card os carrega (oculta caso contrário) — verificado em build
+>   local: 313 dos 321 itens públicos com licença, `lbRights` no HTML.
+> - **Backfill DemoMuseum** (commit `a4336aa`, deploy verde): 450 imports do
+>   Met com `CC0 1.0` + URL da peça; 5 pinturas de domínio público
+>   (Vermeer, Van Gogh, Monet, Rembrandt) com `Domínio público` + Wikimedia.
+>   **Esculturas demo ficaram sem** — atribuições fictícias sem proveniência
+>   verificável; preencher é dever do cliente no checklist, não do script.
+> - **Ressalva de deploy**: o gate da imagem 0.4.0 (contrato 1.1.0) aceitou
+>   os campos novos — minor compatível funcionando como projetado; o **render
+>   visual** dos créditos entra no site publicado com o artifact 0.5.0
+>   (frontend novo) + re-pin do cliente.
+> - Testes: builder 164 verdes (drift do schema + freshness da API reference
+>   provam a sincronia 1.2.0).
+
 ### M4.7 — Ambiente de demonstração
 
 **3 museus fictícios, um por tier** (Bronze/Silver/Gold), com narrativa de

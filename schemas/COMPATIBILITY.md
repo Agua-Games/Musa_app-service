@@ -30,6 +30,14 @@ dois lugares que devem concordar:
 > então a validação estrita vive no campo novo. Todo card que validava continua
 > validando; nenhum consumer existente lê `data_iso`.
 
+> **Nota da minor 1.2.0 (2026-10-17, milestone M4.6):** adicionados os campos
+> **opcionais** `licenca` (declaração de direitos da mídia/registro — "CC0 1.0",
+> "Domínio público", "CC BY-SA 4.0") e `fonte` (instituição ou URL de origem do
+> asset). Motivação: todo asset público exibido deve mostrar seus créditos e
+> licença — o site renderiza os dois na visualização da peça. Todo card que
+> validava continua validando; consumers que não leem os campos novos não são
+> afetados.
+
 ## O que é mudança compatível (sobe o *minor* ou o *patch*, continua `v1`)
 
 Um card que validava **continua validando**, e um consumer que lia a v1 continua

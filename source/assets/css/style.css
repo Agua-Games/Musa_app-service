@@ -385,6 +385,7 @@ section { padding: 120px 0; position: relative; }
 .lightbox-bar button:hover { border-color: var(--gold); background: rgba(216, 184, 120, 0.12); }
 .lightbox-cap { margin-top: 16px; text-align: center; color: var(--paper-dim); font-size: 13px; }
 .lightbox-cap strong { font-family: var(--serif); font-size: 19px; font-weight: 500; color: var(--paper); display: block; }
+.lightbox-rights { margin-top: 4px; font-size: 11px; opacity: 0.75; }
 .lightbox-close { position: absolute; top: 24px; right: 28px; background: none; border: 0; color: var(--paper); font-size: 30px; opacity: 0.7; transition: opacity 0.3s; }
 .lightbox-close:hover { opacity: 1; }
 
