@@ -61,6 +61,13 @@ def run(repo: Path, seed: int, routines: list[str], out_dir: Path,
         harness = ServeHarness(work_repo, data_dir, token=token, log_dir=root / "logs")
         client = harness.boot()
 
+        # Red-line baseline BEFORE any suite mutates the overlay: the repo
+        # seed as served. The edge battery's corrupted-overlay case wipes the
+        # overlay on purpose (persona edits are lost by design — RPO is the
+        # M4.4 backup), so the battery must compare against the seed, not
+        # against post-persona state (found by the 0.5.0 release smoke).
+        seed_baseline = inv.snapshot_public_items(client)
+
         try:
             if suite in ("personas", "all"):
                 for persona in make_personas(client, seed, run_id, museum_tier):
@@ -96,7 +103,7 @@ def run(repo: Path, seed: int, routines: list[str], out_dir: Path,
                     return 2
                 edge = EdgeRunner(harness, client, random.Random(f"{seed}:edge"),
                                   run_id, museum_tier, work_repo, BUILDER_DIR,
-                                  FRONTEND_DIR, root)
+                                  FRONTEND_DIR, root, seed_baseline=seed_baseline)
                 all_events.extend(edge.run_all())
         finally:
             harness.stop()

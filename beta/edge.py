@@ -58,7 +58,7 @@ class EdgeRunner:
     def __init__(self, harness: ServeHarness, client: ApiClient,
                  rng: random.Random, run_id: str, museum_tier: str,
                  work_repo: Path, builder_dir: Path, frontend_dir: Path,
-                 tmp_root: Path):
+                 tmp_root: Path, seed_baseline: dict[str, str] | None = None):
         self.harness = harness
         self.client = client
         self.rng = rng
@@ -70,7 +70,14 @@ class EdgeRunner:
         self.tmp_root = Path(tmp_root)
         self.events: list[Event] = []
         self._now = lambda: datetime.now(timezone.utc).isoformat(timespec="seconds")
-        self._baseline = snapshot_public_items(client)
+        # Red line: the REPO SEED as served, snapshotted by the driver before
+        # any suite touched the overlay. case_corrupted_overlay wipes the
+        # overlay on purpose (persona/battery edits are lost by design — their
+        # RPO is the M4.4 backup); a baseline taken here, after the personas
+        # ran, would flag those by-design losses as drift (found by the 0.5.0
+        # release smoke: painting-one + persona items "drifted").
+        self._baseline = (seed_baseline if seed_baseline is not None
+                          else snapshot_public_items(client))
         self._created: list[str] = []  # asset_ids born in this battery
 
     # -- plumbing ------------------------------------------------------------
