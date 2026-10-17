@@ -218,3 +218,19 @@ docker run --rm -p 8000:8000 -v ${PWD}:/work -e MUSA_ADMIN_TOKEN=<token> \
 #   feat(builder): ... · fix(serve): ... · docs: ... · test(beta): ...
 git log --oneline -10      # ver o padrão antes de commitar
 ```
+
+## Leitura de logs (tools/logread.py) — SEMPRE que for ler um log
+
+```bash
+# Lê a CAUDA com repetições colapsadas: normaliza timestamps, durações, hex,
+# paths e números, agrupa linhas "iguais" e imprime cada grupo UMA vez com a
+# contagem. "O mesmo erro 400x" custa 1 linha; um erro distinto sempre
+# sobrevive. Use SEMPRE para ler log (build, serve, beta) em vez de cat/tail.
+python tools/logread.py read --file beta/out/beta-log-<run>.jsonl --lines 400 --show 40
+python tools/logread.py read --file <log> --grep "erro|fail"   # filtra antes de colapsar
+python tools/logread.py read --file <log> --json               # eco JSON completo (padrão: só resumo)
+
+# sweep: mantém a pasta de logs limitada — apaga os mais velhos quando o TOTAL
+# passa do teto. SÓ arquivos do padrão, SÓ na pasta indicada, nunca diretórios.
+python tools/logread.py sweep --folder beta/out --pattern "*.jsonl" --max-mb 500 --dry_run
+```

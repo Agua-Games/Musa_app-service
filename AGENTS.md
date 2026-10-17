@@ -75,3 +75,19 @@ through MUSA; later the company may bundle it). **Before implementing anything
 that moves data on Cloudflare — especially multi-megabyte transfers (uploads,
 migrations, bucket/account sync) — verify whose account, bucket and card is
 involved.** Apply the same check to any new paid service.
+
+## Reading logs (owner request, 2026-10-17)
+
+**Always read logs through `tools/logread.py`, never with plain cat/tail/Read
+on a log file** — reading *all* of a log is the expensive way, and a thousand
+identical lines say what one says.
+
+- `python tools/logread.py read --file <log> [--lines 400] [--grep <pat>] [--show 40]`
+  reads the **tail** with repetitions collapsed: timestamps, durations, hex,
+  paths and bare numbers become placeholders, equal lines are grouped, each
+  group prints **once with its count**. A distinct error always survives.
+  The trailing JSON is a summary; `--json` echoes the full per-line report.
+- `python tools/logread.py sweep --folder <dir> [--pattern "*.log"] [--max-mb 500] [--dry_run]`
+  keeps a log folder bounded — only matching files, only that folder, never
+  directories; removes the oldest first and reports each removal.
+- Full flags: `docs/comandos-dev.md` §Leitura de logs.
