@@ -1,5 +1,5 @@
-# Downloads public-domain museum imagery from Wikimedia Commons
-# into source/assets/img/ for the MUSA frontend demo.
+"""Download public-domain museum imagery from Wikimedia Commons into
+source/assets/img/ for the MUSA frontend demo."""
 import json, urllib.request, urllib.parse, os, sys, time
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "source", "assets", "img")
