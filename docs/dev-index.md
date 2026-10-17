@@ -46,7 +46,7 @@ chegam ao payload publicado.
 | `tools/check_frontend.py` | Fail the build on frontend mistakes that only surface in a browser |
 | `tools/demo_narrative.py` | M4.7 — the 5-minute investor narrative, EXECUTED end to end (not narrated) |
 | `tools/dr_drill.py` | M4.4 — DR drill: disaster -> restore -> verified service, timed |
-| `tools/fetch_assets.py` | import json, urllib.request, urllib.parse, os, sys, time |
+| `tools/fetch_assets.py` | (sem docstring) |
 | `tools/fetch_models.py` | Fetch the 3D models used by the frontend demo into source/assets/models/ |
 | `tools/fetch_vendor.py` | Vendor three.js into source/assets/vendor/ (browser ES modules, no bundler) |
 | `tools/gen_dev_index.py` | Generate docs/dev-index.md — the always-fresh entry point for AI agents |

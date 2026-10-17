@@ -64,19 +64,15 @@ def _count(pattern: str, root: Path = ROOT) -> int:
 
 
 def _tools_listing() -> list[str]:
+    import ast
     lines = []
     for path in sorted((ROOT / "tools").glob("*.py")):
         first = ""
         try:
-            for line in path.read_text(encoding="utf-8").splitlines():
-                s = line.strip().strip('"')
-                if s and not s.startswith(('"""', "'''", "#!", "#")) and len(s) > 20:
-                    first = s.rstrip(".")
-                    break
-                if s.startswith('"""') and len(s) > 6:
-                    first = s.strip('""" ').rstrip(".")
-                    break
-        except OSError:
+            doc = ast.get_docstring(ast.parse(path.read_text(encoding="utf-8")))
+            if doc:
+                first = doc.strip().splitlines()[0].rstrip(".")
+        except (OSError, SyntaxError):
             pass
         lines.append(f"| `tools/{path.name}` | {first or '(sem docstring)'} |")
     return lines
