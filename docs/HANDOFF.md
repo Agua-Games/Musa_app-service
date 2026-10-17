@@ -679,6 +679,12 @@ pode correr em paralelo.
 Migração para **multi-tenant** quando o custo de operação doer (referência: ~10 clientes);
 onboarding self-service; marketplace de módulos; suporte N1 com runbook.
 
+**Registrado pelo dono (2026-10-17), para milestone futura:** **canal de feedback em
+linguagem natural** — numa chat session com o agente, o dev ou o cliente envia feature
+requests e bug reports em texto corrido; o agente classifica, registra (issue/ADR-lite) e
+despacha. Primo do que o `mcp_server` já prova: a operação por linguagem natural funciona;
+aqui o alvo é o loop de feedback do produto.
+
 ---
 
 ### Trilhas paralelas (não bloqueiam o caminho crítico)

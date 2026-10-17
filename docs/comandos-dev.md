@@ -150,6 +150,17 @@ cd builder && python -m musa_build api-reference
 cd builder && python -m musa_build api-reference --check
 ```
 
+## Dev index (gerado — mapa vivo do repo)
+
+```bash
+# Regenera docs/dev-index.md (componentes, suítes, tools, contagens). Rode
+# depois de mudança estrutural (módulo/ferramenta/suíte nova). É o arquivo
+# que um agente de IA lê primeiro — o AGENTS.md já aponta para ele; numa
+# config .env/.ini de dev, aponte DEV_INDEX/AGENTS doc para docs/dev-index.md.
+python tools/gen_dev_index.py
+python tools/gen_dev_index.py --check   # exit 1 = stale (CI-friendly)
+```
+
 ## Cliente virtual (M3) — personas + gerador de uso indevido
 
 ```bash
