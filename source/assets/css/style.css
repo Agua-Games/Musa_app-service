@@ -972,3 +972,26 @@ footer { border-top: 1px solid var(--line); padding: 60px 0 40px; background: va
 @media (max-width: 720px) {
   .carousel-caption { width: 100%; padding: 16px 18px 18px; min-height: 0; }
 }
+
+/* ======================= Static pages (content/paginas/*.md) ============= */
+/* Institutional pages (privacidade, termos): readable measure, same palette. */
+.page-doc { background: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
+.page-head { padding: 34px 0 0; }
+.page-home { font-family: var(--sans); font-size: 13px; letter-spacing: 0.08em; color: var(--paper-dim); text-decoration: none; }
+.page-home:hover { color: var(--paper); }
+.page-body { max-width: 760px; padding: 40px 0 70px; flex: 1; }
+.page-body h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(30px, 4.4vw, 44px); margin: 0 0 18px; }
+.page-body h2 { font-family: var(--serif); font-weight: 500; font-size: 26px; margin: 38px 0 12px; }
+.page-body h3 { font-family: var(--sans); font-weight: 600; font-size: 16px; margin: 26px 0 8px; }
+.page-body p, .page-body li { color: var(--paper-dim); font-size: 15.5px; line-height: 1.75; }
+.page-body ul, .page-body ol { padding-left: 22px; margin: 10px 0; }
+.page-body li { margin-bottom: 6px; }
+.page-body a { color: var(--gold); }
+.page-body strong { color: var(--paper); font-weight: 600; }
+.page-body hr { border: 0; border-top: 1px solid var(--line); margin: 34px 0; }
+.page-body blockquote { border-left: 2px solid var(--bronze); margin: 18px 0; padding: 4px 0 4px 18px; color: var(--paper-dim); }
+.page-body table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+.page-body th, .page-body td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); color: var(--paper-dim); }
+.page-body th { color: var(--paper-faint); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500; }
+.page-body code { background: var(--ink-3); padding: 2px 6px; border-radius: 4px; font-size: 13.5px; }
+.page-foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 22px 0 40px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--paper-faint); }

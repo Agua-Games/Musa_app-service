@@ -4,14 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "musa-app"
-version = "0.5.0"
+version = "0.6.0"
 description = "MUSA app-service builder: turns a client content repository into the museum's static site."
 readme = "README.md"
 requires-python = ">=3.10"
 # fastapi+uvicorn power `musa-build serve` (M1.4); httpx is imported by the
 # test suite's fastapi.testclient.TestClient, which the release gate runs.
 # boto3 is the S3-compatible client of `musa-build upload` (M1.3, R2 today).
-dependencies = ["jsonschema>=4.20", "cryptography>=42", "fastapi>=0.110", "uvicorn>=0.29", "httpx>=0.27", "boto3>=1.34"]
+# markdown-it-py renders content/paginas/*.md into static pages (raw HTML is
+# escaped — a client page can never inject scripts into the site).
+dependencies = ["jsonschema>=4.20", "cryptography>=42", "fastapi>=0.110", "uvicorn>=0.29", "httpx>=0.27", "boto3>=1.34", "markdown-it-py>=3.0"]
 
 [project.scripts]
 musa-build = "musa_build.cli:main"

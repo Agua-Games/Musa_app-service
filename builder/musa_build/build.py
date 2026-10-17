@@ -6,10 +6,12 @@ Input (the client repository):
     content/<collection>/<item>/card.json      the contract record + presentation fields
     content/<collection>/<item>/<assets...>     images, models (or URLs in the card)
     content/site.json                           (optional) films, products, wallHotspots
+    content/paginas/<slug>.md                   (optional) static pages (termos, privacidade)
 
 Output (the published site):
     <frontend files, minus demo content and dev-server files>
     data/catalog.js / data/catalog.json         generated payload (gated)
+    <slug>.html                                 static pages (always public, not gated)
     assets/content/...                          copied client assets (included items only)
     build-report.json / build-report.md         what went in, what stayed out, why
     build-log.jsonl                             every decision as a JSON line (M1.5)
@@ -29,6 +31,7 @@ from .contract import make_validator, validate_card
 from .entitlements import load_public_key, verify_entitlements
 from .gate import check_tier, gate_record, gate_tier
 from .log import get_logger
+from .pages import emit_pages, read_pages
 from .report import BuildReport, Entry
 
 # The frontend folder doubles as the platform's own published demo, so the
@@ -360,6 +363,9 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
     report.modules = entitlement["modules"]
 
     collections, items, site = read_content(repo, report)
+    # Static pages (content/paginas/*.md): validated here, emitted below.
+    # Always-public informational pages — not gated, not cards.
+    pages = read_pages(repo, report)
     if report.errors:
         raise BuildFailure(report)
     log.log(
@@ -446,6 +452,10 @@ def build_site(repo: Path, frontend: Path, out: Path, *, entitlements_key: Path 
         "wallHotspots": site.get("wallHotspots", []),
         "accounts": [],
     }
+
+    # Static pages: <slug>.html at the site root + footer entries in the
+    # payload (the landing renders the links from catalog.pages).
+    catalog["pages"] = emit_pages(pages, museum_cfg, catalog["generated"], out, log)
 
     data_dir = out / "data"
     data_dir.mkdir(exist_ok=True)

@@ -77,8 +77,24 @@
     if (brand) brand.innerHTML = `<span class="mark">${museum.name.charAt(0)}</span>${museum.name}`;
   }
 
+  // Institutional pages (client's content/paginas/*.md, listed by the build
+  // in catalog.pages): fill the footer column; stays hidden when there are none.
+  function applyPages() {
+    const pages = (window.MUSA_MOCK && window.MUSA_MOCK.pages) || [];
+    const col = $("#footPages");
+    if (!col || !pages.length) return;
+    pages.forEach((p) => {
+      const a = document.createElement("a");
+      a.href = `${p.slug}.html`;  // relative: client sites can live in a subpath
+      a.textContent = p.titulo;
+      col.appendChild(a);
+    });
+    col.hidden = false;
+  }
+
   applySkin();
   applyIdentity();
+  applyPages();
 
   /* ===================================================== HERO BACKGROUND == */
   /* The hero plays the venue's montage behind the headline. One path only: the
