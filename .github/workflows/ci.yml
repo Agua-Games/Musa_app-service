@@ -27,6 +27,25 @@ jobs:
       - name: Install the validation dependency
         run: python -m pip install --disable-pip-version-check ./builder
 
+      # A workflow file that does not parse fails silently at 0s on every
+      # push (M4.1 regression: unquoted "Smoke: ..." step name). Parse them
+      # all here so the break is loud and immediate.
+      - name: Lint the workflow files themselves
+        run: |
+          python -m pip install --disable-pip-version-check pyyaml
+          python - <<'EOF'
+          import glob, sys, yaml
+          bad = []
+          for f in glob.glob(".github/workflows/*.yml"):
+              try:
+                  yaml.safe_load(open(f, encoding="utf-8"))
+              except Exception as e:
+                  bad.append(f"{f}: {e}")
+          if bad:
+              print("\n".join(bad)); sys.exit(1)
+          print("all workflow files parse")
+          EOF
+
       - name: Validate the catalog against the contract
         run: python tools/validate_catalog.py
 

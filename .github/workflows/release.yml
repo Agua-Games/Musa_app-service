@@ -94,13 +94,13 @@ jobs:
       # M4.1: the image must prove its hardening before it is published —
       # the whole virtual-client suite runs INSIDE the fresh image with a
       # read-only root filesystem, as the unprivileged default user.
-      - name: Smoke: image runs as the non-root musa user
+      - name: "Smoke: image runs as the non-root musa user"
         run: |
           docker run --rm --entrypoint id \
             ghcr.io/agua-games/musa-app:${{ needs.gate.outputs.version }} \
             | grep -q "uid=1000(musa)"
 
-      - name: Smoke: beta suite green with read-only root FS
+      - name: "Smoke: beta suite green with read-only root FS"
         run: |
           # MUSA_REQUIRE_SIGNED_ENTITLEMENTS=0: the image (M4.3) refuses
           # unsigned entitlements, but the beta runs against the dev-pinned
