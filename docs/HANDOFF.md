@@ -646,8 +646,12 @@ pode correr em paralelo.
 - [ ] Custo por cliente/mês conhecido, dentro da margem de cada tier.
 
 **Comercial e jurídico**
-- [ ] **Documento de IP**: o que é da plataforma, o que é do cliente, o que é de quem contribuiu. O
+- [x] **Documento de IP**: o que é da plataforma, o que é do cliente, o que é de quem contribuiu. O
       material deste repositório é sensível (preços, estratégia, conversas) — mantenha tudo privado.
+      — **Pronto (2026-10-17)**: `docs/ip.md` — inventário factual (licenças verificadas no repo:
+      three.js MIT, fontes OFL, GLBs Khronos, Vênus CC0 sem URL registrada), autoria assistida por
+      IA documentada, política de cessão para novos membros, custódia de segredos. Checklist de
+      pendências no fim do documento (marca no INPI, termos, auditoria de licenças).
 - [ ] Contrato de serviço (SLA, propriedade do acervo, portabilidade e saída).
       — **Minuta pronta (2026-10-17)**: `docs/contrato-servico.md` — estrutura
       completa com os números medidos de SLO, tabela de IP (plataforma × museu ×
