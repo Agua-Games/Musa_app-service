@@ -112,6 +112,16 @@ class ServeTest(unittest.TestCase):
     def test_unknown_collection_items_is_a_404(self):
         self.assertEqual(self.client.get("/collections/nope/items").status_code, 404)
 
+    def test_module_gated_endpoints_follow_the_stealth_rule(self):
+        """M4.7 finding: store/cinema were ungated — a museum downgraded from
+        a module kept serving it. The fixture has modules [assistant, store]:
+        the store answers, the cinema is a stealth 404 (no module, no
+        endpoint — same rule as the assistant)."""
+        self.assertEqual(self.client.get("/store/products").status_code, 200)
+        self.assertEqual(self.client.get("/cinema/programme").status_code, 404)
+        # Plans are the public pricing page by design — never gated.
+        self.assertEqual(self.client.get("/plans").status_code, 200)
+
 
 if __name__ == "__main__":
     unittest.main()

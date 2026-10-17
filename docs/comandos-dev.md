@@ -219,6 +219,24 @@ docker run --rm -p 8000:8000 -v ${PWD}:/work -e MUSA_ADMIN_TOKEN=<token> \
 git log --oneline -10      # ver o padrão antes de commitar
 ```
 
+## Demos e narrativa de investidor (M4.7)
+
+```bash
+# Gerar/regenerar os 3 demos (H:\Musa_app-service\demos\ — fora do git).
+# Re-assina os entitlements com a chave real da plataforma; idempotente.
+python tools/make_demos.py --key "H:\Musa_app-service\secrets\musa-entitlements-ed25519.key"
+
+# Narrativa executável de 5 beats (bronze no ar → login → publicar peça →
+# upgrade REAL de tier por re-assinatura → recursos Gold aparecem).
+# Roda numa cópia descartável: o repo demo fica intacto, é re-executável.
+python tools/demo_narrative.py --repo "H:\Musa_app-service\demos\atelier-bronze" --key "H:\Musa_app-service\secrets\musa-entitlements-ed25519.key"
+
+# Servir um demo para mostrar no navegador (um terminal por demo; o roteiro
+# completo de apresentação — o que dizer em cada beat — é demos\ROTEIRO.md)
+set MUSA_ADMIN_TOKEN=demo
+cd builder && python -m musa_build serve --repo "H:\Musa_app-service\demos\palazzo-gold" --host 127.0.0.1 --port 8010
+```
+
 ## Leitura de logs (tools/logread.py) — SEMPRE que for ler um log
 
 ```bash

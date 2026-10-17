@@ -389,12 +389,19 @@ def create_app(repo: Path, *, data_dir: Path | None = None,
 
     # Service sections the storefront renders (spec §6.1 siblings): the static
     # build embeds them in the catalog; the dynamic API serves them here.
+    # M4.7 finding: these endpoints were UNGATED — a museum downgraded from a
+    # module would keep serving it. Same stealth rule as the assistant:
+    # no module, no endpoint.
     @app.get("/cinema/programme")
     def cinema_programme():
+        if not ({"streaming", "screening-room"} & set(state.modules)):
+            raise HTTPException(status_code=404, detail="not found")
         return envelope(state.films, count=len(state.films))
 
     @app.get("/store/products")
     def store_products():
+        if "store" not in state.modules:
+            raise HTTPException(status_code=404, detail="not found")
         return envelope(state.products, count=len(state.products))
 
     @app.get("/plans")

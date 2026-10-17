@@ -935,6 +935,7 @@
     if (!i) return;
     fb.currentItem = i;
     $("#ipImg").src = i.image;
+    $("#ipImg").alt = i.titulo;
     $("#ipId").textContent = `${i.asset_id} · ${i.colecao}${i.subcolecao ? " / " + i.subcolecao : ""}`;
     $("#ipTitle").textContent = i.titulo;
     $("#ipAuthor").textContent = `${i.autor} · ${i.data} · ${i.material}`;

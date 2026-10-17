@@ -60,7 +60,7 @@
 
     <form class="assistant reveal-up d4" id="assistantForm">
       <span class="orb"></span>
-      <input type="text" id="assistantInput" placeholder="Ask the collection assistant… try “Which pieces have 3D models?”" autocomplete="off" />
+      <input type="text" id="assistantInput" placeholder="Ask the collection assistant… try “Which pieces have 3D models?”" autocomplete="off" aria-label="Ask the collection assistant" />
       <button type="submit">Ask</button>
     </form>
     <div class="assistant-hints reveal-up d4">
@@ -462,8 +462,8 @@
 <!-- ======================= Overlays ======================= -->
 
 <!-- Lightbox (Bronze zoom) -->
-<div class="lightbox" id="lightbox">
-  <button class="lightbox-close" id="lbClose">×</button>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Artwork lightbox">
+  <button class="lightbox-close" id="lbClose" aria-label="Close lightbox">×</button>
   <div class="lightbox-stage" id="lbStage"><img id="lbImg" src="" alt="" /></div>
   <div class="lightbox-bar">
     <button id="lbZoomOut" title="Zoom out">−</button>
@@ -478,8 +478,8 @@
 </div>
 
 <!-- Wall hotspot popup (item frame + caption) -->
-<div class="wall-modal" id="wallModal">
-  <button class="viewer-modal-close" id="wallClose">×</button>
+<div class="wall-modal" id="wallModal" role="dialog" aria-modal="true" aria-labelledby="wfTitle">
+  <button class="viewer-modal-close" id="wallClose" aria-label="Close artwork popup">×</button>
   <div class="wall-frame">
     <div class="wall-frame-stage">
       <img id="wfImg" src="" alt="" />
@@ -502,8 +502,8 @@
 </div>
 
 <!-- 3D viewer modal (Silver) -->
-<div class="viewer-modal" id="viewerModal">
-  <button class="viewer-modal-close" id="vmClose">×</button>
+<div class="viewer-modal" id="viewerModal" role="dialog" aria-modal="true" aria-label="3D viewer">
+  <button class="viewer-modal-close" id="vmClose" aria-label="Close 3D viewer">×</button>
   <div class="viewer-shell">
     <div class="viewer-stage" id="vmStage">
       <div class="loading" id="vmLoading">Preparing the piece…</div>
@@ -524,10 +524,10 @@
 </div>
 
 <!-- Login modal -->
-<div class="modal" id="loginModal">
+<div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
   <div class="modal-card">
     <p class="eyebrow">Venue access</p>
-    <h3>Sign in</h3>
+    <h3 id="loginTitle">Sign in</h3>
     <p class="sub">Two admin tiers: the venue owner manages collections &amp; hero pieces; MUSA team members see operations, modules &amp; billing.</p>
     <p class="form-err" id="loginErr"></p>
     <form id="loginForm">
@@ -545,8 +545,8 @@
 
 <!-- Cart drawer -->
 <div class="scrim" id="scrim"></div>
-<aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart">
-  <header><h3 class="serif">Cart</h3><button id="cartClose">×</button></header>
+<aside class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-label="Shopping cart">
+  <header><h3 class="serif">Cart</h3><button id="cartClose" aria-label="Close cart">×</button></header>
   <div class="cart-items" id="cartItems"></div>
   <div class="cart-foot">
     <div class="cart-total"><span>Total</span><span id="cartTotal">R$ 0</span></div>
@@ -555,15 +555,15 @@
 </aside>
 
 <!-- Chat panel -->
-<div class="chat-panel" id="chatPanel">
+<div class="chat-panel" id="chatPanel" role="dialog" aria-label="Collection assistant">
   <div class="chat-head">
     <span class="orb"></span>
     <div><b>Collection assistant</b><span>● online · knows the acervo</span></div>
-    <button id="chatClose">×</button>
+    <button id="chatClose" aria-label="Close chat">×</button>
   </div>
   <div class="chat-log" id="chatLog"></div>
   <form class="chat-input" id="chatForm">
-    <input type="text" id="chatInput" placeholder="Ask about any piece…" autocomplete="off" />
+    <input type="text" id="chatInput" placeholder="Ask about any piece…" autocomplete="off" aria-label="Ask about a piece" />
     <button type="submit">➤</button>
   </form>
 </div>

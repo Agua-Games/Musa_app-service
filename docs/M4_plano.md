@@ -325,6 +325,34 @@ multi-idioma (spec: já é requisito; aqui vira verificação formal).
 (criar conta → publicar peça → upgrade de tier → recurso Gold aparece);
 checklist WCAG AA varrido na landing e no acervo.
 
+> **→ Concluída (2026-10-17)**
+> - **3 demos assinados** em `H:\Musa_app-service\demos\` (fora do git da
+>   plataforma, como o DemoMuseum): `atelier-bronze`, `galeria-silver`
+>   (assistente + Vênus de Milo 3D offline) e `palazzo-gold` (assistente,
+>   loja, streaming, sala de exibição), gerados por `tools/make_demos.py`
+>   com entitlements Ed25519 reais (expiram 2030). Build validado nos 3.
+>   Decisão de custo: GitHub Free tem repos públicos ilimitados e Actions
+>   grátis em repo público — demos podem ir ao ar a custo zero quando o
+>   dono decidir; repos remotos NÃO foram criados (não autorizado).
+> - **Narrativa executável** `tools/demo_narrative.py`: os 5 beats rodam de
+>   verdade contra um harness descartável (repo demo intacto, re-executável)
+>   — inclui o **upgrade real** (re-assinatura bronze→gold+módulos com a
+>   chave da plataforma). RODADA: "NARRATIVA APROVADA" em ~4s. Roteiro
+>   humano (o que dizer em cada beat + perguntas prováveis) em
+>   `demos/ROTEIRO.md`.
+> - **Achado real → correção**: a narrativa reprovou no beat 1 — `/store/products`
+>   e `/cinema/programme` não eram gated por módulo no `serve.py` (só o
+>   assistente tinha a regra stealth). Corrigido: cinema exige `streaming`
+>   ou `screening-room`, loja exige `store`, senão 404; `/plans` segue
+>   público por desenho. Regressão coberta em `tests.test_serve`.
+> - **WCAG AA**: checklist formal em `docs/wcag.md` — contraste computado
+>   pela fórmula oficial, `--paper-faint` corrigido (α 0.38→0.55, piso
+>   documentado no CSS), `role="dialog"`+`aria-modal`+rótulos nos 6
+>   overlays, `aria-label` nos botões "×" e nos 2 inputs sem label, `alt`
+>   dinâmico no admin. Dívidas registradas: ordem de headings (h4 sob h2)
+>   e focus trap — nenhuma reprova AA. Multi-idioma documentado como
+>   módulo pago não implementado (m-multilingual).
+
 ### M4.8 — Deploy de produção ⛔ **PORTÃO PAGO — bloqueado até o 1º cliente**
 
 Só começa com cliente fechado (decisão do dono, 2026-10-12). Provisionar o

@@ -10,7 +10,9 @@
   --ink-3: #211e18;
   --paper: #f3ede2;
   --paper-dim: rgba(243, 237, 226, 0.62);
-  --paper-faint: rgba(243, 237, 226, 0.38);
+  /* WCAG AA: alpha floor 0.55 — below ~0.50 small text on --ink falls under
+     the 4.5:1 contrast ratio (see docs/wcag.md). */
+  --paper-faint: rgba(243, 237, 226, 0.55);
   --bronze: #b98a4a;
   --gold: #d8b878;
   --line: rgba(243, 237, 226, 0.14);

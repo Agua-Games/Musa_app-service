@@ -625,14 +625,24 @@ pode correr em paralelo.
       de vereditos e divergências corrigidas em `docs/M4_plano.md` §M4.5.
 
 **Produto e apresentação**
-- [ ] Acessibilidade (WCAG no mínimo AA) e multi-idioma.
+- [x] Acessibilidade (WCAG no mínimo AA) e multi-idioma.
+      — **M4.7 (2026-10-17)**: WCAG 2.1 AA conforme nos critérios avaliados —
+      checklist completo em `docs/wcag.md` (contraste computado, ARIA nos
+      overlays, teclado, foco). Multi-idioma: módulo pago m-multilingual,
+      não implementado — registrado como dívida de produto, não de AA.
 - [x] Créditos e licenças de todo asset público exibidos corretamente.
       — **M4.6 (2026-10-17)**: contrato 1.2.0 (campos opcionais `licenca` + `fonte`,
       minor compatível — COMPATIBILITY.md); lightbox do site renderiza os dois; DemoMuseum
       com 455 cards preenchidos (450 Met CC0 com URL da peça, 5 pinturas PD/Wikimedia);
       esculturas demo sem proveniência verificável ficaram sem — checklist do cliente cobre.
-- [ ] **Ambiente de demonstração** com 3 museus fictícios, cada um em um tier, e uma narrativa de
+- [x] **Ambiente de demonstração** com 3 museus fictícios, cada um em um tier, e uma narrativa de
       upgrade — é isso que se mostra a um investidor ou a um cliente.
+      — **M4.7 (2026-10-17)**: `atelier-bronze` / `galeria-silver` / `palazzo-gold` em
+      `H:\Musa_app-service\demos\` (entitlements assinados de verdade, gerados por
+      `tools/make_demos.py`); narrativa de upgrade **executável** em
+      `tools/demo_narrative.py` (5 beats, "NARRATIVA APROVADA"); roteiro humano em
+      `demos/ROTEIRO.md`. Achado da rodada: store/cinema agora seguem a regra
+      stealth de módulos no `serve.py` (antes só o assistente era gated).
 - [ ] Custo por cliente/mês conhecido, dentro da margem de cada tier.
 
 **Comercial e jurídico**
