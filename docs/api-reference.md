@@ -2,7 +2,7 @@
 
 > **Gerado automaticamente — não editar à mão.** Regenere com `cd builder && python -m musa_build api-reference` (a suíte de testes falha se este doc ficar velho em relação ao código). Conceitos, justificativas e o porquê das decisões: `docs/api-dinamica.md` e `docs/api-estatica.md`.
 
-Plataforma **v0.4.0** · contrato do card **v1.2.0** (`schemas/card/v1/card.schema.json`).
+Plataforma **v0.5.0** · contrato do card **v1.2.0** (`schemas/card/v1/card.schema.json`).
 
 ## Convenções
 
