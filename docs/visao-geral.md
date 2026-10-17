@@ -2,7 +2,7 @@
 
 > Documento de apresentação (2026-10). Sem jargão técnico; onde um termo
 > técnico for inevitável, ele vem explicado. Os números citados são medidos
-> no produto real, não projeções.
+> no produto real, não projeções. English version: `visao-geral.en.md`.
 
 ## O que é o MUSA
 

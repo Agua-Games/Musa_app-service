@@ -57,7 +57,7 @@ chegam ao payload publicado.
 
 ## Números atuais (auto-gerados)
 
-- Cards de schema: 1 · ADRs: 17 · docs: 32 na raiz de docs/
+- Cards de schema: 1 · ADRs: 17 · docs: 33 na raiz de docs/
 - Testes: 18 arquivos no builder, 1 no MCP server, 4 no beta
 
 ## Para onde ir depois
