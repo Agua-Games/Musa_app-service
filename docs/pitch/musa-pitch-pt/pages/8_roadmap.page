@@ -1,0 +1,89 @@
+pageType: content
+background: {type: solid, color: "$paper"}
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [64, 48, 460, 18]
+    content:
+      style: "$kicker"
+      color: "$bronze"
+      text: 07 — ROADMAP
+  - elementId: title
+    elementType: text
+    bounds: [64, 80, 620, 52]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 36
+      color: "$ink"
+      wrap: false
+      text: Do museu demo à rede de museus.
+  - elementId: node1-label
+    elementType: text
+    bounds: [64, 224, 240, 18]
+    content: {style: "$kicker", color: "$bronze", wrap: false, text: HOJE}
+  - elementId: node2-label
+    elementType: text
+    bounds: [380, 224, 240, 18]
+    content: {style: "$kicker", color: "$bronze", wrap: false, text: PRÓXIMO PASSO}
+  - elementId: node3-label
+    elementType: text
+    bounds: [660, 224, 236, 18]
+    content: {style: "$kicker", color: "$bronze", wrap: false, text: ESCALA}
+  - elementId: timeline
+    elementType: shape
+    bounds: [64, 290, 832, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$bronze"}
+  - elementId: dot1
+    elementType: shape
+    bounds: [126, 285, 11, 11]
+    shapeName: ellipse
+    fill: {type: solid, color: "$bronze"}
+  - elementId: dot2
+    elementType: shape
+    bounds: [442, 285, 11, 11]
+    shapeName: ellipse
+    fill: {type: solid, color: "$bronze"}
+  - elementId: dot3
+    elementType: shape
+    bounds: [722, 285, 11, 11]
+    shapeName: ellipse
+    fill: {type: solid, color: "$bronze"}
+  - elementId: node1-desc
+    elementType: text
+    bounds: [64, 316, 260, 110]
+    content:
+      style: "$body"
+      fontSize: 12
+      color: "$mutedLight"
+      text: museu demo público no ar — catálogo, 3D, assistente de IA e painel do curador, demonstrável ao vivo em 5 minutos
+  - elementId: node2-desc
+    elementType: text
+    bounds: [380, 316, 240, 60]
+    content:
+      style: "$body"
+      fontSize: 12
+      color: "$mutedLight"
+      text: primeiro museu cliente em produção
+  - elementId: node3-desc
+    elementType: text
+    bounds: [660, 316, 236, 110]
+    content:
+      style: "$body"
+      fontSize: 12
+      color: "$mutedLight"
+      text: rede de parceiros de escaneamento 3D — dezenas de museus na mesma operação
+  - elementId: closing
+    elementType: text
+    bounds: [64, 458, 640, 28]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 18
+      italic: true
+      color: "$bronze"
+      wrap: false
+      text: Cada museu novo entra no ar em dias — não meses.
+  - elementId: pagenum
+    elementType: text
+    bounds: [860, 506, 36, 16]
+    content: {fontFamily: Inter, fontSize: 9, color: "$mutedLight", align: [right, top], text: "08"}

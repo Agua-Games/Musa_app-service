@@ -1,0 +1,56 @@
+version: v2
+title: MUSA — Pitch for partners and investors
+size: [960, 540]
+customFonts:
+  - family: Cormorant Garamond
+    src: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond"
+  - family: Inter
+    src: "https://fonts.googleapis.com/css2?family=Inter"
+theme:
+  colors:
+    ink: "#0e0d0b"
+    inkSoft: "#171511"
+    paper: "#f3ede2"
+    bronze: "#b98a4a"
+    gold: "#d8b878"
+    cream: "#e9e0cf"
+    mutedDark: "#a89e8a"
+    mutedLight: "#6f6455"
+    hairlineLight: "#d8cebc"
+  textStyles:
+    kicker:
+      fontFamily: Inter
+      fontSize: 11
+      letterSpacing: 3
+      bold: true
+    body:
+      fontFamily: Inter
+      fontSize: 13
+      lineHeight: 1.55
+  tableStyles:
+    pricing:
+      cellStyle:
+        fontFamily: Inter
+        fontSize: 12
+        color: "$cream"
+        lineHeight: 1.4
+        align: [left, middle]
+        border: [null, null, {style: solid, width: 0.75, color: "#b98a4a55"}, null]
+      firstRowStyle:
+        fontFamily: Cormorant Garamond
+        fontSize: 20
+        color: "$gold"
+        border: [null, null, {style: solid, width: 1, color: "$bronze"}, null]
+      firstColumnStyle:
+        color: "$mutedDark"
+        fontSize: 11
+pages:
+  - pages/1_cover.page
+  - pages/2_problem.page
+  - pages/3_solution.page
+  - pages/4_proof.page
+  - pages/5_model.page
+  - pages/6_edge.page
+  - pages/7_market.page
+  - pages/8_roadmap.page
+  - pages/9_ask.page

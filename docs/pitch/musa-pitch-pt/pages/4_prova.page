@@ -1,0 +1,100 @@
+pageType: content
+background: {type: solid, color: "$paper"}
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [64, 48, 460, 18]
+    content:
+      style: "$kicker"
+      color: "$bronze"
+      text: 03 — PROVA, NÃO PROMESSA
+  - elementId: title
+    elementType: text
+    bounds: [64, 80, 620, 52]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 36
+      color: "$ink"
+      wrap: false
+      text: O produto está no ar — e medido.
+  - elementId: bignum
+    elementType: text
+    bounds: [64, 170, 300, 116]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 100
+      color: "$bronze"
+      wrap: false
+      text: 36 s
+  - elementId: bignum-caption
+    elementType: text
+    bounds: [64, 296, 280, 56]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      color: "$mutedLight"
+      text: mediana para uma peça nova ir do painel do curador ao site público
+  - elementId: divider
+    elementType: shape
+    bounds: [392, 176, 1, 250]
+    shapeName: rect
+    fill: {type: solid, color: "$hairlineLight"}
+  - elementId: stat2-num
+    elementType: text
+    bounds: [436, 176, 140, 64]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 54
+      color: "$ink"
+      wrap: false
+      text: "455"
+  - elementId: stat2-label
+    elementType: text
+    bounds: [436, 248, 420, 40]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      color: "$mutedLight"
+      text: fichas publicadas no catálogo do museu demo — cada uma com licença e fonte públicas
+  - elementId: stat3-num
+    elementType: text
+    bounds: [436, 316, 240, 64]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 54
+      color: "$ink"
+      wrap: false
+      text: AA
+  - elementId: stat3-label
+    elementType: text
+    bounds: [436, 388, 420, 40]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      color: "$mutedLight"
+      text: acessibilidade WCAG AA e conformidade LGPD desde o primeiro dia
+  - elementId: rule
+    elementType: shape
+    bounds: [64, 458, 832, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$hairlineLight"}
+  - elementId: demo-link
+    elementType: text
+    bounds: [64, 474, 560, 22]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      color: "$ink"
+      wrap: false
+      text: |
+        <p>Veja ao vivo: <a href="https://agua-games.github.io/DemoMuseum/">agua-games.github.io/DemoMuseum</a></p>
+  - elementId: note
+    elementType: text
+    bounds: [560, 476, 336, 18]
+    content:
+      fontFamily: Inter
+      fontSize: 9.5
+      color: "$mutedLight"
+      align: [right, top]
+      wrap: false
+      text: números medidos no produto real · outubro de 2026

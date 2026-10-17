@@ -1,0 +1,68 @@
+pageType: cover
+background: {type: solid, color: "$ink"}
+elements:
+  - elementId: hero-img
+    elementType: image
+    bounds: [600, 0, 360, 540]
+    src: "https://pub-61e9fc2b46a54c66a9421fe7c23a5b64.r2.dev/pinturas/moca-com-brinco-de-perola/images/moca-com-brinco-de-perola.jpg"
+    fit: {mode: cover}
+  - elementId: hero-veil
+    elementType: shape
+    bounds: [560, 0, 400, 540]
+    shapeName: rect
+    fill:
+      type: gradient
+      gradientType: linear
+      angle: 0
+      stops:
+        - {position: 0, color: "#0e0d0b"}
+        - {position: 0.35, color: "#0e0d0bdd"}
+        - {position: 1, color: "#0e0d0b00"}
+  - elementId: kicker
+    elementType: text
+    bounds: [64, 60, 460, 20]
+    content:
+      style: "$kicker"
+      color: "$gold"
+      text: AGUA GAMES · MUSEUM SUITE SERVICE
+  - elementId: title
+    elementType: text
+    bounds: [60, 140, 520, 130]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 108
+      color: "$paper"
+      letterSpacing: 8
+      wrap: false
+      text: MUSA
+  - elementId: tagline
+    elementType: text
+    bounds: [64, 292, 470, 40]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 27
+      italic: true
+      color: "$bronze"
+      wrap: false
+      text: Presença digital completa para museus.
+  - elementId: sub
+    elementType: text
+    bounds: [64, 348, 440, 66]
+    content:
+      style: "$body"
+      color: "$mutedDark"
+      text: Do catálogo pesquisável ao gêmeo digital — o nível de experiência que hoje só os grandes museus do mundo têm, como serviço.
+  - elementId: rule
+    elementType: shape
+    bounds: [64, 472, 472, 1]
+    shapeName: rect
+    fill: {type: solid, color: "#b98a4a66"}
+  - elementId: footer
+    elementType: text
+    bounds: [64, 486, 520, 18]
+    content:
+      fontFamily: Inter
+      fontSize: 10
+      letterSpacing: 2
+      color: "$mutedDark"
+      text: DECK PARA PARCEIROS E INVESTIDORES · OUTUBRO DE 2026

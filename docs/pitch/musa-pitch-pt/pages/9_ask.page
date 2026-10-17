@@ -1,0 +1,71 @@
+pageType: final
+background: {type: solid, color: "$ink"}
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [64, 64, 460, 18]
+    content:
+      style: "$kicker"
+      color: "$gold"
+      text: 08 — O QUE BUSCAMOS
+  - elementId: title
+    elementType: text
+    bounds: [64, 106, 760, 64]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 44
+      color: "$paper"
+      wrap: false
+      text: |
+        <p>Vamos colocar o museu inteiro <em>online</em>?</p>
+  - elementId: arrow1
+    elementType: icon
+    bounds: [64, 216, 16, 16]
+    iconName: "fas:arrow-right"
+    fill: {type: solid, color: "$gold"}
+  - elementId: ask1
+    elementType: text
+    bounds: [96, 210, 560, 26]
+    content: {fontFamily: Inter, fontSize: 15, color: "$cream", wrap: false, text: Seed investment ou incubadora}
+  - elementId: arrow2
+    elementType: icon
+    bounds: [64, 268, 16, 16]
+    iconName: "fas:arrow-right"
+    fill: {type: solid, color: "$gold"}
+  - elementId: ask2
+    elementType: text
+    bounds: [96, 262, 560, 26]
+    content: {fontFamily: Inter, fontSize: 15, color: "$cream", wrap: false, text: Um museu-piloto para o primeiro case}
+  - elementId: arrow3
+    elementType: icon
+    bounds: [64, 320, 16, 16]
+    iconName: "fas:arrow-right"
+    fill: {type: solid, color: "$gold"}
+  - elementId: ask3
+    elementType: text
+    bounds: [96, 314, 560, 26]
+    content: {fontFamily: Inter, fontSize: 15, color: "$cream", wrap: false, text: Parceiros de escaneamento 3D}
+  - elementId: rule
+    elementType: shape
+    bounds: [64, 402, 472, 1]
+    shapeName: rect
+    fill: {type: solid, color: "#b98a4a66"}
+  - elementId: contact1
+    elementType: text
+    bounds: [64, 422, 640, 24]
+    content:
+      style: "$body"
+      fontSize: 13
+      color: "$gold"
+      wrap: false
+      text: "Veja tudo funcionando: agua-games.github.io/DemoMuseum"
+  - elementId: contact2
+    elementType: text
+    bounds: [64, 452, 640, 20]
+    content:
+      fontFamily: Inter
+      fontSize: 10.5
+      letterSpacing: 2
+      color: "$mutedDark"
+      wrap: false
+      text: MUSA · MUSEUM SUITE SERVICE — UM PRODUTO AGUA GAMES

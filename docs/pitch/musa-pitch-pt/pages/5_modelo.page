@@ -1,0 +1,72 @@
+pageType: content
+background: {type: solid, color: "$ink"}
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [64, 48, 460, 18]
+    content:
+      style: "$kicker"
+      color: "$gold"
+      text: 04 — MODELO DE NEGÓCIO
+  - elementId: title
+    elementType: text
+    bounds: [64, 80, 620, 52]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 36
+      color: "$paper"
+      wrap: false
+      text: Assinatura mensal por museu.
+  - elementId: pricing
+    elementType: table
+    bounds: [64, 146, 832, 236]
+    columnWidths: [0.2, 0.266, 0.267, 0.267]
+    rowHeights: [0.22, 0.2, 0.38, 0.2]
+    style: "$pricing"
+    rows:
+      - - text: ""
+        - text: BRONZE
+        - text: SILVER
+        - text: GOLD
+      - - text: mensalidade
+        - text: R$ 597
+          fontFamily: Cormorant Garamond
+          fontSize: 21
+          color: "$gold"
+        - text: R$ 1.197
+          fontFamily: Cormorant Garamond
+          fontSize: 21
+          color: "$gold"
+        - text: R$ 3.197
+          fontFamily: Cormorant Garamond
+          fontSize: 21
+          color: "$gold"
+      - - text: inclui
+        - text: museu digital completo — site, catálogo pesquisável e painel do curador
+        - text: tudo do Bronze, mais 3D interativo e assistente de IA
+        - text: tudo do Silver, mais o museu inteiro espelhado online — gêmeo digital e totens
+      - - text: perfil
+        - text: primeiro passo digital
+        - text: experiência interativa
+        - text: referência digital
+  - elementId: modules
+    elementType: text
+    bounds: [64, 402, 832, 24]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      wrap: false
+      text: |
+        <p><span style="color:$gold;"><strong>Módulos avulsos:</strong></span> <span style="color:$cream;">assistente de IA · loja online · streaming de cinema de arte · gêmeo digital ampliado · API de dados · camada multilíngue</span></p>
+  - elementId: note
+    elementType: text
+    bounds: [64, 446, 832, 40]
+    content:
+      style: "$body"
+      fontSize: 11.5
+      color: "$mutedDark"
+      text: O museu contrata a própria infraestrutura de nuvem — centavos na escala de um acervo típico. É isso que mantém nosso custo marginal por museu próximo de zero.
+  - elementId: pagenum
+    elementType: text
+    bounds: [860, 506, 36, 16]
+    content: {fontFamily: Inter, fontSize: 9, color: "$mutedDark", align: [right, top], text: "05"}

@@ -1,0 +1,125 @@
+pageType: content
+background: {type: solid, color: "$paper"}
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [64, 48, 460, 18]
+    content:
+      style: "$kicker"
+      color: "$bronze"
+      text: 05 — POR QUE O MUSA
+  - elementId: title
+    elementType: text
+    bounds: [64, 72, 520, 88]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 32
+      color: "$ink"
+      lineHeight: 1.15
+      text: |
+        <p>Defensável pelo desenho —</p>
+        <p>não pelo segredo.</p>
+  - elementId: icon1
+    elementType: icon
+    bounds: [64, 172, 20, 20]
+    iconName: "fas:lock-open"
+    fill: {type: solid, color: "$bronze"}
+  - elementId: item1-label
+    elementType: text
+    bounds: [100, 170, 440, 20]
+    content: {fontFamily: Inter, fontSize: 13.5, bold: true, color: "$ink", wrap: false, text: O acervo é do museu}
+  - elementId: item1-desc
+    elementType: text
+    bounds: [100, 194, 440, 38]
+    content:
+      style: "$body"
+      fontSize: 12
+      color: "$mutedLight"
+      text: formato aberto e documentado, com exportação total a qualquer momento — o oposto do cativeiro de dados que o setor teme
+  - elementId: rule1
+    elementType: shape
+    bounds: [64, 236, 476, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$hairlineLight"}
+  - elementId: icon2
+    elementType: icon
+    bounds: [64, 252, 20, 20]
+    iconName: "fas:gauge-high"
+    fill: {type: solid, color: "$bronze"}
+  - elementId: item2-label
+    elementType: text
+    bounds: [100, 250, 440, 20]
+    content: {fontFamily: Inter, fontSize: 13.5, bold: true, color: "$ink", wrap: false, text: Operação centralizada}
+  - elementId: item2-desc
+    elementType: text
+    bounds: [100, 274, 440, 38]
+    content:
+      style: "$body"
+      fontSize: 12
+      color: "$mutedLight"
+      text: um museu novo entra no ar em dias, não meses — e a mudança de plano tem efeito imediato
+  - elementId: rule2
+    elementType: shape
+    bounds: [64, 322, 476, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$hairlineLight"}
+  - elementId: icon3
+    elementType: icon
+    bounds: [64, 338, 20, 20]
+    iconName: "fas:scale-balanced"
+    fill: {type: solid, color: "$bronze"}
+  - elementId: item3-label
+    elementType: text
+    bounds: [100, 336, 440, 20]
+    content: {fontFamily: Inter, fontSize: 13.5, bold: true, color: "$ink", wrap: false, text: Conformidade desde o dia 1}
+  - elementId: item3-desc
+    elementType: text
+    bounds: [100, 360, 440, 38]
+    content:
+      style: "$body"
+      fontSize: 12
+      color: "$mutedLight"
+      text: LGPD (o museu é o controlador dos dados, nós os operadores), acessibilidade WCAG AA e licenças das obras exibidas na ficha
+  - elementId: rule3
+    elementType: shape
+    bounds: [64, 408, 476, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$hairlineLight"}
+  - elementId: icon4
+    elementType: icon
+    bounds: [64, 424, 20, 20]
+    iconName: "fas:shield-halved"
+    fill: {type: solid, color: "$bronze"}
+  - elementId: item4-label
+    elementType: text
+    bounds: [100, 422, 440, 20]
+    content: {fontFamily: Inter, fontSize: 13.5, bold: true, color: "$ink", wrap: false, text: Qualidade auditável}
+  - elementId: item4-desc
+    elementType: text
+    bounds: [100, 446, 440, 38]
+    content:
+      style: "$body"
+      fontSize: 12
+      color: "$mutedLight"
+      text: toda versão passa por um portão de testes com bateria de mau uso — simulamos um cliente fazendo tudo errado para provar que nada se perde
+  - elementId: side-img
+    elementType: image
+    bounds: [604, 110, 292, 360]
+    src: "https://pub-61e9fc2b46a54c66a9421fe7c23a5b64.r2.dev/pinturas/a-leiteira/images/a-leiteira.jpg"
+    fit: {mode: cover}
+    border: {style: solid, width: 1, color: "$bronze"}
+  - elementId: side-caption
+    elementType: text
+    bounds: [604, 480, 292, 16]
+    content:
+      fontFamily: Inter
+      fontSize: 9.5
+      italic: true
+      color: "$mutedLight"
+      align: [right, top]
+      wrap: false
+      text: A Leiteira — acervo do museu demo
+  - elementId: pagenum
+    elementType: text
+    bounds: [860, 510, 36, 16]
+    content: {fontFamily: Inter, fontSize: 9, color: "$mutedLight", align: [right, top], text: "06"}

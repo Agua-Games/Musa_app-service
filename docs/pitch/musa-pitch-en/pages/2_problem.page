@@ -1,0 +1,100 @@
+pageType: content
+background: {type: solid, color: "$paper"}
+elements:
+  - elementId: side-img
+    elementType: image
+    bounds: [656, 0, 304, 540]
+    src: "https://pub-61e9fc2b46a54c66a9421fe7c23a5b64.r2.dev/pinturas/nenufares/images/nenufares.jpg"
+    fit: {mode: cover}
+  - elementId: side-veil
+    elementType: shape
+    bounds: [616, 0, 344, 540]
+    shapeName: rect
+    fill:
+      type: gradient
+      gradientType: linear
+      angle: 0
+      stops:
+        - {position: 0, color: "#f3ede2"}
+        - {position: 0.3, color: "#f3ede2cc"}
+        - {position: 1, color: "#f3ede200"}
+  - elementId: kicker
+    elementType: text
+    bounds: [64, 48, 400, 18]
+    content:
+      style: "$kicker"
+      color: "$bronze"
+      text: 01 — THE PROBLEM
+  - elementId: title
+    elementType: text
+    bounds: [64, 80, 560, 104]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 40
+      color: "$ink"
+      lineHeight: 1.15
+      text: |
+        <p>Valuable collections.</p>
+        <p><em>No</em> digital presence.</p>
+  - elementId: item1-label
+    elementType: text
+    bounds: [64, 208, 480, 20]
+    content: {fontFamily: Inter, fontSize: 14, bold: true, color: "$ink", wrap: false, text: Agencies}
+  - elementId: item1-desc
+    elementType: text
+    bounds: [64, 232, 470, 22]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      color: "$mutedLight"
+      text: charge heavily for a website that ages — and dies.
+  - elementId: rule1
+    elementType: shape
+    bounds: [64, 272, 496, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$hairlineLight"}
+  - elementId: item2-label
+    elementType: text
+    bounds: [64, 292, 480, 20]
+    content: {fontFamily: Inter, fontSize: 14, bold: true, color: "$ink", wrap: false, text: Generic platforms}
+  - elementId: item2-desc
+    elementType: text
+    bounds: [64, 316, 470, 22]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      color: "$mutedLight"
+      wrap: false
+      text: "don't understand collections: catalog records, image licensing, object tiers."
+  - elementId: rule2
+    elementType: shape
+    bounds: [64, 356, 496, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$hairlineLight"}
+  - elementId: item3-label
+    elementType: text
+    bounds: [64, 376, 480, 20]
+    content: {fontFamily: Inter, fontSize: 14, bold: true, color: "$ink", wrap: false, text: Bespoke projects}
+  - elementId: item3-desc
+    elementType: text
+    bounds: [64, 400, 470, 22]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      color: "$mutedLight"
+      wrap: false
+      text: don't scale — every museum becomes a brand-new development, from scratch.
+  - elementId: conclusion
+    elementType: text
+    bounds: [64, 462, 530, 28]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 18
+      italic: true
+      color: "$bronze"
+      wrap: false
+      text: "The result: thousands of museums invisible to the digital public."
+  - elementId: pagenum
+    elementType: text
+    bounds: [596, 506, 36, 16]
+    content: {fontFamily: Inter, fontSize: 9, color: "$mutedLight", align: [right, top], text: "02"}

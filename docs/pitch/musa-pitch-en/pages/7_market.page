@@ -1,0 +1,71 @@
+pageType: content
+background: {type: solid, color: "$ink"}
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [64, 48, 460, 18]
+    content:
+      style: "$kicker"
+      color: "$gold"
+      text: 06 — MARKET
+  - elementId: bignum
+    elementType: text
+    bounds: [64, 110, 500, 140]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 120
+      color: "$gold"
+      wrap: false
+      text: "3,902"
+  - elementId: bignum-caption
+    elementType: text
+    bounds: [64, 262, 640, 26]
+    content:
+      style: "$body"
+      fontSize: 13.5
+      color: "$cream"
+      wrap: false
+      text: |
+        <p>museums mapped in Brazil — <a href="https://agenciagov.ebc.com.br/noticias/202401/ibram-celebra-15-anos-neste-sabado-20-e-lanca-a-plataforma-nova-museus-br">Museus BR / Ibram platform, 2024</a></p>
+  - elementId: rule
+    elementType: shape
+    bounds: [64, 320, 520, 1]
+    shapeName: rect
+    fill: {type: solid, color: "#b98a4a55"}
+  - elementId: line1
+    elementType: text
+    bounds: [64, 344, 620, 24]
+    content:
+      style: "$body"
+      fontSize: 13
+      color: "$paper"
+      wrap: false
+      text: The vast majority are small and mid-sized, with no technical staff —
+  - elementId: line2
+    elementType: text
+    bounds: [64, 370, 600, 24]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 17
+      italic: true
+      color: "$bronze"
+      wrap: false
+      text: exactly who MUSA serves.
+  - elementId: line3
+    elementType: text
+    bounds: [64, 424, 640, 24]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      color: "$mutedDark"
+      wrap: false
+      text: "And the pattern repeats worldwide: valuable collections, precarious digital presence."
+  - elementId: deco-icon
+    elementType: icon
+    bounds: [740, 170, 150, 150]
+    iconName: "fas:landmark"
+    fill: {type: solid, color: "#b98a4a2e"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [860, 506, 36, 16]
+    content: {fontFamily: Inter, fontSize: 9, color: "$mutedDark", align: [right, top], text: "07"}

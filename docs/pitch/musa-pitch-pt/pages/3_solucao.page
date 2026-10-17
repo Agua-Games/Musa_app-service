@@ -1,0 +1,102 @@
+pageType: content
+background: {type: solid, color: "$ink"}
+elements:
+  - elementId: side-img
+    elementType: image
+    bounds: [620, 0, 340, 540]
+    src: "https://pub-61e9fc2b46a54c66a9421fe7c23a5b64.r2.dev/pinturas/ronda-noturna/images/ronda-noturna.jpg"
+    fit: {mode: cover}
+  - elementId: side-veil
+    elementType: shape
+    bounds: [580, 0, 380, 540]
+    shapeName: rect
+    fill:
+      type: gradient
+      gradientType: linear
+      angle: 0
+      stops:
+        - {position: 0, color: "#0e0d0b"}
+        - {position: 0.32, color: "#0e0d0bcc"}
+        - {position: 1, color: "#0e0d0b00"}
+  - elementId: kicker
+    elementType: text
+    bounds: [64, 48, 400, 18]
+    content:
+      style: "$kicker"
+      color: "$gold"
+      text: 02 — A SOLUÇÃO
+  - elementId: title
+    elementType: text
+    bounds: [64, 80, 540, 52]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 36
+      color: "$paper"
+      wrap: false
+      text: Um museu digital completo, operado por nós.
+  - elementId: subtitle
+    elementType: text
+    bounds: [64, 138, 520, 26]
+    content:
+      fontFamily: Cormorant Garamond
+      fontSize: 17
+      italic: true
+      color: "$bronze"
+      wrap: false
+      text: A experiência é centralizada. O conteúdo é inteiramente do museu.
+  - elementId: icon1
+    elementType: icon
+    bounds: [64, 198, 22, 22]
+    iconName: "fas:building-columns"
+    fill: {type: solid, color: "$gold"}
+  - elementId: item1-label
+    elementType: text
+    bounds: [102, 196, 430, 22]
+    content: {fontFamily: Inter, fontSize: 14, bold: true, color: "$paper", wrap: false, text: Site + catálogo pesquisável}
+  - elementId: item1-desc
+    elementType: text
+    bounds: [102, 220, 430, 22]
+    content: {style: "$body", fontSize: 12, color: "$mutedDark", wrap: false, text: uma peça nova vai do painel do curador ao ar em segundos}
+  - elementId: icon2
+    elementType: icon
+    bounds: [64, 270, 22, 22]
+    iconName: "fas:cube"
+    fill: {type: solid, color: "$gold"}
+  - elementId: item2-label
+    elementType: text
+    bounds: [102, 268, 430, 22]
+    content: {fontFamily: Inter, fontSize: 14, bold: true, color: "$paper", wrap: false, text: 3D interativo}
+  - elementId: item2-desc
+    elementType: text
+    bounds: [102, 292, 430, 22]
+    content: {style: "$body", fontSize: 12, color: "$mutedDark", wrap: false, text: peças giráveis na tela do celular do visitante}
+  - elementId: icon3
+    elementType: icon
+    bounds: [64, 342, 22, 22]
+    iconName: "fas:wand-magic-sparkles"
+    fill: {type: solid, color: "$gold"}
+  - elementId: item3-label
+    elementType: text
+    bounds: [102, 340, 430, 22]
+    content: {fontFamily: Inter, fontSize: 14, bold: true, color: "$paper", wrap: false, text: Assistente de IA}
+  - elementId: item3-desc
+    elementType: text
+    bounds: [102, 364, 430, 22]
+    content: {style: "$body", fontSize: 12, color: "$mutedDark", wrap: false, text: conhece cada peça e responde citando a ficha oficial como fonte}
+  - elementId: icon4
+    elementType: icon
+    bounds: [64, 414, 22, 22]
+    iconName: "fas:gem"
+    fill: {type: solid, color: "$gold"}
+  - elementId: item4-label
+    elementType: text
+    bounds: [102, 412, 430, 22]
+    content: {fontFamily: Inter, fontSize: 14, bold: true, color: "$paper", wrap: false, text: "Loja, cinema e gêmeo digital"}
+  - elementId: item4-desc
+    elementType: text
+    bounds: [102, 436, 430, 22]
+    content: {style: "$body", fontSize: 12, color: "$mutedDark", wrap: false, text: conforme o plano — incluindo os totens do museu físico}
+  - elementId: pagenum
+    elementType: text
+    bounds: [556, 506, 36, 16]
+    content: {fontFamily: Inter, fontSize: 9, color: "$mutedDark", align: [right, top], text: "03"}
