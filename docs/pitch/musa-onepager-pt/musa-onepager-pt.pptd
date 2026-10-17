@@ -1,0 +1,28 @@
+version: v2
+title: MUSA — One-pager (PT)
+size: [960, 540]
+customFonts:
+  - family: Cormorant Garamond
+    src: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond"
+  - family: Inter
+    src: "https://fonts.googleapis.com/css2?family=Inter"
+theme:
+  colors:
+    ink: "#0e0d0b"
+    paper: "#f3ede2"
+    bronze: "#b98a4a"
+    gold: "#d8b878"
+    cream: "#e9e0cf"
+    mutedDark: "#a89e8a"
+  textStyles:
+    kicker:
+      fontFamily: Inter
+      fontSize: 10
+      letterSpacing: 3
+      bold: true
+    body:
+      fontFamily: Inter
+      fontSize: 11.5
+      lineHeight: 1.5
+pages:
+  - pages/1_onepager.page

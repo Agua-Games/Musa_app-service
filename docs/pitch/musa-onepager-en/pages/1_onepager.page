@@ -1,0 +1,128 @@
+pageType: content
+background: {type: solid, color: "$ink"}
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [64, 36, 420, 16]
+    content: {style: "$kicker", color: "$gold", wrap: false, text: AGUA GAMES · MUSEUM SUITE SERVICE}
+  - elementId: date
+    elementType: text
+    bounds: [560, 36, 336, 16]
+    content: {style: "$kicker", color: "$mutedDark", align: [right, top], wrap: false, text: ONE-PAGER · OCTOBER 2026}
+  - elementId: logo
+    elementType: text
+    bounds: [60, 58, 230, 84]
+    content: {fontFamily: Cormorant Garamond, fontSize: 66, color: "$paper", letterSpacing: 6, wrap: false, text: MUSA}
+  - elementId: tagline
+    elementType: text
+    bounds: [296, 96, 460, 30]
+    content: {fontFamily: Cormorant Garamond, fontSize: 20, italic: true, color: "$bronze", wrap: false, text: Complete digital presence for museums.}
+  - elementId: rule-top
+    elementType: shape
+    bounds: [64, 152, 832, 1]
+    shapeName: rect
+    fill: {type: solid, color: "#b98a4a55"}
+  # ——— Left column ———
+  - elementId: prob-kicker
+    elementType: text
+    bounds: [64, 170, 300, 16]
+    content: {style: "$kicker", color: "$gold", wrap: false, text: THE PROBLEM}
+  - elementId: prob-text
+    elementType: text
+    bounds: [64, 192, 400, 52]
+    content:
+      style: "$body"
+      color: "$mutedDark"
+      text: Small and mid-sized museums hold valuable collections with no digital presence. Agencies, generic platforms and bespoke projects all fail them.
+  - elementId: sol-kicker
+    elementType: text
+    bounds: [64, 258, 300, 16]
+    content: {style: "$kicker", color: "$gold", wrap: false, text: THE SOLUTION}
+  - elementId: sol-text
+    elementType: text
+    bounds: [64, 280, 400, 92]
+    content:
+      style: "$body"
+      color: "$cream"
+      text: |
+        <p>— Elegant website with a searchable catalog</p>
+        <p>— Interactive 3D, on the visitor's own phone</p>
+        <p>— AI assistant that cites the official record</p>
+        <p>— Store, cinema and digital twin, by plan</p>
+  - elementId: why-kicker
+    elementType: text
+    bounds: [64, 386, 300, 16]
+    content: {style: "$kicker", color: "$gold", wrap: false, text: WHY MUSA}
+  - elementId: why-text
+    elementType: text
+    bounds: [64, 408, 400, 76]
+    content:
+      style: "$body"
+      color: "$mutedDark"
+      text: |
+        <p>— The museum legally owns its collection — no lock-in</p>
+        <p>— Centralized operations: a new museum live in days</p>
+        <p>— LGPD and WCAG AA compliance from day one</p>
+  # ——— Right column ———
+  - elementId: prova-kicker
+    elementType: text
+    bounds: [520, 170, 300, 16]
+    content: {style: "$kicker", color: "$gold", wrap: false, text: "PROOF, NOT PROMISE"}
+  - elementId: prova-text
+    elementType: text
+    bounds: [520, 192, 376, 52]
+    content:
+      style: "$body"
+      color: "$cream"
+      text: |
+        <p><span style="color:$gold;">36 s</span> median to publish a piece · <span style="color:$gold;">455</span> records in the demo museum · test gate with a misuse battery</p>
+  - elementId: modelo-kicker
+    elementType: text
+    bounds: [520, 258, 300, 16]
+    content: {style: "$kicker", color: "$gold", wrap: false, text: BUSINESS MODEL}
+  - elementId: modelo-text
+    elementType: text
+    bounds: [520, 280, 376, 52]
+    content:
+      style: "$body"
+      color: "$mutedDark"
+      text: |
+        <p><span style="color:$cream;">Bronze R$ 597 · Silver R$ 1,197 · Gold R$ 3,197</span>/month, plus add-on modules. Marginal cost per museum near zero.</p>
+  - elementId: mercado-kicker
+    elementType: text
+    bounds: [520, 346, 300, 16]
+    content: {style: "$kicker", color: "$gold", wrap: false, text: MARKET}
+  - elementId: mercado-text
+    elementType: text
+    bounds: [520, 368, 376, 40]
+    content:
+      style: "$body"
+      color: "$mutedDark"
+      text: |
+        <p><span style="color:$cream;">3,902</span> museums mapped in Brazil (Museus BR / Ibram, 2024) — most with no technical staff.</p>
+  - elementId: ask-kicker
+    elementType: text
+    bounds: [520, 422, 300, 16]
+    content: {style: "$kicker", color: "$gold", wrap: false, text: WHAT WE'RE LOOKING FOR}
+  - elementId: ask-text
+    elementType: text
+    bounds: [520, 444, 376, 40]
+    content:
+      style: "$body"
+      color: "$cream"
+      text: Seed investment or incubator · a pilot museum · 3D-scanning partners
+  # ——— Footer ———
+  - elementId: rule-bottom
+    elementType: shape
+    bounds: [64, 492, 832, 1]
+    shapeName: rect
+    fill: {type: solid, color: "#b98a4a55"}
+  - elementId: footer
+    elementType: text
+    bounds: [64, 504, 832, 18]
+    content:
+      fontFamily: Inter
+      fontSize: 11
+      color: "$gold"
+      wrap: false
+      text: "See it all working live: agua-games.github.io/DemoMuseum — an Agua Games product"
